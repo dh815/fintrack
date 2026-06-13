@@ -1836,7 +1836,7 @@ function delIt(type,id){
     var map={ent:'ent',sai:'sai',parc:'parc',plan:'plans',inv:'inv'};
     var k=map[type];
     if(k) d[k]=d[k].filter(function(x){return x.id!==id;});
-    sud(d, function(){ toast('Excluído.','ok'); render(S.page);
+    sud(d, function(){ toast('Excluído.','ok'); render(S.page); });
   });
 }
 
