@@ -6,6 +6,7 @@
 <title>Fintrack — Controle Financeiro</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 <style>
 :root {
   --bg:       #07090F;
@@ -46,6 +47,26 @@ body {
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--s3); border-radius: 10px; }
+
+
+/* ===== MATERIAL ICONS ===== */
+.mi {
+  font-family: 'Material Symbols Rounded';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+.sb-icon { font-size: 18px !important; }
+.sb-icon .mi { font-size: 18px; }
 
 /* ===== AUTH SCREENS ===== */
 .auth-screen {
@@ -270,7 +291,7 @@ body {
   background: var(--teal);
   border-radius: 0 2px 2px 0;
 }
-.sb-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
+.sb-icon { font-size: 18px; width: 22px; text-align: center; flex-shrink: 0; display:flex; align-items:center; justify-content:center; }
 .sb-foot {
   padding: 12px 10px;
   border-top: 1px solid var(--border);
@@ -365,11 +386,12 @@ body {
 .metric.yellow::after { background: var(--yellow); }
 .metric.purple::after { background: var(--purple); }
 .metric-icon {
-  width: 34px; height: 34px;
-  border-radius: 10px;
+  width: 40px; height: 40px;
+  border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 15px; margin-bottom: 14px;
+  font-size: 15px; margin-bottom: 16px;
 }
+.metric-icon .mi { font-size: 22px; }
 .metric.teal .metric-icon { background: var(--teal-dim); }
 .metric.red .metric-icon { background: var(--red-dim); }
 .metric.blue .metric-icon { background: var(--blue-dim); }
@@ -642,7 +664,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 <div class="auth-screen" id="loginScreen">
   <div class="auth-card">
     <div class="auth-logo">
-      <div class="auth-logo-icon">&#9733;</div>
+      <div class="auth-logo-icon"><span class="mi">auto_awesome</span></div>
       <h1>Fin<span>track</span></h1>
       <p>Controle financeiro inteligente</p>
     </div>
@@ -664,7 +686,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 <div class="auth-screen" id="registerScreen">
   <div class="auth-card">
     <div class="auth-logo">
-      <div class="auth-logo-icon">&#10024;</div>
+      <div class="auth-logo-icon"><span class="mi">person_add</span></div>
       <h1>Criar <span>conta</span></h1>
       <p>Comece a controlar suas finan&#231;as</p>
     </div>
@@ -697,7 +719,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
     <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
       <div class="sb-head">
-        <div class="sb-logo">&#9733;</div>
+        <div class="sb-logo"><span class="mi" style="font-size:17px;color:#07090F">bolt</span></div>
         <div><div class="sb-brand">Fin<span>track</span></div></div>
       </div>
       <div class="sb-user">
@@ -706,20 +728,20 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
       </div>
       <nav class="sb-nav">
         <div class="sb-section">Vis&#227;o geral</div>
-        <button class="sb-item" data-p="dashboard" onclick="nav('dashboard')"><span class="sb-icon">&#9783;</span>Dashboard</button>
+        <button class="sb-item" data-p="dashboard" onclick="nav('dashboard')"><span class="sb-icon"><span class="mi">dashboard</span></span>Dashboard</button>
         <div class="sb-section">Movimenta&#231;&#245;es</div>
-        <button class="sb-item" data-p="entradas" onclick="nav('entradas')"><span class="sb-icon">&#8593;</span>Entradas</button>
-        <button class="sb-item" data-p="saidas" onclick="nav('saidas')"><span class="sb-icon">&#8595;</span>Sa&#237;das</button>
-        <button class="sb-item" data-p="saldo" onclick="nav('saldo')"><span class="sb-icon">&#8652;</span>Saldo do m&#234;s</button>
+        <button class="sb-item" data-p="entradas" onclick="nav('entradas')"><span class="sb-icon"><span class="mi">trending_up</span></span>Entradas</button>
+        <button class="sb-item" data-p="saidas" onclick="nav('saidas')"><span class="sb-icon"><span class="mi">trending_down</span></span>Sa&#237;das</button>
+        <button class="sb-item" data-p="saldo" onclick="nav('saldo')"><span class="sb-icon"><span class="mi">account_balance_wallet</span></span>Saldo do m&#234;s</button>
         <div class="sb-section">Gest&#227;o</div>
-        <button class="sb-item" data-p="parcelas" onclick="nav('parcelas')"><span class="sb-icon">&#9654;</span>Parcelas</button>
-        <button class="sb-item" data-p="planejamento" onclick="nav('planejamento')"><span class="sb-icon">&#9670;</span>Planejamento</button>
-        <button class="sb-item" data-p="investimentos" onclick="nav('investimentos')"><span class="sb-icon">&#9650;</span>Investimentos</button>
+        <button class="sb-item" data-p="parcelas" onclick="nav('parcelas')"><span class="sb-icon"><span class="mi">receipt_long</span></span>Parcelas</button>
+        <button class="sb-item" data-p="planejamento" onclick="nav('planejamento')"><span class="sb-icon"><span class="mi">target</span></span>Planejamento</button>
+        <button class="sb-item" data-p="investimentos" onclick="nav('investimentos')"><span class="sb-icon"><span class="mi">candlestick_chart</span></span>Investimentos</button>
         <div class="sb-section">Config</div>
-        <button class="sb-item" data-p="categorias" onclick="nav('categorias')"><span class="sb-icon">&#9632;</span>Categorias</button>
+        <button class="sb-item" data-p="categorias" onclick="nav('categorias')"><span class="sb-icon"><span class="mi">sell</span></span>Categorias</button>
       </nav>
       <div class="sb-foot">
-        <button class="sb-logout" onclick="doLogout()"><span>&#8627;</span>Sair da conta</button>
+        <button class="sb-logout" onclick="doLogout()"><span class="mi" style="font-size:16px">logout</span>Sair da conta</button>
       </div>
     </aside>
 
@@ -727,13 +749,13 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
     <main class="main">
       <div class="topbar">
         <div class="topbar-left">
-          <button class="menu-btn" onclick="toggleSb()">&#9776;</button>
+          <button class="menu-btn" onclick="toggleSb()"><span class="mi" style="font-size:22px">menu</span></button>
           <div class="page-title" id="pageTitle">Dashboard</div>
         </div>
         <div class="month-nav">
-          <button onclick="chMonth(-1)">&#8249;</button>
+          <button onclick="chMonth(-1)"><span class="mi" style="font-size:18px">chevron_left</span></button>
           <span id="monthLbl">-</span>
-          <button onclick="chMonth(1)">&#8250;</button>
+          <button onclick="chMonth(1)"><span class="mi" style="font-size:18px">chevron_right</span></button>
         </div>
       </div>
       <div class="content">
@@ -845,15 +867,15 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
         <!-- CATEGORIAS -->
         <div class="page" id="page-categorias">
           <div class="panel" style="margin-bottom:14px">
-            <div class="panel-head"><span class="panel-title">Entradas</span><button class="btn btn-primary btn-sm" onclick="addCat('entrada')">+ Nova</button></div>
+            <div class="panel-head"><span class="panel-title"><span class="mi" style="font-size:16px;vertical-align:middle;margin-right:6px;color:var(--teal)">trending_up</span>Entradas</span><button class="btn btn-primary btn-sm" onclick="addCat('entrada')">+ Nova</button></div>
             <div class="cat-grid" id="cg-ent"></div>
           </div>
           <div class="panel" style="margin-bottom:14px">
-            <div class="panel-head"><span class="panel-title">Sa&#237;das</span><button class="btn btn-primary btn-sm" onclick="addCat('saida')">+ Nova</button></div>
+            <div class="panel-head"><span class="panel-title"><span class="mi" style="font-size:16px;vertical-align:middle;margin-right:6px;color:var(--red)">trending_down</span>Sa&#237;das</span><button class="btn btn-primary btn-sm" onclick="addCat('saida')">+ Nova</button></div>
             <div class="cat-grid" id="cg-sai"></div>
           </div>
           <div class="panel">
-            <div class="panel-head"><span class="panel-title">Investimentos</span><button class="btn btn-primary btn-sm" onclick="addCat('investimento')">+ Novo</button></div>
+            <div class="panel-head"><span class="panel-title"><span class="mi" style="font-size:16px;vertical-align:middle;margin-right:6px;color:var(--blue)">candlestick_chart</span>Investimentos</span><button class="btn btn-primary btn-sm" onclick="addCat('investimento')">+ Novo</button></div>
             <div class="cat-grid" id="cg-inv"></div>
           </div>
         </div>
@@ -866,7 +888,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 <!-- MODAL -->
 <div class="modal-wrap" id="mainModal">
   <div class="modal">
-    <div class="modal-head"><span class="modal-title" id="mTitle">-</span><button class="modal-x" onclick="closeModal()">&#215;</button></div>
+    <div class="modal-head"><span class="modal-title" id="mTitle">-</span><button class="modal-x" onclick="closeModal()"><span class="mi" style="font-size:16px">close</span></button></div>
     <div class="modal-body" id="mBody"></div>
     <div class="modal-foot" id="mFoot"></div>
   </div>
@@ -875,7 +897,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 <!-- CONFIRM -->
 <div class="modal-wrap" id="confirmWrap">
   <div class="modal" style="max-width:360px">
-    <div class="modal-head"><span class="modal-title" id="cfTitle">Confirmar</span><button class="modal-x" onclick="closeCf()">&#215;</button></div>
+    <div class="modal-head"><span class="modal-title" id="cfTitle">Confirmar</span><button class="modal-x" onclick="closeCf()"><span class="mi" style="font-size:16px">close</span></button></div>
     <div class="modal-body"><p class="confirm-text" id="cfText"></p></div>
     <div class="modal-foot"><button class="btn btn-ghost" onclick="closeCf()">Cancelar</button><button class="btn btn-del" id="cfBtn">Confirmar</button></div>
   </div>
@@ -990,11 +1012,11 @@ function rDash(){
   var tE=sum(ent), tS=sum(sai), sal=tE-tS;
   var invT=sum(d.inv), pAb=d.parc.filter(function(p){return p.st==='ativo';}).length;
   g('d-metrics').innerHTML=
-    mc('&#8593;','Entradas',fmt(tE),'teal',ent.length+' registros')+
-    mc('&#8595;','Saídas',fmt(tS),'red',sai.length+' registros')+
-    mc('&#9651;','Saldo',fmt(sal),sal>=0?'teal':'red',MONTHS[S.month])+
-    mc('&#9670;','Investido',fmt(invT),'blue',d.inv.length+' posições')+
-    mc('&#8635;','Parcelas',String(pAb),'yellow','contas ativas');
+    mc('<span class="mi">trending_up</span>','Entradas',fmt(tE),'teal',ent.length+' registros')+
+    mc('<span class="mi">trending_down</span>','Saídas',fmt(tS),'red',sai.length+' registros')+
+    mc('<span class="mi">account_balance_wallet</span>','Saldo',fmt(sal),sal>=0?'teal':'red',MONTHS[S.month])+
+    mc('<span class="mi">candlestick_chart</span>','Investido',fmt(invT),'blue',d.inv.length+' posições')+
+    mc('<span class="mi">receipt_long</span>','Parcelas',String(pAb),'yellow','contas ativas');
   g('d-summary').innerHTML=
     sr('Total de entradas',fmt(tE),'var(--teal)')+
     sr('Total de saídas',fmt(tS),'var(--red)')+
@@ -1045,7 +1067,7 @@ function sr(label,val,color){
     '<span class="sum-val" style="color:'+color+'">'+val+'</span></div>';
 }
 function sum(arr){ return (arr||[]).reduce(function(a,x){return a+parseFloat(x.val||0);},0); }
-function empt(msg){ return '<div class="empty"><div class="empty-icon">&#9723;</div><p>'+msg+'</p></div>'; }
+function empt(msg){ return '<div class="empty"><div class="empty-icon"><span class="mi" style="font-size:40px;opacity:.3">inbox</span></div><p>'+msg+'</p></div>'; }
 function emptr(cols,msg){ return '<tr><td colspan="'+cols+'">'+empt(msg)+'</td></tr>'; }
 
 // ENTRADAS
@@ -1059,9 +1081,9 @@ function rEnt(){
       '<td style="font-weight:700;color:var(--teal)">+'+fmt(e.val)+'</td>'+
       '<td><div style="display:flex;gap:6px">'+
       '<button class="btn btn-edit btn-sm" onclick="editIt(\'ent\',\''+escq(e.id)+'\')">Editar</button>'+
-      '<button class="btn btn-del btn-sm" onclick="delIt(\'ent\',\''+escq(e.id)+'\')">&#10005;</button>'+
+      '<button class="btn btn-del btn-sm" onclick="delIt(\'ent\',\''+escq(e.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
-  }).join(''):emptr(5,'Nenhuma entrada neste mês');
+  }).join(''):emptr(5,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">trending_up</span>Nenhuma entrada neste mês');
 }
 
 // SAIDAS
@@ -1076,9 +1098,9 @@ function rSai(){
       '<td>'+(s.ori?'<span class="badge bg-muted">'+esc(s.ori)+'</span>':'<span style="color:var(--t3)">—</span>')+'</td>'+
       '<td><div style="display:flex;gap:6px">'+
       (!s.auto?'<button class="btn btn-edit btn-sm" onclick="editIt(\'sai\',\''+escq(s.id)+'\')">Editar</button>':'')+
-      '<button class="btn btn-del btn-sm" onclick="delIt(\'sai\',\''+escq(s.id)+'\')">&#10005;</button>'+
+      '<button class="btn btn-del btn-sm" onclick="delIt(\'sai\',\''+escq(s.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
-  }).join(''):emptr(6,'Nenhuma saída neste mês');
+  }).join(''):emptr(6,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">trending_down</span>Nenhuma saída neste mês');
 }
 
 // SALDO
@@ -1088,9 +1110,9 @@ function rSal(){
   var sai=d.sai.filter(function(s){return inM(s.date);});
   var tE=sum(ent),tS=sum(sai),sal=tE-tS;
   g('s-metrics').innerHTML=
-    mc('&#8593;','Entradas',fmt(tE),'teal',ent.length+' registros')+
-    mc('&#8595;','Saídas',fmt(tS),'red',sai.length+' registros')+
-    mc('&#9651;','Saldo',fmt(sal),sal>=0?'teal':'red','resultado');
+    mc('<span class="mi">trending_up</span>','Entradas',fmt(tE),'teal',ent.length+' registros')+
+    mc('<span class="mi">trending_down</span>','Saídas',fmt(tS),'red',sai.length+' registros')+
+    mc('<span class="mi">account_balance_wallet</span>','Saldo',fmt(sal),sal>=0?'teal':'red','resultado');
   var all=[].concat(
     ent.map(function(e){return Object.assign({},e,{_t:'Entrada'});}),
     sai.map(function(s){return Object.assign({},s,{_t:'Saída'});})
@@ -1102,7 +1124,7 @@ function rSal(){
       '<td><span class="badge bg-muted">'+esc(t.cat)+'</span></td>'+
       '<td style="font-weight:700;color:'+(t._t==='Entrada'?'var(--teal)':'var(--red)')+'">'+
       (t._t==='Entrada'?'+':'-')+fmt(t.val)+'</td></tr>';
-  }).join(''):emptr(5,'Sem movimentações neste mês');
+  }).join(''):emptr(5,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">account_balance_wallet</span>Sem movimentações neste mês');
 }
 
 // PARCELAS
@@ -1123,11 +1145,11 @@ function rParc(){
       '<td><span class="badge '+scls+'">'+p.st+'</span></td>'+
       '<td><div style="display:flex;gap:5px;flex-wrap:wrap">'+
       (prox&&p.st==='ativo'?'<button class="btn btn-pay btn-sm" onclick="pgParc(\''+escq(p.id)+'\')">Pagar</button>':'')+
-      '<button class="btn btn-edit btn-sm" onclick="editIt(\'parc\',\''+escq(p.id)+'\')">&#9999;</button>'+
-      '<button class="btn btn-warn btn-sm" onclick="canParc(\''+escq(p.id)+'\')">&#9940;</button>'+
-      '<button class="btn btn-del btn-sm" onclick="delIt(\'parc\',\''+escq(p.id)+'\')">&#10005;</button>'+
+      '<button class="btn btn-edit btn-sm" onclick="editIt(\'parc\',\''+escq(p.id)+'\')"><span class="mi" style="font-size:13px">edit</span></button>'+
+      '<button class="btn btn-warn btn-sm" onclick="canParc(\''+escq(p.id)+'\')"><span class="mi" style="font-size:13px">block</span></button>'+
+      '<button class="btn btn-del btn-sm" onclick="delIt(\'parc\',\''+escq(p.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
-  }).join(''):emptr(7,'Nenhuma parcela cadastrada');
+  }).join(''):emptr(7,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">receipt_long</span>Nenhuma parcela cadastrada');
 }
 function pgParc(id){
   var d=ud();
@@ -1161,7 +1183,7 @@ function rPlan(){
       (p.desc?'<div style="font-size:12px;color:var(--t3);margin-top:3px">'+esc(p.desc)+'</div>':'')+
       '</div><div style="display:flex;gap:6px">'+
       '<button class="btn btn-edit btn-sm" onclick="editIt(\'plan\',\''+escq(p.id)+'\')">Editar</button>'+
-      '<button class="btn btn-del btn-sm" onclick="delIt(\'plan\',\''+escq(p.id)+'\')">&#10005;</button>'+
+      '<button class="btn btn-del btn-sm" onclick="delIt(\'plan\',\''+escq(p.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></div>'+
       '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:7px">'+
       '<span>Meta: <strong style="color:var(--t1)">'+fmt(p.tgt)+'</strong></span>'+
@@ -1190,9 +1212,9 @@ function rInv(){
   var total=sum(d.inv);
   var rend=d.inv.reduce(function(a,i){return a+parseFloat(i.yld||0);},0);
   g('i-metrics').innerHTML=
-    mc('&#9670;','Total investido',fmt(total),'blue',d.inv.length+' posições')+
-    mc('&#9651;','Rendimento',fmt(rend),'teal','acumulado')+
-    mc('&#37;','Rentabilidade',(total>0?(rend/total*100).toFixed(2):0)+'%',rend>=0?'teal':'red','sobre o total');
+    mc('<span class="mi">savings</span>','Total investido',fmt(total),'blue',d.inv.length+' posições')+
+    mc('<span class="mi">show_chart</span>','Rendimento',fmt(rend),'teal','acumulado')+
+    mc('<span class="mi">percent</span>','Rentabilidade',(total>0?(rend/total*100).toFixed(2):0)+'%',rend>=0?'teal':'red','sobre o total');
   g('i-list').innerHTML=d.inv.length?d.inv.map(function(i){
     var yp=parseFloat(i.yld||0);
     return '<div class="inv-card">'+
@@ -1207,7 +1229,7 @@ function rInv(){
       '<span style="font-size:11px;color:var(--t3)">Aporte: '+fd(i.date)+'</span>'+
       '<div style="display:flex;gap:6px">'+
       '<button class="btn btn-edit btn-sm" onclick="editIt(\'inv\',\''+escq(i.id)+'\')">Editar</button>'+
-      '<button class="btn btn-del btn-sm" onclick="delIt(\'inv\',\''+escq(i.id)+'\')">&#10005;</button>'+
+      '<button class="btn btn-del btn-sm" onclick="delIt(\'inv\',\''+escq(i.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></div></div>';
   }).join(''):empt('Nenhum investimento cadastrado');
 }
@@ -1219,7 +1241,7 @@ function rCats(){
   Object.keys(map).forEach(function(type){
     g(map[type]).innerHTML=d.cats[type].map(function(c){
       return '<div class="cat-tag"><span>'+esc(c)+'</span>'+
-        '<button class="cat-x" onclick="delCat(\''+type+'\',\''+escq(c)+'\')">&#215;</button></div>';
+        '<button class="cat-x" onclick="delCat(\''+type+'\',\''+escq(c)+'\')"><span class="mi" style="font-size:16px">close</span></button></div>';
     }).join('');
   });
 }
