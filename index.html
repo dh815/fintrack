@@ -672,8 +672,8 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
   .auth-card { padding: 32px 24px; }
 }
 </style>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div id="toast"></div>
@@ -982,6 +982,13 @@ var firebaseConfig = {
   };
 firebase.initializeApp(firebaseConfig);
 var fdb = firebase.firestore();
+// Força long-polling: resolve "client is offline" em redes que bloqueiam WebSockets/streams
+fdb.settings({
+  experimentalForceLongPolling: true,
+  merge: true
+});
+console.log('Firebase inicializado:', firebase.apps.length > 0);
+console.log('Firestore pronto:', !!fdb);
 
 var S = { user:null, page:'dashboard', month:new Date().getMonth(), year:new Date().getFullYear(), eid:null, etype:null };
 var MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
