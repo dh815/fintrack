@@ -672,8 +672,8 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
   .auth-card { padding: 32px 24px; }
 }
 </style>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
 <div id="toast"></div>
@@ -975,20 +975,15 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 var firebaseConfig = {
     apiKey: "AIzaSyBiHiCoBBG2ofR6FQO2aLRh_iIadF9FECQ",
     authDomain: "fintrack-b1b89.firebaseapp.com",
+    databaseURL: "https://fintrack-b1b89-default-rtdb.firebaseio.com",
     projectId: "fintrack-b1b89",
     storageBucket: "fintrack-b1b89.firebasestorage.app",
     messagingSenderId: "712253855706",
     appId: "1:712253855706:web:8c592cf6e0a845c204d2e3"
   };
 firebase.initializeApp(firebaseConfig);
-var fdb = firebase.firestore();
-// Força long-polling: resolve "client is offline" em redes que bloqueiam WebSockets/streams
-fdb.settings({
-  experimentalForceLongPolling: true,
-  merge: true
-});
+var fdb = firebase.database();
 console.log('Firebase inicializado:', firebase.apps.length > 0);
-console.log('Firestore pronto:', !!fdb);
 
 var S = { user:null, page:'dashboard', month:new Date().getMonth(), year:new Date().getFullYear(), eid:null, etype:null };
 var MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -997,9 +992,9 @@ var COLORS=['#00C896','#4D9CFF','#FF5E5E','#FFB547','#A78BFA','#F06292','#4DB6AC
 // ===== LOCAL CACHE (para velocidade) =====
 var _cache = null;
 
-// ===== FIRESTORE HELPERS =====
-function getUserDoc(){
-  return fdb.collection('users').doc(S.user);
+// ===== DATABASE HELPERS =====
+function getUserRef(){
+  return fdb.ref('users/' + S.user);
 }
 
 function ud(){ return _cache; }
@@ -1007,16 +1002,17 @@ function ud(){ return _cache; }
 function loadUD(cb){
   if(!S.user){ cb(null); return; }
   showLoading(true);
-  getUserDoc().get().then(function(doc){
-    if(doc.exists){
-      _cache = doc.data();
+  getUserRef().once('value').then(function(snap){
+    var data = snap.val();
+    if(data){
+      _cache = data;
     } else {
       _cache = {ent:[],sai:[],parc:[],plans:[],inv:[],cats:{
         entrada:['Salário','Freelance','Aluguel','Investimento','Bônus','Outros'],
         saida:['Alimentação','Transporte','Moradia','Saúde','Lazer','Educação','Vestuário','Parcela','Assinaturas','Outros'],
         investimento:['Renda Fixa','Renda Variável','FIIs','Ações','Criptomoedas','Poupança','Tesouro Direto','Outros']
       }};
-      getUserDoc().set(_cache);
+      getUserRef().set(_cache);
     }
     showLoading(false);
     cb(_cache);
@@ -1029,7 +1025,7 @@ function loadUD(cb){
 
 function sud(data, cb){
   _cache = data;
-  getUserDoc().set(data).then(function(){
+  getUserRef().set(data).then(function(){
     if(cb) cb();
   }).catch(function(e){
     toast('Erro ao salvar: '+e.message,'err');
@@ -1048,19 +1044,20 @@ function doLogin(){
   showErr('loginError','');
   var btn = document.querySelector('#loginScreen .auth-btn');
   btn.textContent='Entrando...'; btn.disabled=true;
-  fdb.collection('accounts').doc(u).get().then(function(doc){
+  fdb.ref('accounts/'+u).once('value').then(function(snap){
     btn.textContent='Entrar'; btn.disabled=false;
-    if(!doc.exists||doc.data().p!==bto(p)){
+    var acc = snap.val();
+    if(!acc||acc.p!==bto(p)){
       showErr('loginError','Usuário ou senha incorretos.');return;
     }
     S.user=u;
     localStorage.setItem('ftS',u);
     loadUD(function(data){
-      if(data) showApp(doc.data().n);
+      if(data) showApp(acc.n);
     });
   }).catch(function(e){
     btn.textContent='Entrar'; btn.disabled=false;
-    showErr('loginError','Erro de conexão. Verifique sua internet.');
+    showErr('loginError','Erro de conexão: '+e.message);
   });
 }
 
@@ -1071,12 +1068,12 @@ function doRegister(){
   if(p.length<4){showErr('registerError','Senha muito curta.');return;}
   var btn = document.querySelector('#registerScreen .auth-btn');
   btn.textContent='Criando...'; btn.disabled=true;
-  fdb.collection('accounts').doc(u).get().then(function(doc){
-    if(doc.exists){
+  fdb.ref('accounts/'+u).once('value').then(function(snap){
+    if(snap.val()){
       btn.textContent='Criar conta'; btn.disabled=false;
       showErr('registerError','Usuário já existe.');return;
     }
-    return fdb.collection('accounts').doc(u).set({n:n,p:bto(p)});
+    return fdb.ref('accounts/'+u).set({n:n,p:bto(p)});
   }).then(function(){
     btn.textContent='Criar conta'; btn.disabled=false;
     toast('Conta criada! Faça login.','ok');
@@ -1871,10 +1868,11 @@ window.addEventListener('load',function(){
   var s=localStorage.getItem('ftS');
   if(s){
     S.user=s;
-    fdb.collection('accounts').doc(s).get().then(function(doc){
-      if(doc.exists){
+    fdb.ref('accounts/'+s).once('value').then(function(snap){
+      var acc=snap.val();
+      if(acc){
         loadUD(function(data){
-          if(data) showApp(doc.data().n);
+          if(data) showApp(acc.n);
           else { g('loginScreen').style.display='flex'; updMonth(); }
         });
       } else {
