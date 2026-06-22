@@ -1159,6 +1159,14 @@ function rDash(){
     var resto=p.pars.filter(function(x){return !x.pg;}).reduce(function(s,x){return s+parseFloat(x.val||0);},0);
     return a+resto;
   },0);
+  // Parcelas que vencem NO MÊS SELECIONADO
+  var parcMes=d.parc.filter(function(p){return p.st==='ativo';}).reduce(function(a,p){
+    var venceMes=p.pars.filter(function(x){return !x.pg && inM(x.date);});
+    return a+venceMes.reduce(function(s,x){return s+parseFloat(x.val||0);},0);
+  },0);
+  var parcMesQtd=d.parc.filter(function(p){return p.st==='ativo';}).reduce(function(a,p){
+    return a+p.pars.filter(function(x){return !x.pg && inM(x.date);}).length;
+  },0);
 
   // METRICS
   g('d-metrics').innerHTML=
@@ -1167,7 +1175,8 @@ function rDash(){
     mc('<span class="mi">account_balance_wallet</span>','Saldo',fmt(sal),sal>=0?'teal':'red',MONTHS[S.month])+
     mc('<span class="mi">candlestick_chart</span>','Investido',fmt(invT),'blue',d.inv.length+' posições')+
     mc('<span class="mi">receipt_long</span>','Parcelas',String(pAb),'yellow','contas ativas')+
-    mc('<span class="mi">payments</span>','A Pagar',fmt(parcTotal),'purple','saldo em aberto');
+    mc('<span class="mi">payments</span>','A Pagar',fmt(parcTotal),'purple','total em aberto')+
+    mc('<span class="mi">calendar_month</span>','Parcelas '+MONTHS[S.month].slice(0,3),fmt(parcMes),'yellow',parcMesQtd+' venc. no m\u00eas');
 
   // SUMMARY
   g('d-summary').innerHTML=
@@ -1192,15 +1201,25 @@ function rDash(){
     empt('Sem transações neste mês');
 
   // PLANS
-  g('d-plans').innerHTML=d.plans.length?d.plans.slice(0,4).map(function(p){
+  g('d-plans').innerHTML=d.plans.length?d.plans.map(function(p){
     var pct=Math.min(100,((p.cur||0)/p.tgt*100));
-    return '<div style="margin-bottom:14px">'+
-      '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">'+
-      '<span style="font-weight:600;color:var(--t1)">'+esc(p.name)+'</span>'+
-      '<span style="color:var(--t2)">'+fmt(p.cur||0)+' / '+fmt(p.tgt)+'</span></div>'+
-      '<div class="prog-wrap"><div class="prog-fill" style="width:'+pct.toFixed(0)+'%;background:'+(pct>=100?'var(--teal)':'var(--blue)')+'"></div></div>'+
-      '<div style="font-size:10px;color:var(--t3);margin-top:4px">'+pct.toFixed(0)+'% concluído</div></div>';
-  }).join(''):'<p style="font-size:12px;color:var(--t3)">Nenhuma meta criada.</p>';
+    var falta=Math.max(0,p.tgt-(p.cur||0));
+    var cor=pct>=100?'var(--teal)':pct>=50?'var(--blue)':'var(--purple)';
+    return '<div style="background:var(--s2);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px;margin-bottom:10px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'+
+      '<div style="flex:1;min-width:0">'+
+      '<div style="font-weight:600;font-size:13px;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(p.name)+'</div>'+
+      (p.dead?'<div style="font-size:10px;color:var(--t3);margin-top:2px">Prazo: '+fd(p.dead)+'</div>':'')+'</div>'+
+      '<div style="text-align:right;flex-shrink:0;margin-left:10px">'+
+      '<div style="font-size:15px;font-weight:800;color:'+cor+'">'+pct.toFixed(0)+'%</div>'+
+      '</div></div>'+
+      '<div class="prog-wrap" style="margin-bottom:8px"><div class="prog-fill" style="width:'+pct.toFixed(0)+'%;background:'+cor+'"></div></div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3)">'+
+      '<span>'+fmt(p.cur||0)+' acumulado</span>'+
+      '<span>Falta: <b style="color:var(--t1)">'+fmt(falta)+'</b></span>'+
+      '</div></div>';
+  }).join(''):'<div style="text-align:center;padding:24px;color:var(--t3);font-size:12px">Nenhuma meta criada.<br>'+
+    '<button onclick="nav(&quot;planejamento&quot;)" style="margin-top:8px;background:var(--s3);border:none;border-radius:8px;padding:6px 14px;color:var(--teal);font-size:12px;cursor:pointer;font-family:inherit">+ Criar planejamento</button></div>';
 
   // PARCELAS ATIVAS
   var parc = d.parc.filter(function(p){return p.st==='ativo';}).slice(0,5);
@@ -1559,7 +1578,7 @@ function rSai(){
       '<td style="font-weight:700;color:var(--red)">-'+fmt(s.val)+'</td>'+
       '<td>'+(s.ori?'<span class="badge bg-muted">'+esc(s.ori)+'</span>':'<span style="color:var(--t3)">—</span>')+'</td>'+
       '<td><div style="display:flex;gap:6px">'+
-      (!s.auto?'<button class="btn btn-edit btn-sm" onclick="editIt(\'sai\',\''+escq(s.id)+'\')">Editar</button>':'')+
+      '<button class="btn btn-edit btn-sm" onclick="editIt(\'sai\',\''+escq(s.id)+'\')">Editar</button>'+
       '<button class="btn btn-del btn-sm" onclick="delIt(\'sai\',\''+escq(s.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
   }).join(''):emptr(6,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">trending_down</span>Nenhuma saída neste mês');
@@ -1741,15 +1760,14 @@ function openModal(type,item){
       fld('Observação','<textarea id="fo" placeholder="Opcional">'+(item?esc(item.obs||''):'')+'</textarea>');
   } else if(type==='parcela'||type==='parc'){
     var cats2=d.cats.saida.map(function(c){return '<option value="'+esc(c)+'"'+(item&&item.cat===c?' selected':'')+'>'+esc(c)+'</option>';}).join('');
-    var dis=item?'disabled':'';
     body=fld('Nome da conta *','<input id="fn" value="'+(item?esc(item.name):'')+'" placeholder="Ex: Financiamento TV">')+
       '<div class="field-row">'+
-      fld('Valor total (R$) *','<input id="ftot" type="number" step="0.01" value="'+(item?item.tot:'')+'" placeholder="0,00" '+dis+'>')+
-      fld('Nº de parcelas *','<input id="fnum" type="number" value="'+(item?item.pars.length:'')+'" placeholder="12" '+dis+'>')+'</div>'+
+      fld('Valor total (R$) *','<input id="ftot" type="number" step="0.01" value="'+(item?item.tot:'')+'" placeholder="0,00">')+
+      fld('Nº de parcelas *','<input id="fnum" type="number" value="'+(item?item.pars.length:'')+'" placeholder="12">')+'</div>'+
       '<div class="field-row">'+
-      fld('1º vencimento *','<input id="fdt" type="date" value="'+(item&&item.pars[0]?item.pars[0].date:today)+'" '+dis+'>')+
+      fld('1º vencimento *','<input id="fdt" type="date" value="'+(item&&item.pars[0]?item.pars[0].date:today)+'">')+
       fld('Categoria','<select id="fc">'+cats2+'</select>')+'</div>'+
-      (!item?'<p class="field-hint">Datas das parcelas geradas automaticamente (mensalmente).</p>':'');
+      (item?'<p class="field-hint">Atenção: alterar valor total, nº de parcelas ou data recalcula todas as parcelas não pagas. Parcelas já pagas não são afetadas.</p>':'<p class="field-hint">Datas das parcelas geradas automaticamente (mensalmente).</p>');
   } else if(type==='plano'||type==='plan'){
     body=fld('Nome *','<input id="fn" value="'+(item?esc(item.name):'')+'" placeholder="Ex: Viagem Europa">')+
       fld('Descrição','<textarea id="fd" placeholder="Detalhe seu objetivo">'+(item?esc(item.desc||''):'')+'</textarea>')+
@@ -1792,17 +1810,30 @@ function saveModal(){
     } else { arr.push({id:uid(),desc:desc,val:val,date:date,cat:cat,obs:fv('fo')}); }
   } else if(type==='parcela'||type==='parc'){
     var name=(fv('fn')||'').trim(), cat2=fv('fc');
-    if(!name){toast('Informe o nome.','err');return;}
+    var tot=parseFloat(fv('ftot')), num=parseInt(fv('fnum')), fd0=fv('fdt');
+    if(!name||isNaN(tot)||isNaN(num)||!fd0||num<1){toast('Preencha os campos obrigatórios.','err');return;}
     if(isE){
       var it2=d.parc.find(function(x){return x.id===S.eid;});
-      if(it2){it2.name=name;it2.cat=cat2;}
+      if(it2){
+        it2.name=name; it2.cat=cat2; it2.tot=tot;
+        var pagas=it2.pars.filter(function(x){return x.pg;});
+        var qtdPagas=pagas.length;
+        var restante=tot-pagas.reduce(function(a,x){return a+parseFloat(x.val||0);},0);
+        var numRestantes=Math.max(1,num-qtdPagas);
+        var vpRest=parseFloat((restante/numRestantes).toFixed(2));
+        var novasPars=pagas.slice();
+        for(var i=0;i<numRestantes;i++){
+          var dd=new Date(fd0+'T12:00:00'); dd.setMonth(dd.getMonth()+i);
+          novasPars.push({seq:qtdPagas+i+1,date:dd.toISOString().slice(0,10),val:vpRest,pg:false});
+        }
+        it2.pars=novasPars;
+        if(it2.st==='quitado'&&novasPars.some(function(x){return !x.pg;})) it2.st='ativo';
+      }
     } else {
-      var tot=parseFloat(fv('ftot')), num=parseInt(fv('fnum')), fd0=fv('fdt');
-      if(isNaN(tot)||isNaN(num)||!fd0||num<1){toast('Preencha os campos obrigatórios.','err');return;}
       var vp=parseFloat((tot/num).toFixed(2)), pars=[];
       for(var i=0;i<num;i++){
-        var dd=new Date(fd0+'T12:00:00'); dd.setMonth(dd.getMonth()+i);
-        pars.push({seq:i+1,date:dd.toISOString().slice(0,10),val:vp,pg:false});
+        var dd2=new Date(fd0+'T12:00:00'); dd2.setMonth(dd2.getMonth()+i);
+        pars.push({seq:i+1,date:dd2.toISOString().slice(0,10),val:vp,pg:false});
       }
       d.parc.push({id:uid(),name:name,cat:cat2,tot:tot,pars:pars,st:'ativo'});
     }
