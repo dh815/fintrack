@@ -653,6 +653,19 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 .chart-tab.active { background: var(--s3); color: var(--t1); }
 @media(max-width:768px){ .chart-grid { grid-template-columns: 1fr; } }
 
+
+/* ===== FILTERS ===== */
+.filter-bar { display:flex; gap:10px; flex-wrap:wrap; padding:12px 20px; border-bottom:1px solid var(--border); }
+.filter-bar input, .filter-bar select {
+  padding:8px 12px; background:var(--s2); border:1px solid var(--border);
+  border-radius:8px; color:var(--t1); font-size:13px; font-family:inherit; outline:none;
+  transition:border-color .2s;
+}
+.filter-bar input:focus, .filter-bar select:focus { border-color:var(--teal); }
+.filter-bar input { flex:2; min-width:160px; }
+.filter-bar select { flex:1; min-width:130px; }
+.filter-info { padding:5px 20px 6px; font-size:11px; color:var(--t3); }
+
 /* ===== RESPONSIVE ===== */
 @media(max-width:768px){
   .sidebar { transform: translateX(-100%); }
@@ -861,6 +874,13 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
               <span class="panel-title">Entradas</span>
               <button class="btn btn-primary" onclick="openModal('entrada',null)">+ Nova entrada</button>
             </div>
+            <div class="filter-bar">
+              <input id="ent-busca" oninput="rEnt()" placeholder="&#128269; Buscar descri&#231;&#227;o...">
+              <select id="ent-cat" onchange="rEnt()"><option value="">Todas categorias</option></select>
+              <input id="ent-de" type="date" onchange="rEnt()" title="Data inicial" style="flex:1;min-width:130px">
+              <input id="ent-ate" type="date" onchange="rEnt()" title="Data final" style="flex:1;min-width:130px">
+            </div>
+            <div class="filter-info" id="ent-info"></div>
             <div class="table-wrap">
               <table><thead><tr><th>Data</th><th>Descri&#231;&#227;o</th><th>Categoria</th><th>Valor</th><th>A&#231;&#245;es</th></tr></thead>
               <tbody id="tb-ent"></tbody></table>
@@ -875,6 +895,13 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
               <span class="panel-title">Sa&#237;das</span>
               <button class="btn btn-primary" onclick="openModal('saida',null)">+ Nova sa&#237;da</button>
             </div>
+            <div class="filter-bar">
+              <input id="sai-busca" oninput="rSai()" placeholder="&#128269; Buscar descri&#231;&#227;o...">
+              <select id="sai-cat" onchange="rSai()"><option value="">Todas categorias</option></select>
+              <input id="sai-de" type="date" onchange="rSai()" title="Data inicial" style="flex:1;min-width:130px">
+              <input id="sai-ate" type="date" onchange="rSai()" title="Data final" style="flex:1;min-width:130px">
+            </div>
+            <div class="filter-info" id="sai-info"></div>
             <div class="table-wrap">
               <table><thead><tr><th>Data</th><th>Descri&#231;&#227;o</th><th>Categoria</th><th>Valor</th><th>Origem</th><th>A&#231;&#245;es</th></tr></thead>
               <tbody id="tb-sai"></tbody></table>
