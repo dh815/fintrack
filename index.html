@@ -1618,9 +1618,33 @@ function emptr(cols,msg){ return '<tr><td colspan="'+cols+'">'+empt(msg)+'</td><
 // ENTRADAS
 function rEnt(){
   var d=ud(); if(!d) return;
-  var items=d.ent.filter(function(e){return inM(e.date);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  // Preenche categorias no select
+  var catSel=g('ent-cat');
+  if(catSel){
+    var cats=[]; d.ent.forEach(function(e){ if(cats.indexOf(e.cat)<0) cats.push(e.cat); });
+    var cur=catSel.value;
+    catSel.innerHTML='<option value="">Todas categorias</option>'+
+      cats.sort().map(function(ct){ return '<option value="'+esc(ct)+'"'+(cur===ct?' selected':'')+'>'+esc(ct)+'</option>'; }).join('');
+    catSel.value=cur;
+  }
+  var busca=g('ent-busca')?g('ent-busca').value.toLowerCase().trim():'';
+  var filtCat=g('ent-cat')?g('ent-cat').value:'';
+  var de=g('ent-de')?g('ent-de').value:'';
+  var ate=g('ent-ate')?g('ent-ate').value:'';
+  var temFiltro=(busca||filtCat||de||ate);
+  var items=d.ent.filter(function(e){
+    if(!temFiltro && !inM(e.date)) return false;
+    if(busca && e.desc.toLowerCase().indexOf(busca)<0) return false;
+    if(filtCat && e.cat!==filtCat) return false;
+    if(de && e.date<de) return false;
+    if(ate && e.date>ate) return false;
+    return true;
+  }).sort(function(a,b){ return new Date(b.date)-new Date(a.date); });
+  var totalVal=items.reduce(function(a,e){return a+parseFloat(e.val||0);},0);
+  if(g('ent-info')) g('ent-info').textContent=items.length+' registro(s) — Total: '+fmt(totalVal);
   g('tb-ent').innerHTML=items.length?items.map(function(e){
-    return '<tr><td style="color:var(--t2);font-size:12px">'+fd(e.date)+'</td>'+
+    return '<tr>'+
+      '<td style="color:var(--t2);font-size:12px">'+fd(e.date)+'</td>'+
       '<td style="font-weight:500">'+esc(e.desc)+'</td>'+
       '<td><span class="badge bg-teal">'+esc(e.cat)+'</span></td>'+
       '<td style="font-weight:700;color:var(--teal)">+'+fmt(e.val)+'</td>'+
@@ -1628,15 +1652,39 @@ function rEnt(){
       '<button class="btn btn-edit btn-sm" onclick="editIt(\'ent\',\''+escq(e.id)+'\')">Editar</button>'+
       '<button class="btn btn-del btn-sm" onclick="delIt(\'ent\',\''+escq(e.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
-  }).join(''):emptr(5,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">trending_up</span>Nenhuma entrada neste mês');
+  }).join(''):emptr(5,'Nenhum registro encontrado');
 }
 
 // SAIDAS
 function rSai(){
   var d=ud(); if(!d) return;
-  var items=d.sai.filter(function(s){return inM(s.date);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  // Preenche categorias no select
+  var catSel=g('sai-cat');
+  if(catSel){
+    var cats=[]; d.sai.forEach(function(s){ if(cats.indexOf(s.cat)<0) cats.push(s.cat); });
+    var cur=catSel.value;
+    catSel.innerHTML='<option value="">Todas categorias</option>'+
+      cats.sort().map(function(ct){ return '<option value="'+esc(ct)+'"'+(cur===ct?' selected':'')+'>'+esc(ct)+'</option>'; }).join('');
+    catSel.value=cur;
+  }
+  var busca=g('sai-busca')?g('sai-busca').value.toLowerCase().trim():'';
+  var filtCat=g('sai-cat')?g('sai-cat').value:'';
+  var de=g('sai-de')?g('sai-de').value:'';
+  var ate=g('sai-ate')?g('sai-ate').value:'';
+  var temFiltro=(busca||filtCat||de||ate);
+  var items=d.sai.filter(function(s){
+    if(!temFiltro && !inM(s.date)) return false;
+    if(busca && s.desc.toLowerCase().indexOf(busca)<0) return false;
+    if(filtCat && s.cat!==filtCat) return false;
+    if(de && s.date<de) return false;
+    if(ate && s.date>ate) return false;
+    return true;
+  }).sort(function(a,b){ return new Date(b.date)-new Date(a.date); });
+  var totalVal=items.reduce(function(a,s){return a+parseFloat(s.val||0);},0);
+  if(g('sai-info')) g('sai-info').textContent=items.length+' registro(s) — Total: '+fmt(totalVal);
   g('tb-sai').innerHTML=items.length?items.map(function(s){
-    return '<tr><td style="color:var(--t2);font-size:12px">'+fd(s.date)+'</td>'+
+    return '<tr>'+
+      '<td style="color:var(--t2);font-size:12px">'+fd(s.date)+'</td>'+
       '<td style="font-weight:500">'+esc(s.desc)+'</td>'+
       '<td><span class="badge bg-red">'+esc(s.cat)+'</span></td>'+
       '<td style="font-weight:700;color:var(--red)">-'+fmt(s.val)+'</td>'+
@@ -1645,7 +1693,7 @@ function rSai(){
       '<button class="btn btn-edit btn-sm" onclick="editIt(\'sai\',\''+escq(s.id)+'\')">Editar</button>'+
       '<button class="btn btn-del btn-sm" onclick="delIt(\'sai\',\''+escq(s.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
-  }).join(''):emptr(6,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">trending_down</span>Nenhuma saída neste mês');
+  }).join(''):emptr(6,'Nenhum registro encontrado');
 }
 
 // SALDO
