@@ -1456,11 +1456,21 @@ function drawDonutChart(d){
 
   // Legend
   g('d-donut-legend').innerHTML=items.map(function(item,i){
-    var pct=(item[1]/total*100).toFixed(0);
-    return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;width:100%">'+
-      '<div style="width:8px;height:8px;border-radius:50%;background:'+COLORS[i%COLORS.length]+';flex-shrink:0"></div>'+
+    var pct=(item[1]/total*100).toFixed(1);
+    var color=COLORS[i%COLORS.length];
+    return '<div style="margin-bottom:10px;width:100%">'+
+      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'+
+      '<div style="width:8px;height:8px;border-radius:50%;background:'+color+';flex-shrink:0"></div>'+
       '<span style="flex:1;font-size:11px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(item[0])+'</span>'+
-      '<span style="font-size:11px;font-weight:700;color:var(--t1)">'+pct+'%</span></div>';
+      '<span style="font-size:11px;font-weight:700;color:var(--t1)">'+pct+'%</span>'+
+      '</div>'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;padding-left:14px">'+
+      '<div style="flex:1;height:3px;background:rgba(255,255,255,.06);border-radius:2px;margin-right:8px">'+
+      '<div style="height:3px;border-radius:2px;background:'+color+';width:'+pct+'%"></div>'+
+      '</div>'+
+      '<span style="font-size:11px;font-weight:700;color:'+color+';white-space:nowrap">'+fmt(item[1])+'</span>'+
+      '</div>'+
+      '</div>';
   }).join('');
 }
 
