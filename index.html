@@ -1366,7 +1366,7 @@ var _charts = {};
 function destroyChart(id){ if(_charts[id]){ try{_charts[id].destroy();}catch(e){} delete _charts[id]; } }
 
 function rDash(){
-  var d=ud(); if(!d) return;
+  var d=ud(); if(!d||!d.ent) return;
   var ent=d.ent.filter(function(e){return inM(e.date);});
   var sai=d.sai.filter(function(s){return inM(s.date);});
   var tE=sum(ent), tS=sum(sai), sal=tE-tS;
@@ -1779,7 +1779,7 @@ function emptr(cols,msg){ return '<tr><td colspan="'+cols+'">'+empt(msg)+'</td><
 
 // ENTRADAS
 function rEnt(){
-  var d=ud(); if(!d) return;
+  var d=ud(); if(!d||!d.ent) return;
   // Preenche categorias no select
   var catSel=g('ent-cat');
   if(catSel){
@@ -1819,7 +1819,7 @@ function rEnt(){
 
 // SAIDAS
 function rSai(){
-  var d=ud(); if(!d) return;
+  var d=ud(); if(!d||!d.sai) return;
   // Preenche categorias no select
   var catSel=g('sai-cat');
   if(catSel){
@@ -1860,7 +1860,7 @@ function rSai(){
 
 // SALDO
 function rSal(){
-  var d=ud(); if(!d) return;
+  var d=ud(); if(!d||!d.ent||!d.sai) return;
   var ent=d.ent.filter(function(e){return inM(e.date);});
   var sai=d.sai.filter(function(s){return inM(s.date);});
   var tE=sum(ent),tS=sum(sai),sal=tE-tS;
@@ -1884,7 +1884,7 @@ function rSal(){
 
 // PARCELAS
 function rParc(){
-  var d=ud(); if(!d) return;
+  var d=ud(); if(!d||!d.parc) return;
 
   // Preenche select de categorias
   var catSel=g('parc-cat');
@@ -1983,7 +1983,7 @@ function canParc(id){
 
 // PLANEJAMENTO
 function rPlan(){
-  var d=ud(); if(!d) return;
+  var d=ud(); if(!d||!d.plans) return;
   g('p-list').innerHTML=d.plans.length?d.plans.map(function(p){
     var pct=Math.min(100,((p.cur||0)/p.tgt*100));
     return '<div class="plan-card">'+
@@ -2017,7 +2017,7 @@ function updPlan(id){
 
 // INVESTIMENTOS
 function rInv(){
-  var d=ud(); if(!d) return;
+  var d=ud(); if(!d||!d.inv) return;
   var total=sum(d.inv);
   var rend=d.inv.reduce(function(a,i){return a+parseFloat(i.yld||0);},0);
   g('i-metrics').innerHTML=
@@ -2045,7 +2045,7 @@ function rInv(){
 
 // CATEGORIAS
 function rCats(){
-  var d=ud(); if(!d) return;
+  var d=ud(); if(!d||!d.cats) return;
   var map={entrada:'cg-ent',saida:'cg-sai',investimento:'cg-inv'};
   Object.keys(map).forEach(function(type){
     g(map[type]).innerHTML=d.cats[type].map(function(c){
@@ -2317,17 +2317,18 @@ function exportPDF(){
 
 // CRIAR ACESSO PARA CLIENTE
 function openCreateAccess(){
-  g('modalTitle').textContent='Criar acesso para cliente';
+  g('mTitle').textContent='Criar acesso para cliente';
   g('mBody').innerHTML=
     '<div style="background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);border-radius:10px;padding:12px 16px;font-size:12px;color:#00C896;margin-bottom:16px;line-height:1.6">'+
-    '&#128274; O cliente receberá um usuário e senha temporária. No primeiro acesso, será obrigado a criar uma senha pessoal.</div>'+
-    '<div class="field"><label>Nome completo do cliente</label><input id="ca-name" placeholder="Ex: João Silva"></div>'+
-    '<div class="field"><label>Usuário (único, sem espaços)</label><input id="ca-user" placeholder="Ex: joaosilva"></div>'+
-    '<div class="field"><label>Senha temporária</label><input id="ca-pass" type="text" placeholder="Ex: 1234 (cliente vai trocar no 1º acesso)" value="1234"></div>';
+    '&#128274; O cliente recebera um usuario e senha temporaria. No primeiro acesso, sera obrigado a criar uma senha pessoal.</div>'+
+    '<div class="field"><label>Nome completo do cliente</label><input id="ca-name" placeholder="Ex: Joao Silva"></div>'+
+    '<div class="field"><label>Usuario (unico, sem espacos)</label><input id="ca-user" placeholder="Ex: joaosilva"></div>'+
+    '<div class="field"><label>Senha temporaria</label><input id="ca-pass" type="text" placeholder="Ex: 1234" value="1234"></div>';
   g('mFoot').innerHTML=
     '<button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>'+
     '<button class="btn btn-primary" onclick="saveCreateAccess()">Criar acesso</button>';
   g('mainModal').classList.add('open');
+  setTimeout(function(){ var el=g('ca-name'); if(el) el.focus(); },100);
 }
 
 function saveCreateAccess(){
