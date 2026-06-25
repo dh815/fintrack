@@ -2317,18 +2317,27 @@ function exportPDF(){
 
 // CRIAR ACESSO PARA CLIENTE
 function openCreateAccess(){
-  g('mTitle').textContent='Criar acesso para cliente';
-  g('mBody').innerHTML=
-    '<div style="background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);border-radius:10px;padding:12px 16px;font-size:12px;color:#00C896;margin-bottom:16px;line-height:1.6">'+
-    '&#128274; O cliente recebera um usuario e senha temporaria. No primeiro acesso, sera obrigado a criar uma senha pessoal.</div>'+
-    '<div class="field"><label>Nome completo do cliente</label><input id="ca-name" placeholder="Ex: Joao Silva"></div>'+
-    '<div class="field"><label>Usuario (unico, sem espacos)</label><input id="ca-user" placeholder="Ex: joaosilva"></div>'+
-    '<div class="field"><label>Senha temporaria</label><input id="ca-pass" type="text" placeholder="Ex: 1234" value="1234"></div>';
-  g('mFoot').innerHTML=
-    '<button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>'+
+  // Use the same modal elements used by openModal() - proven to work
+  var title = g('mTitle');
+  var body  = g('mBody');
+  var foot  = g('mFoot');
+  var wrap  = g('mainModal');
+  if(!title||!body||!foot||!wrap){
+    alert('Erro: modal nao encontrado. Recarregue a pagina.');
+    return;
+  }
+  title.textContent = 'Criar acesso para cliente';
+  body.innerHTML =
+    '<div style="background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);border-radius:10px;padding:12px 14px;font-size:12px;color:#00C896;margin-bottom:16px;line-height:1.6">' +
+    'O cliente recebera usuario e senha temporaria. No primeiro acesso tera que criar uma senha pessoal.</div>' +
+    '<div class="field"><label>Nome completo *</label><input id="ca-name" placeholder="Ex: Joao Silva" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>' +
+    '<div class="field"><label>Usuario (sem espacos) *</label><input id="ca-user" placeholder="Ex: joaosilva" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>' +
+    '<div class="field"><label>Senha temporaria *</label><input id="ca-pass" type="text" value="1234" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>';
+  foot.innerHTML =
+    '<button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>' +
     '<button class="btn btn-primary" onclick="saveCreateAccess()">Criar acesso</button>';
-  g('mainModal').classList.add('open');
-  setTimeout(function(){ var el=g('ca-name'); if(el) el.focus(); },100);
+  wrap.classList.add('open');
+  setTimeout(function(){ var el=g('ca-name'); if(el) el.focus(); }, 150);
 }
 
 function saveCreateAccess(){
