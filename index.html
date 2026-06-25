@@ -712,7 +712,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
     </div>
     <button class="auth-btn" onclick="doLogin()">Entrar</button>
     <div class="auth-error" id="loginError">Usu&#225;rio ou senha incorretos.</div>
-    <div class="auth-switch">Sem conta? <button onclick="showRegister()">Criar agora</button></div>
+    <!-- Contas criadas pelo administrador -->
   </div>
 </div>
 
@@ -720,7 +720,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 <div class="auth-screen" id="registerScreen">
   <div class="auth-card">
     <div class="auth-logo">
-      <div class="auth-logo-icon"><span class="mi">person_add</span></div>
+      <div class="auth-logo-icon"><span class="mi">how_to_reg</span></div>
       <h1>Criar <span>conta</span></h1>
       <p>Comece a controlar suas finan&#231;as</p>
     </div>
@@ -800,7 +800,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
         <button class="sb-item" data-p="categorias" onclick="nav('categorias')"><span class="sb-icon"><span class="mi">sell</span></span>Categorias</button>
       </nav>
       <div class="sb-foot">
-        <button class="sb-logout" style="color:var(--teal);margin-bottom:6px" onclick="openCreateAccess()"><span class="mi" style="font-size:16px">person_add</span>Criar acesso</button>
+        <button class="sb-logout" id="btnCriarAcesso" style="color:var(--teal);margin-bottom:6px;display:none" onclick="openCreateAccess()"><span class="mi" style="font-size:16px">person_add</span>Criar acesso</button>
         <button class="sb-logout" onclick="doLogout()"><span class="mi" style="font-size:16px">logout</span>Sair da conta</button>
       </div>
     </aside>
@@ -1256,8 +1256,15 @@ function showRegister(){ g('loginScreen').style.display='none'; g('registerScree
 function showLogin(){ g('registerScreen').style.display='none'; g('loginScreen').style.display='flex'; }
 function showApp(n){
   g('loginScreen').style.display='none'; g('registerScreen').style.display='none';
+  g('changePassScreen').style.display='none';
   g('appScreen').style.display='block';
   g('sbName').textContent=n; g('sbAvatar').textContent=n.charAt(0).toUpperCase();
+  // Mostrar botão criar acesso só para admin
+  fdb.ref('accounts/'+S.user+'/role').once('value').then(function(snap){
+    var role=snap.val();
+    var btn=g('btnCriarAcesso');
+    if(btn) btn.style.display=(role==='admin')?'flex':'none';
+  });
   updMonth(); nav('dashboard');
 }
 function bto(s){ try{ return btoa(unescape(encodeURIComponent(s))); }catch(e){ return btoa(s); } }
@@ -2201,9 +2208,9 @@ function cf(title,text,cb){
 function closeCf(){ g('confirmWrap').classList.remove('open'); }
 
 // TOAST
-function toast(msg,type){
+function toast(msg,type,dur){
   var t=g('toast'); t.textContent=msg; t.className='show '+(type||'');
-  clearTimeout(t._t); t._t=setTimeout(function(){t.className='';},3000);
+  clearTimeout(t._t); t._t=setTimeout(function(){t.className='';},dur||3000);
 }
 
 
@@ -2326,26 +2333,31 @@ function openCreateAccess(){
 
 function saveCreateAccess(){
   var name=(g('ca-name')?g('ca-name').value.trim():'');
-  var user=(g('ca-user')?g('ca-user').value.trim().replace(/\s+/g,''):'');
+  var user=(g('ca-user')?g('ca-user').value.trim().replace(/[^a-zA-Z0-9_]/g,''):'');
   var pass=(g('ca-pass')?g('ca-pass').value:'');
   if(!name||!user||!pass){toast('Preencha todos os campos.','err');return;}
   var btn=g('mFoot').querySelector('.btn-primary');
   btn.textContent='Criando...'; btn.disabled=true;
+  var savedPass=pass;
+  // Verifica se usuário já existe
   fdb.ref('accounts/'+user).once('value').then(function(snap){
     if(snap.val()){
       btn.textContent='Criar acesso'; btn.disabled=false;
-      toast('Usuário "'+user+'" já existe!','err');return;
+      toast('Usuário "'+user+'" já existe!','err');
+      throw new Error('CANCEL');
     }
-    return hashPass(pass).then(function(hashed){
-      return fdb.ref('accounts/'+user).set({n:name,p:hashed,firstAccess:true,role:'user',createdBy:S.user});
+    return hashPass(pass);
+  }).then(function(hashed){
+    return fdb.ref('accounts/'+user).set({
+      n:name, p:hashed, firstAccess:true, role:'user', createdBy:S.user
     });
   }).then(function(){
     btn.textContent='Criar acesso'; btn.disabled=false;
     closeModal();
-    toast('Acesso criado! Usuário: '+user+' | Senha temp: '+g('ca-pass').value,'ok');
+    toast('✅ Acesso criado! Usuário: '+user+' | Senha: '+savedPass,'ok',8000);
   }).catch(function(e){
     btn.textContent='Criar acesso'; btn.disabled=false;
-    toast('Erro: '+e.message,'err');
+    if(e.message!=='CANCEL') toast('Erro: '+e.message,'err');
   });
 }
 
