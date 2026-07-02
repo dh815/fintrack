@@ -689,6 +689,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 <div id="toast"></div>
@@ -1105,6 +1106,7 @@ var firebaseConfig = {
   };
 firebase.initializeApp(firebaseConfig);
 var fdb = firebase.database();
+var fauth = firebase.auth();
 console.log('Firebase inicializado:', firebase.apps.length > 0);
 
 var S = { user:null, page:'dashboard', month:new Date().getMonth(), year:new Date().getFullYear(), eid:null, etype:null };
@@ -1164,33 +1166,48 @@ function doLogin(){
   var u=g('loginUser').value.trim(), p=g('loginPass').value;
   if(!u||!p){showErr('loginError','Preencha todos os campos.');return;}
   showErr('loginError','');
-  var btn = document.querySelector('#loginScreen .auth-btn');
+  var btn=document.querySelector('#loginScreen .auth-btn');
   btn.textContent='Entrando...'; btn.disabled=true;
+  var hashedPass;
+  // 1) Hash a senha
   hashPass(p).then(function(hashed){
-    return fdb.ref('accounts/'+u).once('value').then(function(snap){
-      btn.textContent='Entrar'; btn.disabled=false;
-      var acc = snap.val();
-      // Suporta senha antiga (btoa) e nova (sha256) para migração
-      var passOk = acc && (acc.p===hashed || acc.p===bto(p));
-      if(!acc||!passOk){
-        showErr('loginError','Usuário ou senha incorretos.');return;
-      }
-      // Migra senha antiga para SHA-256 automaticamente
-      if(acc.p===bto(p)){
-        fdb.ref('accounts/'+u+'/p').set(hashed);
-      }
-      S.user=u; S.accName=acc.n; S.isAdmin=(acc.role==='admin');
-      localStorage.setItem('ftS',u);
-      if(acc.firstAccess){
-        g('loginScreen').style.display='none';
-        g('changePassScreen').style.display='flex';
-        return;
-      }
-      loadUD(function(data){ if(data) showApp(acc.n); });
+    hashedPass=hashed;
+    // 2) Autenticar anonimamente ANTES de qualquer leitura (exigido pelas regras)
+    return fauth.signInAnonymously();
+  }).then(function(result){
+    var uid=result.user.uid;
+    S.firebaseUid=uid;
+    // 3) Salvar uid NA conta (permite escrita pois uid ainda nao existe ou e o mesmo)
+    return fdb.ref('accounts/'+u+'/uid').set(uid).then(function(){
+      // 4) Ler conta (agora autenticado + uid salvo = regras satisfeitas)
+      return fdb.ref('accounts/'+u).once('value');
     });
+  }).then(function(snap){
+    var acc=snap.val();
+    var passOk=acc&&(acc.p===hashedPass||acc.p===bto(p));
+    if(!acc||!passOk){
+      btn.textContent='Entrar'; btn.disabled=false;
+      showErr('loginError','Usuario ou senha incorretos.');
+      fauth.signOut().catch(function(){});
+      return;
+    }
+    // Migrar senha antiga btoa para SHA-256
+    if(acc.p===bto(p)){
+      fdb.ref('accounts/'+u+'/p').set(hashedPass).catch(function(){});
+    }
+    btn.textContent='Entrar'; btn.disabled=false;
+    S.user=u; S.accName=acc.n; S.isAdmin=(acc.role==='admin');
+    localStorage.setItem('ftS',u);
+    if(acc.firstAccess){
+      g('loginScreen').style.display='none';
+      g('changePassScreen').style.display='flex';
+      return;
+    }
+    loadUD(function(data){ if(data) showApp(acc.n); });
   }).catch(function(e){
     btn.textContent='Entrar'; btn.disabled=false;
-    showErr('loginError','Erro de conexão: '+e.message);
+    fauth.signOut().catch(function(){});
+    showErr('loginError','Erro de conexao: '+e.message);
   });
 }
 
@@ -1245,8 +1262,9 @@ function doRegister(){
 }
 
 function doLogout(){
-  S.user=null; S.accName=null; _cache=null;
+  S.user=null; S.accName=null; S.isAdmin=false; _cache=null;
   localStorage.removeItem('ftS');
+  fauth.signOut().catch(function(){});
   g('appScreen').style.display='none';
   g('changePassScreen').style.display='none';
   g('loginScreen').style.display='flex';
@@ -2382,12 +2400,19 @@ window.addEventListener('load',function(){
   var s=localStorage.getItem('ftS');
   if(s){
     S.user=s;
-    fdb.ref('accounts/'+s).once('value').then(function(snap){
+    // Re-authenticate anonymously FIRST, then read account
+    fauth.signInAnonymously().then(function(result){
+      var uid=result.user.uid;
+      S.firebaseUid=uid;
+      // Update uid then read account
+      return fdb.ref('accounts/'+s+'/uid').set(uid).then(function(){
+        return fdb.ref('accounts/'+s).once('value');
+      });
+    }).then(function(snap){
       var acc=snap.val();
       if(acc){
-        S.accName=acc.n;
+        S.accName=acc.n; S.isAdmin=(acc.role==='admin');
         if(acc.firstAccess){
-          S.user=s;
           g('changePassScreen').style.display='flex';
           updMonth(); return;
         }
@@ -2400,7 +2425,22 @@ window.addEventListener('load',function(){
         g('loginScreen').style.display='flex'; updMonth();
       }
     }).catch(function(){
-      g('loginScreen').style.display='flex'; updMonth();
+      // Fallback without auth
+      fdb.ref('accounts/'+s).once('value').then(function(snap){
+        var acc=snap.val();
+        if(acc){
+          S.accName=acc.n; S.isAdmin=(acc.role==='admin');
+          loadUD(function(data){
+            if(data) showApp(acc.n);
+            else { g('loginScreen').style.display='flex'; updMonth(); }
+          });
+        } else {
+          localStorage.removeItem('ftS');
+          g('loginScreen').style.display='flex'; updMonth();
+        }
+      }).catch(function(){
+        g('loginScreen').style.display='flex'; updMonth();
+      });
     });
   } else {
     g('loginScreen').style.display='flex';
