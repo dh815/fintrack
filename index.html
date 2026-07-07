@@ -1880,7 +1880,10 @@ window.addEventListener('load', function(){
     var p = cur ? Promise.resolve(cur) : fauth.signInAnonymously().then(function(r){ return r.user; });
     p.then(function(user){
       S.firebaseUid = user.uid;
+      // Save uid first, then verify it was saved, then read user data
       return fdb.ref('accounts/'+s+'/uid').set(user.uid).then(function(){
+        return fdb.ref('accounts/'+s+'/uid').once('value');
+      }).then(function(uidSnap){
         return fdb.ref('accounts/'+s).once('value');
       });
     }).then(function(snap){
@@ -1947,10 +1950,13 @@ function doLogin(){
     // 4) Senha correta: salvar uid na conta para as regras funcionarem
     var updates={uid:S.firebaseUid};
     if(acc.p===bto(p)) updates.p=hashed; // migra btoa->sha256
+    S.user=u; S.accName=acc.n; S.isAdmin=(acc.role==='admin');
+    localStorage.setItem('ftS',u);
     return fdb.ref('accounts/'+u).update(updates).then(function(){
+      // Verificar que uid foi salvo corretamente antes de carregar dados
+      return fdb.ref('accounts/'+u+'/uid').once('value');
+    }).then(function(uidSnap){
       btn.textContent='Entrar'; btn.disabled=false;
-      S.user=u; S.accName=acc.n; S.isAdmin=(acc.role==='admin');
-      localStorage.setItem('ftS',u);
       if(acc.firstAccess){
         g('loginScreen').style.display='none';
         g('changePassScreen').style.display='flex';
