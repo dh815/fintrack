@@ -732,6 +732,30 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
   </div>
 </div>
 
+<!-- TROCAR SENHA (primeiro acesso) -->
+<div class="auth-screen" id="changePassScreen" style="display:none">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon"><span class="mi">lock_reset</span></div>
+      <h1>Criar sua <span>senha</span></h1>
+      <p>Por seguran&#231;a, defina uma senha pessoal antes de continuar</p>
+    </div>
+    <div style="background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);border-radius:10px;padding:12px 16px;font-size:12px;color:#00C896;margin-bottom:20px;line-height:1.6">
+      &#128274; Este &#233; seu primeiro acesso. Escolha uma senha segura &#8212; voc&#234; usar&#225; ela sempre que entrar.
+    </div>
+    <div class="auth-field">
+      <label>Nova senha</label>
+      <input type="password" id="cpNewPass" placeholder="M&#237;nimo 4 caracteres" autocomplete="new-password">
+    </div>
+    <div class="auth-field">
+      <label>Confirmar nova senha</label>
+      <input type="password" id="cpConfPass" placeholder="Repita a nova senha" autocomplete="new-password">
+    </div>
+    <button class="auth-btn" onclick="doChangePass()">Salvar senha e entrar</button>
+    <div class="auth-error" id="changePassError"></div>
+  </div>
+</div>
+
 <!-- APP -->
 <div id="appScreen">
   <div class="sb-overlay" id="sbOverlay" onclick="closeSb()"></div>
