@@ -760,7 +760,6 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
         <button class="sb-item" data-p="categorias" onclick="nav('categorias')"><span class="sb-icon"><span class="mi">sell</span></span>Categorias</button>
       </nav>
       <div class="sb-foot">
-        <button class="sb-logout" style="color:var(--yellow);margin-bottom:6px" onclick="restoreFromBackup()"><span class="mi" style="font-size:16px">restore</span>Restaurar backup</button>
         <button class="sb-logout" onclick="doLogout()"><span class="mi" style="font-size:16px">logout</span>Sair da conta</button>
       </div>
     </aside>
@@ -862,13 +861,6 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
               <span class="panel-title">Entradas</span>
               <button class="btn btn-primary" onclick="openModal('entrada',null)">+ Nova entrada</button>
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--border)">
-              <input id="ent-busca" oninput="rEnt()" placeholder="&#128269; Buscar..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
-              <select id="ent-cat" onchange="rEnt()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todas categorias</option></select>
-              <input id="ent-de" type="date" onchange="rEnt()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
-              <input id="ent-ate" type="date" onchange="rEnt()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
-            </div>
-            <div style="padding:4px 20px;font-size:11px;color:var(--t3)" id="ent-info"></div>
             <div class="table-wrap">
               <table><thead><tr><th>Data</th><th>Descri&#231;&#227;o</th><th>Categoria</th><th>Valor</th><th>A&#231;&#245;es</th></tr></thead>
               <tbody id="tb-ent"></tbody></table>
@@ -883,13 +875,6 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
               <span class="panel-title">Sa&#237;das</span>
               <button class="btn btn-primary" onclick="openModal('saida',null)">+ Nova sa&#237;da</button>
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--border)">
-              <input id="sai-busca" oninput="rSai()" placeholder="&#128269; Buscar..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
-              <select id="sai-cat" onchange="rSai()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todas categorias</option></select>
-              <input id="sai-de" type="date" onchange="rSai()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
-              <input id="sai-ate" type="date" onchange="rSai()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
-            </div>
-            <div style="padding:4px 20px;font-size:11px;color:var(--t3)" id="sai-info"></div>
             <div class="table-wrap">
               <table><thead><tr><th>Data</th><th>Descri&#231;&#227;o</th><th>Categoria</th><th>Valor</th><th>Origem</th><th>A&#231;&#245;es</th></tr></thead>
               <tbody id="tb-sai"></tbody></table>
@@ -1140,7 +1125,6 @@ function render(p){
   else if(p==='planejamento') rPlan();
   else if(p==='investimentos') rInv();
   else if(p==='categorias') rCats();
-  else if(p==='perfil') rPerfil();
 }
 
 // MONTH
@@ -1569,82 +1553,38 @@ function emptr(cols,msg){ return '<tr><td colspan="'+cols+'">'+empt(msg)+'</td><
 
 // ENTRADAS
 function rEnt(){
-  var d=ud(); if(!d||!d.ent) return;
-  var catSel=g('ent-cat');
-  if(catSel){
-    var cats=[]; d.ent.forEach(function(e){ if(cats.indexOf(e.cat)<0) cats.push(e.cat); });
-    var cur=catSel.value;
-    catSel.innerHTML='<option value="">Todas categorias</option>'+cats.sort().map(function(ct){
-      return '<option value="'+esc(ct)+'"'+(cur===ct?' selected':'')+'>'+esc(ct)+'</option>';
-    }).join('');
-    catSel.value=cur;
-  }
-  var busca=g('ent-busca')?g('ent-busca').value.toLowerCase().trim():'';
-  var filtCat=g('ent-cat')?g('ent-cat').value:'';
-  var de=g('ent-de')?g('ent-de').value:'';
-  var ate=g('ent-ate')?g('ent-ate').value:'';
-  var temFiltro=(busca||filtCat||de||ate);
-  var items=d.ent.filter(function(e){
-    if(!temFiltro&&!inM(e.date)) return false;
-    if(busca&&e.desc.toLowerCase().indexOf(busca)<0) return false;
-    if(filtCat&&e.cat!==filtCat) return false;
-    if(de&&e.date<de) return false;
-    if(ate&&e.date>ate) return false;
-    return true;
-  }).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
-  var totalVal=items.reduce(function(a,e){return a+parseFloat(e.val||0);},0);
-  if(g('ent-info')) g('ent-info').textContent=items.length+' registro(s) — Total: '+fmt(totalVal);
+  var d=ud(); if(!d) return;
+  var items=d.ent.filter(function(e){return inM(e.date);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
   g('tb-ent').innerHTML=items.length?items.map(function(e){
-    return '<tr>'+
-      '<td style="color:var(--t2);font-size:12px">'+fd(e.date)+'</td>'+
+    return '<tr><td style="color:var(--t2);font-size:12px">'+fd(e.date)+'</td>'+
       '<td style="font-weight:500">'+esc(e.desc)+'</td>'+
       '<td><span class="badge bg-teal">'+esc(e.cat)+'</span></td>'+
       '<td style="font-weight:700;color:var(--teal)">+'+fmt(e.val)+'</td>'+
       '<td><div style="display:flex;gap:6px">'+
-      '<button class="btn btn-edit btn-sm" onclick="editIt('ent',''+escq(e.id)+'')">Editar</button>'+
-      '<button class="btn btn-del btn-sm" onclick="delIt('ent',''+escq(e.id)+'')"><span class="mi" style="font-size:13px">delete</span></button>'+
+      '<button class="btn btn-edit btn-sm" onclick="editIt(\'ent\',\''+escq(e.id)+'\')">Editar</button>'+
+      '<button class="btn btn-del btn-sm" onclick="delIt(\'ent\',\''+escq(e.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
-  }).join(''):emptr(5,'Nenhum registro encontrado');
+  }).join(''):emptr(5,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">trending_up</span>Nenhuma entrada neste mês');
 }
+
+// SAIDAS
 function rSai(){
-  var d=ud(); if(!d||!d.sai) return;
-  var catSel=g('sai-cat');
-  if(catSel){
-    var cats=[]; d.sai.forEach(function(s){ if(cats.indexOf(s.cat)<0) cats.push(s.cat); });
-    var cur=catSel.value;
-    catSel.innerHTML='<option value="">Todas categorias</option>'+cats.sort().map(function(ct){
-      return '<option value="'+esc(ct)+'"'+(cur===ct?' selected':'')+'>'+esc(ct)+'</option>';
-    }).join('');
-    catSel.value=cur;
-  }
-  var busca=g('sai-busca')?g('sai-busca').value.toLowerCase().trim():'';
-  var filtCat=g('sai-cat')?g('sai-cat').value:'';
-  var de=g('sai-de')?g('sai-de').value:'';
-  var ate=g('sai-ate')?g('sai-ate').value:'';
-  var temFiltro=(busca||filtCat||de||ate);
-  var items=d.sai.filter(function(s){
-    if(!temFiltro&&!inM(s.date)) return false;
-    if(busca&&s.desc.toLowerCase().indexOf(busca)<0) return false;
-    if(filtCat&&s.cat!==filtCat) return false;
-    if(de&&s.date<de) return false;
-    if(ate&&s.date>ate) return false;
-    return true;
-  }).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
-  var totalVal=items.reduce(function(a,s){return a+parseFloat(s.val||0);},0);
-  if(g('sai-info')) g('sai-info').textContent=items.length+' registro(s) — Total: '+fmt(totalVal);
+  var d=ud(); if(!d) return;
+  var items=d.sai.filter(function(s){return inM(s.date);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
   g('tb-sai').innerHTML=items.length?items.map(function(s){
-    return '<tr>'+
-      '<td style="color:var(--t2);font-size:12px">'+fd(s.date)+'</td>'+
+    return '<tr><td style="color:var(--t2);font-size:12px">'+fd(s.date)+'</td>'+
       '<td style="font-weight:500">'+esc(s.desc)+'</td>'+
       '<td><span class="badge bg-red">'+esc(s.cat)+'</span></td>'+
       '<td style="font-weight:700;color:var(--red)">-'+fmt(s.val)+'</td>'+
       '<td>'+(s.ori?'<span class="badge bg-muted">'+esc(s.ori)+'</span>':'<span style="color:var(--t3)">—</span>')+'</td>'+
       '<td><div style="display:flex;gap:6px">'+
-      '<button class="btn btn-edit btn-sm" onclick="editIt('sai',''+escq(s.id)+'')">Editar</button>'+
-      '<button class="btn btn-del btn-sm" onclick="delIt('sai',''+escq(s.id)+'')"><span class="mi" style="font-size:13px">delete</span></button>'+
+      '<button class="btn btn-edit btn-sm" onclick="editIt(\'sai\',\''+escq(s.id)+'\')">Editar</button>'+
+      '<button class="btn btn-del btn-sm" onclick="delIt(\'sai\',\''+escq(s.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
-  }).join(''):emptr(6,'Nenhum registro encontrado');
+  }).join(''):emptr(6,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">trending_down</span>Nenhuma saída neste mês');
 }
+
+// SALDO
 function rSal(){
   var d=ud(); if(!d) return;
   var ent=d.ent.filter(function(e){return inM(e.date);});
