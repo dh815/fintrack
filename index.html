@@ -863,6 +863,13 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
               <span class="panel-title">Entradas</span>
               <button class="btn btn-primary" onclick="openModal('entrada',null)">+ Nova entrada</button>
             </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--border)">
+              <input id="ent-busca" oninput="rEnt()" placeholder="&#128269; Buscar descri&#231;&#227;o..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
+              <select id="ent-cat" onchange="rEnt()" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todas categorias</option></select>
+              <input id="ent-de" type="date" onchange="rEnt()" title="Data inicial" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
+              <input id="ent-ate" type="date" onchange="rEnt()" title="Data final" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
+            </div>
+            <div style="padding:4px 20px 6px;font-size:11px;color:var(--t3)" id="ent-info"></div>
             <div class="table-wrap">
               <table><thead><tr><th>Data</th><th>Descri&#231;&#227;o</th><th>Categoria</th><th>Valor</th><th>A&#231;&#245;es</th></tr></thead>
               <tbody id="tb-ent"></tbody></table>
@@ -877,6 +884,13 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
               <span class="panel-title">Sa&#237;das</span>
               <button class="btn btn-primary" onclick="openModal('saida',null)">+ Nova sa&#237;da</button>
             </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--border)">
+              <input id="sai-busca" oninput="rSai()" placeholder="&#128269; Buscar descri&#231;&#227;o..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
+              <select id="sai-cat" onchange="rSai()" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todas categorias</option></select>
+              <input id="sai-de" type="date" onchange="rSai()" title="Data inicial" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
+              <input id="sai-ate" type="date" onchange="rSai()" title="Data final" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
+            </div>
+            <div style="padding:4px 20px 6px;font-size:11px;color:var(--t3)" id="sai-info"></div>
             <div class="table-wrap">
               <table><thead><tr><th>Data</th><th>Descri&#231;&#227;o</th><th>Categoria</th><th>Valor</th><th>Origem</th><th>A&#231;&#245;es</th></tr></thead>
               <tbody id="tb-sai"></tbody></table>
@@ -1609,8 +1623,31 @@ function emptr(cols,msg){ return '<tr><td colspan="'+cols+'">'+empt(msg)+'</td><
 
 // ENTRADAS
 function rEnt(){
-  var d=ud(); if(!d) return;
-  var items=d.ent.filter(function(e){return inM(e.date);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  var d=ud(); if(!d||!d.ent) return;
+  // Populate category select
+  var catSel=g('ent-cat');
+  if(catSel){
+    var cats=[]; d.ent.forEach(function(e){ if(cats.indexOf(e.cat)<0) cats.push(e.cat); });
+    var cur=catSel.value;
+    catSel.innerHTML='<option value="">Todas categorias</option>'+
+      cats.sort().map(function(ct){ return '<option value="'+esc(ct)+'"'+(cur===ct?' selected':'')+'>'+esc(ct)+'</option>'; }).join('');
+    catSel.value=cur;
+  }
+  var busca=g('ent-busca')?g('ent-busca').value.toLowerCase().trim():'';
+  var filtCat=g('ent-cat')?g('ent-cat').value:'';
+  var de=g('ent-de')?g('ent-de').value:'';
+  var ate=g('ent-ate')?g('ent-ate').value:'';
+  var temFiltro=busca||filtCat||de||ate;
+  var items=d.ent.filter(function(e){
+    if(!temFiltro && !inM(e.date)) return false;
+    if(busca && e.desc.toLowerCase().indexOf(busca)<0) return false;
+    if(filtCat && e.cat!==filtCat) return false;
+    if(de && e.date<de) return false;
+    if(ate && e.date>ate) return false;
+    return true;
+  }).sort(function(a,b){ return new Date(b.date)-new Date(a.date); });
+  var totalVal=items.reduce(function(a,e){return a+parseFloat(e.val||0);},0);
+  if(g('ent-info')) g('ent-info').textContent=items.length+' registro(s) — Total: '+fmt(totalVal);
   g('tb-ent').innerHTML=items.length?items.map(function(e){
     return '<tr><td style="color:var(--t2);font-size:12px">'+fd(e.date)+'</td>'+
       '<td style="font-weight:500">'+esc(e.desc)+'</td>'+
@@ -1625,8 +1662,31 @@ function rEnt(){
 
 // SAIDAS
 function rSai(){
-  var d=ud(); if(!d) return;
-  var items=d.sai.filter(function(s){return inM(s.date);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  var d=ud(); if(!d||!d.sai) return;
+  // Populate category select
+  var catSel=g('sai-cat');
+  if(catSel){
+    var cats=[]; d.sai.forEach(function(s){ if(cats.indexOf(s.cat)<0) cats.push(s.cat); });
+    var cur=catSel.value;
+    catSel.innerHTML='<option value="">Todas categorias</option>'+
+      cats.sort().map(function(ct){ return '<option value="'+esc(ct)+'"'+(cur===ct?' selected':'')+'>'+esc(ct)+'</option>'; }).join('');
+    catSel.value=cur;
+  }
+  var busca=g('sai-busca')?g('sai-busca').value.toLowerCase().trim():'';
+  var filtCat=g('sai-cat')?g('sai-cat').value:'';
+  var de=g('sai-de')?g('sai-de').value:'';
+  var ate=g('sai-ate')?g('sai-ate').value:'';
+  var temFiltro=busca||filtCat||de||ate;
+  var items=d.sai.filter(function(s){
+    if(!temFiltro && !inM(s.date)) return false;
+    if(busca && s.desc.toLowerCase().indexOf(busca)<0) return false;
+    if(filtCat && s.cat!==filtCat) return false;
+    if(de && s.date<de) return false;
+    if(ate && s.date>ate) return false;
+    return true;
+  }).sort(function(a,b){ return new Date(b.date)-new Date(a.date); });
+  var totalVal=items.reduce(function(a,s){return a+parseFloat(s.val||0);},0);
+  if(g('sai-info')) g('sai-info').textContent=items.length+' registro(s) — Total: '+fmt(totalVal);
   g('tb-sai').innerHTML=items.length?items.map(function(s){
     return '<tr><td style="color:var(--t2);font-size:12px">'+fd(s.date)+'</td>'+
       '<td style="font-weight:500">'+esc(s.desc)+'</td>'+
