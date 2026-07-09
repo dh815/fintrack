@@ -653,6 +653,13 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 .chart-tab.active { background: var(--s3); color: var(--t1); }
 @media(max-width:768px){ .chart-grid { grid-template-columns: 1fr; } }
 
+
+.filter-bar{display:flex;gap:10px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--border)}
+.filter-bar input,.filter-bar select{padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none;transition:border-color .2s}
+.filter-bar input:focus,.filter-bar select:focus{border-color:var(--teal)}
+.filter-bar input{flex:2;min-width:160px}
+.filter-bar select{flex:1;min-width:130px}
+.filter-info{padding:5px 20px 6px;font-size:11px;color:var(--t3)}
 /* ===== RESPONSIVE ===== */
 @media(max-width:768px){
   .sidebar { transform: translateX(-100%); }
@@ -674,11 +681,10 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 <div id="toast"></div>
-<div id="loadingBar" style="display:none;position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--blue));z-index:9999;animation:loadpulse 1s ease-in-out infinite"></div>
+<div id="loadingBar" style="display:none;position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--blue));z-index:9999;animation:loadpulse 1.2s ease-in-out infinite"></div>
 
 <!-- LOGIN -->
 <div class="auth-screen" id="loginScreen">
@@ -732,25 +738,19 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
   </div>
 </div>
 
-<!-- TROCAR SENHA (primeiro acesso) -->
+<!-- TROCAR SENHA -->
 <div class="auth-screen" id="changePassScreen" style="display:none">
   <div class="auth-card">
     <div class="auth-logo">
       <div class="auth-logo-icon"><span class="mi">lock_reset</span></div>
       <h1>Criar sua <span>senha</span></h1>
-      <p>Por seguran&#231;a, defina uma senha pessoal antes de continuar</p>
+      <p>Por seguran&#231;a, defina uma senha pessoal</p>
     </div>
     <div style="background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);border-radius:10px;padding:12px 16px;font-size:12px;color:#00C896;margin-bottom:20px;line-height:1.6">
-      &#128274; Este &#233; seu primeiro acesso. Escolha uma senha segura &#8212; voc&#234; usar&#225; ela sempre que entrar.
+      &#128274; Primeiro acesso. Escolha uma senha segura.
     </div>
-    <div class="auth-field">
-      <label>Nova senha</label>
-      <input type="password" id="cpNewPass" placeholder="M&#237;nimo 4 caracteres" autocomplete="new-password">
-    </div>
-    <div class="auth-field">
-      <label>Confirmar nova senha</label>
-      <input type="password" id="cpConfPass" placeholder="Repita a nova senha" autocomplete="new-password">
-    </div>
+    <div class="auth-field"><label>Nova senha</label><input type="password" id="cpNewPass" placeholder="M&#237;nimo 4 caracteres"></div>
+    <div class="auth-field"><label>Confirmar senha</label><input type="password" id="cpConfPass" placeholder="Repita a senha"></div>
     <button class="auth-btn" onclick="doChangePass()">Salvar senha e entrar</button>
     <div class="auth-error" id="changePassError"></div>
   </div>
@@ -782,13 +782,10 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
         <button class="sb-item" data-p="planejamento" onclick="nav('planejamento')"><span class="sb-icon"><span class="mi">target</span></span>Planejamento</button>
         <button class="sb-item" data-p="investimentos" onclick="nav('investimentos')"><span class="sb-icon"><span class="mi">candlestick_chart</span></span>Investimentos</button>
         <div class="sb-section">Config</div>
-        <button class="sb-item" data-p="perfil" onclick="nav('perfil')"><span class="sb-icon"><span class="mi">manage_accounts</span></span>Minha conta</button>
         <button class="sb-item" data-p="categorias" onclick="nav('categorias')"><span class="sb-icon"><span class="mi">sell</span></span>Categorias</button>
       </nav>
       <div class="sb-foot">
-        <button class="sb-logout" id="btnCriarAcesso" style="color:var(--teal);margin-bottom:6px;display:none" onclick="openCreateAccess()">
-          <span class="mi" style="font-size:16px">person_add</span>Criar acesso
-        </button>
+        <button class="sb-logout" id="btnCriarAcesso" style="color:var(--teal);margin-bottom:6px;display:none" onclick="openCreateAccess()"><span class="mi" style="font-size:16px">person_add</span>Criar acesso</button>
         <button class="sb-logout" onclick="doLogout()"><span class="mi" style="font-size:16px">logout</span>Sair da conta</button>
       </div>
     </aside>
@@ -805,7 +802,6 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
           <span id="monthLbl">-</span>
           <button onclick="chMonth(1)"><span class="mi" style="font-size:18px">chevron_right</span></button>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="exportPDF()" style="display:flex;align-items:center;gap:4px"><span class="mi" style="font-size:15px">picture_as_pdf</span></button>
       </div>
       <div class="content">
 
@@ -891,6 +887,13 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
               <span class="panel-title">Entradas</span>
               <button class="btn btn-primary" onclick="openModal('entrada',null)">+ Nova entrada</button>
             </div>
+            <div class="filter-bar">
+              <input id="ent-busca" oninput="rEnt()" placeholder="&#128269; Buscar...">
+              <select id="ent-cat" onchange="rEnt()"><option value="">Todas categorias</option></select>
+              <input id="ent-de" type="date" onchange="rEnt()" style="flex:1;min-width:130px">
+              <input id="ent-ate" type="date" onchange="rEnt()" style="flex:1;min-width:130px">
+            </div>
+            <div class="filter-info" id="ent-info"></div>
             <div class="table-wrap">
               <table><thead><tr><th>Data</th><th>Descri&#231;&#227;o</th><th>Categoria</th><th>Valor</th><th>A&#231;&#245;es</th></tr></thead>
               <tbody id="tb-ent"></tbody></table>
@@ -905,6 +908,13 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
               <span class="panel-title">Sa&#237;das</span>
               <button class="btn btn-primary" onclick="openModal('saida',null)">+ Nova sa&#237;da</button>
             </div>
+            <div class="filter-bar">
+              <input id="sai-busca" oninput="rSai()" placeholder="&#128269; Buscar...">
+              <select id="sai-cat" onchange="rSai()"><option value="">Todas categorias</option></select>
+              <input id="sai-de" type="date" onchange="rSai()" style="flex:1;min-width:130px">
+              <input id="sai-ate" type="date" onchange="rSai()" style="flex:1;min-width:130px">
+            </div>
+            <div class="filter-info" id="sai-info"></div>
             <div class="table-wrap">
               <table><thead><tr><th>Data</th><th>Descri&#231;&#227;o</th><th>Categoria</th><th>Valor</th><th>Origem</th><th>A&#231;&#245;es</th></tr></thead>
               <tbody id="tb-sai"></tbody></table>
@@ -969,15 +979,15 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
               <div style="padding:20px">
                 <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#07090F;margin-bottom:16px" id="perfil-avatar">?</div>
                 <div style="font-size:18px;font-weight:700;margin-bottom:4px" id="perfil-nome">-</div>
-                <div style="font-size:13px;color:var(--t2)">Usu&#225;rio: <b id="perfil-user">-</b></div>
+                <div style="font-size:13px;color:var(--t2)">Usuário: <b id="perfil-user">-</b></div>
               </div>
             </div>
             <div class="panel">
               <div class="panel-head"><span class="panel-title">Trocar senha</span></div>
               <div style="padding:20px">
-                <div class="field"><label>Senha atual</label><input type="password" id="p-atual" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;"></div>
-                <div class="field"><label>Nova senha</label><input type="password" id="p-nova" placeholder="M&#237;nimo 4 caracteres"></div>
-                <div class="field"><label>Confirmar nova senha</label><input type="password" id="p-conf" placeholder="Repita a nova senha"></div>
+                <div class="field"><label>Senha atual</label><input type="password" id="p-atual" placeholder="••••••••"></div>
+                <div class="field"><label>Nova senha</label><input type="password" id="p-nova" placeholder="Mínimo 4 caracteres"></div>
+                <div class="field"><label>Confirmar nova senha</label><input type="password" id="p-conf" placeholder="Repita a senha"></div>
                 <div class="auth-error" id="p-err" style="margin-bottom:12px"></div>
                 <button class="btn btn-primary" style="width:100%" onclick="salvarSenha()">Salvar nova senha</button>
               </div>
@@ -1025,35 +1035,25 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 </div>
 
 <script>
+var firebaseConfig = {
+    apiKey: "AIzaSyBiHiCoBBG2ofR6FQO2aLRh_iIadF9FECQ",
+    authDomain: "fintrack-b1b89.firebaseapp.com",
+    databaseURL: "https://fintrack-b1b89-default-rtdb.firebaseio.com",
+    projectId: "fintrack-b1b89",
+    storageBucket: "fintrack-b1b89.firebasestorage.app",
+    messagingSenderId: "712253855706",
+    appId: "1:712253855706:web:8c592cf6e0a845c204d2e3"
+};
+firebase.initializeApp(firebaseConfig);
+var fdb = firebase.database();
 
 var S = { user:null, page:'dashboard', month:new Date().getMonth(), year:new Date().getFullYear(), eid:null, etype:null };
 var MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 var COLORS=['#00C896','#4D9CFF','#FF5E5E','#FFB547','#A78BFA','#F06292','#4DB6AC','#FF8A65'];
 
-// ===== FIREBASE =====
-var firebaseConfig = {
-  apiKey: "AIzaSyBiHiCoBBG2ofR6FQO2aLRh_iIadF9FECQ",
-  authDomain: "fintrack-b1b89.firebaseapp.com",
-  databaseURL: "https://fintrack-b1b89-default-rtdb.firebaseio.com",
-  projectId: "fintrack-b1b89",
-  storageBucket: "fintrack-b1b89.firebasestorage.app",
-  messagingSenderId: "712253855706",
-  appId: "1:712253855706:web:8c592cf6e0a845c204d2e3"
-};
-firebase.initializeApp(firebaseConfig);
-var fdb   = firebase.database();
-var fauth = firebase.auth();
-fauth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(){});
+// ===== FIREBASE STORAGE =====
 var _cache = null;
-
 function ud(){ return _cache; }
-
-function toEmail(u){ return u.toLowerCase().replace(/[^a-z0-9]/g,'x')+'@fintrack.app'; }
-
-async function hashPass(s){
-  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
-  return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
-}
 
 function getUserRef(){ return fdb.ref('users/'+S.user); }
 
@@ -1072,21 +1072,99 @@ function loadUD(cb){
       getUserRef().set(_cache);
     }
     showLoading(false); cb(_cache);
-  }).catch(function(e){ showLoading(false); toast('Erro: '+e.message,'err'); cb(null); });
+  }).catch(function(e){ showLoading(false); toast('Erro ao carregar: '+e.message,'err'); cb(null); });
 }
 
 function sud(data,cb){
   _cache=data;
   getUserRef().set(data).then(function(){ if(cb) cb(); })
-  .catch(function(e){ toast('Erro ao salvar: '+e.message,'err'); });
+    .catch(function(e){ toast('Erro ao salvar: '+e.message,'err'); });
 }
 
 function showLoading(show){
   var el=g('loadingBar'); if(el) el.style.display=show?'block':'none';
 }
 
+// ===== AUTH =====
+async function hashPass(s){
+  var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+}
+function bto(s){ try{return btoa(unescape(encodeURIComponent(s)));}catch(e){return btoa(s);} }
+
+function doLogin(){
+  var u=g('loginUser').value.trim(), p=g('loginPass').value;
+  if(!u||!p){showErr('loginError','Preencha todos os campos.');return;}
+  showErr('loginError','');
+  var btn=document.querySelector('#loginScreen .auth-btn');
+  btn.textContent='Entrando...'; btn.disabled=true;
+  var hashed;
+  hashPass(p).then(function(h){
+    hashed=h;
+    return fdb.ref('accounts/'+u).once('value');
+  }).then(function(snap){
+    btn.textContent='Entrar'; btn.disabled=false;
+    var acc=snap.val();
+    var passOk=acc&&(acc.p===hashed||acc.p===bto(p));
+    if(!acc||!passOk){ showErr('loginError','Usuário ou senha incorretos.'); return; }
+    if(acc.p===bto(p)){ fdb.ref('accounts/'+u+'/p').set(hashed).catch(function(){}); }
+    S.user=u; S.accName=acc.n; S.isAdmin=(acc.role==='admin');
+    localStorage.setItem('ftS',u);
+    if(acc.firstAccess){
+      g('loginScreen').style.display='none';
+      g('changePassScreen').style.display='flex';
+      return;
+    }
+    loadUD(function(data){ if(data) showApp(acc.n); });
+  }).catch(function(e){
+    btn.textContent='Entrar'; btn.disabled=false;
+    showErr('loginError','Erro: '+e.message);
+  });
+}
+
+function doChangePass(){
+  var np=g('cpNewPass').value, cp=g('cpConfPass').value;
+  if(!np||np.length<4){showErr('changePassError','Senha deve ter pelo menos 4 caracteres.');return;}
+  if(np!==cp){showErr('changePassError','Senhas não coincidem.');return;}
+  var btn=document.querySelector('#changePassScreen .auth-btn');
+  btn.textContent='Salvando...'; btn.disabled=true;
+  hashPass(np).then(function(hashed){
+    return fdb.ref('accounts/'+S.user).update({p:hashed,firstAccess:false});
+  }).then(function(){
+    btn.textContent='Salvar senha e entrar'; btn.disabled=false;
+    g('changePassScreen').style.display='none';
+    g('cpNewPass').value=''; g('cpConfPass').value='';
+    hideEl('changePassError');
+    loadUD(function(data){ if(data) showApp(S.accName||S.user); });
+  }).catch(function(e){
+    btn.textContent='Salvar senha e entrar'; btn.disabled=false;
+    showErr('changePassError','Erro: '+e.message);
+  });
+}
+
+function doRegister(){
+  var n=g('regName').value.trim(),u=g('regUser').value.trim(),p=g('regPass').value,p2=g('regPass2').value;
+  if(!n||!u||!p){showErr('registerError','Preencha todos os campos.');return;}
+  if(p!==p2){showErr('registerError','Senhas não coincidem.');return;}
+  if(p.length<4){showErr('registerError','Senha muito curta.');return;}
+  var btn=document.querySelector('#registerScreen .auth-btn');
+  btn.textContent='Criando...'; btn.disabled=true;
+  fdb.ref('accounts/'+u).once('value').then(function(snap){
+    if(snap.val()){ btn.textContent='Criar conta'; btn.disabled=false; showErr('registerError','Usuário já existe.'); return; }
+    return hashPass(p).then(function(hashed){
+      return fdb.ref('accounts/'+u).set({n:n,p:hashed,role:'user'});
+    });
+  }).then(function(){
+    btn.textContent='Criar conta'; btn.disabled=false;
+    toast('Conta criada! Faça login.','ok'); showLogin();
+  }).catch(function(e){
+    btn.textContent='Criar conta'; btn.disabled=false;
+    showErr('registerError','Erro: '+e.message);
+  });
+}
+
 function doLogout(){
-  S.user=null; S.accName=null; S.firebaseUid=null; _cache=null;
+  S.user=null; S.accName=null; _cache=null;
   localStorage.removeItem('ftS');
   g('appScreen').style.display='none';
   g('changePassScreen').style.display='none';
@@ -1100,88 +1178,11 @@ function showApp(n){
   g('changePassScreen').style.display='none';
   g('appScreen').style.display='block';
   g('sbName').textContent=n; g('sbAvatar').textContent=n.charAt(0).toUpperCase();
-  // Show admin button only for admins
   fdb.ref('accounts/'+S.user+'/role').once('value').then(function(snap){
     var btn=g('btnCriarAcesso');
     if(btn) btn.style.display=(snap.val()==='admin'?'flex':'none');
   });
   updMonth(); nav('dashboard');
-}
-function bto(s){ try{ return btoa(unescape(encodeURIComponent(s))); }catch(e){ return btoa(s); } }
-
-// NAV
-var PTITLES={dashboard:'Dashboard',perfil:'Minha Conta',entradas:'Entradas',saidas:'Saídas',saldo:'Saldo do mês',parcelas:'Parcelas',planejamento:'Planejamento',investimentos:'Investimentos',categorias:'Categorias'};
-function nav(p){
-  S.page=p;
-  document.querySelectorAll('.sb-item').forEach(function(el){ el.classList.toggle('active',el.getAttribute('data-p')===p); });
-  document.querySelectorAll('.page').forEach(function(el){ el.classList.remove('active'); });
-  g('page-'+p).classList.add('active');
-  g('pageTitle').textContent=PTITLES[p]||p;
-  closeSb(); render(p);
-}
-function render(p){
-  if(p==='dashboard') rDash();
-  else if(p==='perfil') rPerfil();
-  else if(p==='entradas') rEnt();
-  else if(p==='saidas') rSai();
-  else if(p==='saldo') rSal();
-  else if(p==='parcelas') rParc();
-  else if(p==='planejamento') rPlan();
-  else if(p==='investimentos') rInv();
-  else if(p==='categorias') rCats();
-}
-
-// MONTH
-function updMonth(){ g('monthLbl').textContent=MONTHS[S.month]+' '+S.year; }
-function chMonth(d){
-  S.month+=d;
-  if(S.month>11){S.month=0;S.year++;} if(S.month<0){S.month=11;S.year--;}
-  updMonth(); render(S.page);
-}
-function inM(ds){ var d=new Date(ds+'T12:00:00'); return d.getMonth()===S.month&&d.getFullYear()===S.year; }
-
-// FORMAT
-function fmt(n){ return 'R$ '+parseFloat(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function fd(s){ if(!s) return '—'; var p=s.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
-function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2); }
-function g(id){ return document.getElementById(id); }
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function escq(s){ return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
-function showErr(id,m){ var e=g(id); e.textContent=m; e.style.display='block'; }
-function hideEl(id){ var e=g(id); if(e) e.style.display='none'; }
-
-// PERFIL
-function rPerfil(){
-  fdb.ref('accounts/'+S.user).once('value').then(function(snap){
-    var acc=snap.val()||{};
-    if(g('perfil-nome')) g('perfil-nome').textContent=acc.n||S.user;
-    if(g('perfil-user')) g('perfil-user').textContent=S.user;
-    if(g('perfil-avatar')) g('perfil-avatar').textContent=(acc.n||S.user).charAt(0).toUpperCase();
-  });
-}
-function salvarSenha(){
-  var atual=g('p-atual').value, nova=g('p-nova').value, conf=g('p-conf').value;
-  if(!atual||!nova||!conf){showErr('p-err','Preencha todos os campos.');return;}
-  if(nova.length<4){showErr('p-err','Nova senha deve ter pelo menos 4 caracteres.');return;}
-  if(nova!==conf){showErr('p-err','As senhas nao coincidem.');return;}
-  var btn=document.querySelector('#page-perfil .btn-primary');
-  btn.textContent='Salvando...'; btn.disabled=true;
-  hashPass(atual).then(function(hAtual){
-    return fdb.ref('accounts/'+S.user+'/p').once('value').then(function(snap){
-      var stored=snap.val();
-      if(stored!==hAtual&&stored!==bto(atual)) throw new Error('Senha atual incorreta.');
-      return hashPass(nova);
-    });
-  }).then(function(hNova){
-    return fdb.ref('accounts/'+S.user+'/p').set(hNova);
-  }).then(function(){
-    btn.textContent='Salvar nova senha'; btn.disabled=false;
-    g('p-atual').value=''; g('p-nova').value=''; g('p-conf').value='';
-    hideEl('p-err'); toast('Senha alterada!','ok');
-  }).catch(function(e){
-    btn.textContent='Salvar nova senha'; btn.disabled=false;
-    showErr('p-err',e.message);
-  });
 }
 
 // DASHBOARD
@@ -1194,6 +1195,16 @@ function rDash(){
   var sai=d.sai.filter(function(s){return inM(s.date);});
   var tE=sum(ent), tS=sum(sai), sal=tE-tS;
   var invT=sum(d.inv), pAb=d.parc.filter(function(p){return p.st==='ativo';}).length;
+  var parcTotal=d.parc.filter(function(p){return p.st==='ativo';}).reduce(function(a,p){
+    return a+p.pars.filter(function(x){return !x.pg;}).reduce(function(s,x){return s+parseFloat(x.val||0);},0);
+  },0);
+  var parcMes=d.parc.filter(function(p){return p.st==='ativo';}).reduce(function(a,p){
+    var vm=p.pars.filter(function(x){return !x.pg&&inM(x.date);});
+    return a+vm.reduce(function(s,x){return s+parseFloat(x.val||0);},0);
+  },0);
+  var parcMesQtd=d.parc.filter(function(p){return p.st==='ativo';}).reduce(function(a,p){
+    return a+p.pars.filter(function(x){return !x.pg&&inM(x.date);}).length;
+  },0);
 
   // METRICS
   g('d-metrics').innerHTML=
@@ -1201,7 +1212,9 @@ function rDash(){
     mc('<span class="mi">trending_down</span>','Saídas',fmt(tS),'red',sai.length+' registros')+
     mc('<span class="mi">account_balance_wallet</span>','Saldo',fmt(sal),sal>=0?'teal':'red',MONTHS[S.month])+
     mc('<span class="mi">candlestick_chart</span>','Investido',fmt(invT),'blue',d.inv.length+' posições')+
-    mc('<span class="mi">receipt_long</span>','Parcelas',String(pAb),'yellow','contas ativas');
+    mc('<span class="mi">receipt_long</span>','Parcelas',String(pAb),'yellow','contas ativas')+
+    mc('<span class="mi">payments</span>','A Pagar',fmt(parcTotal),'purple','total em aberto')+
+    mc('<span class="mi">calendar_month</span>','Parcelas '+MONTHS[S.month].slice(0,3),fmt(parcMes),'blue',parcMesQtd+' venc. no mês');
 
   // SUMMARY
   g('d-summary').innerHTML=
@@ -1572,10 +1585,32 @@ function emptr(cols,msg){ return '<tr><td colspan="'+cols+'">'+empt(msg)+'</td><
 
 // ENTRADAS
 function rEnt(){
-  var d=ud(); if(!d) return;
-  var items=d.ent.filter(function(e){return inM(e.date);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  var d=ud(); if(!d||!d.ent) return;
+  var catSel=g('ent-cat');
+  if(catSel){
+    var cats=[]; d.ent.forEach(function(e){ if(cats.indexOf(e.cat)<0) cats.push(e.cat); });
+    var cur=catSel.value;
+    catSel.innerHTML='<option value="">Todas categorias</option>'+cats.sort().map(function(ct){ return '<option value="'+esc(ct)+'"'+(cur===ct?' selected':'')+'>'+esc(ct)+'</option>'; }).join('');
+    catSel.value=cur;
+  }
+  var busca=g('ent-busca')?g('ent-busca').value.toLowerCase().trim():'';
+  var filtCat=g('ent-cat')?g('ent-cat').value:'';
+  var de=g('ent-de')?g('ent-de').value:'';
+  var ate=g('ent-ate')?g('ent-ate').value:'';
+  var temFiltro=(busca||filtCat||de||ate);
+  var items=d.ent.filter(function(e){
+    if(!temFiltro&&!inM(e.date)) return false;
+    if(busca&&e.desc.toLowerCase().indexOf(busca)<0) return false;
+    if(filtCat&&e.cat!==filtCat) return false;
+    if(de&&e.date<de) return false;
+    if(ate&&e.date>ate) return false;
+    return true;
+  }).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  var totalVal=items.reduce(function(a,e){return a+parseFloat(e.val||0);},0);
+  if(g('ent-info')) g('ent-info').textContent=items.length+' registro(s) — Total: '+fmt(totalVal);
   g('tb-ent').innerHTML=items.length?items.map(function(e){
-    return '<tr><td style="color:var(--t2);font-size:12px">'+fd(e.date)+'</td>'+
+    return '<tr>'+
+      '<td style="color:var(--t2);font-size:12px">'+fd(e.date)+'</td>'+
       '<td style="font-weight:500">'+esc(e.desc)+'</td>'+
       '<td><span class="badge bg-teal">'+esc(e.cat)+'</span></td>'+
       '<td style="font-weight:700;color:var(--teal)">+'+fmt(e.val)+'</td>'+
@@ -1583,27 +1618,48 @@ function rEnt(){
       '<button class="btn btn-edit btn-sm" onclick="editIt(\'ent\',\''+escq(e.id)+'\')">Editar</button>'+
       '<button class="btn btn-del btn-sm" onclick="delIt(\'ent\',\''+escq(e.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
-  }).join(''):emptr(5,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">trending_up</span>Nenhuma entrada neste mês');
+  }).join(''):emptr(5,'Nenhum registro encontrado');
 }
 
 // SAIDAS
 function rSai(){
-  var d=ud(); if(!d) return;
-  var items=d.sai.filter(function(s){return inM(s.date);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  var d=ud(); if(!d||!d.sai) return;
+  var catSel=g('sai-cat');
+  if(catSel){
+    var cats=[]; d.sai.forEach(function(s){ if(cats.indexOf(s.cat)<0) cats.push(s.cat); });
+    var cur=catSel.value;
+    catSel.innerHTML='<option value="">Todas categorias</option>'+cats.sort().map(function(ct){ return '<option value="'+esc(ct)+'"'+(cur===ct?' selected':'')+'>'+esc(ct)+'</option>'; }).join('');
+    catSel.value=cur;
+  }
+  var busca=g('sai-busca')?g('sai-busca').value.toLowerCase().trim():'';
+  var filtCat=g('sai-cat')?g('sai-cat').value:'';
+  var de=g('sai-de')?g('sai-de').value:'';
+  var ate=g('sai-ate')?g('sai-ate').value:'';
+  var temFiltro=(busca||filtCat||de||ate);
+  var items=d.sai.filter(function(s){
+    if(!temFiltro&&!inM(s.date)) return false;
+    if(busca&&s.desc.toLowerCase().indexOf(busca)<0) return false;
+    if(filtCat&&s.cat!==filtCat) return false;
+    if(de&&s.date<de) return false;
+    if(ate&&s.date>ate) return false;
+    return true;
+  }).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  var totalVal=items.reduce(function(a,s){return a+parseFloat(s.val||0);},0);
+  if(g('sai-info')) g('sai-info').textContent=items.length+' registro(s) — Total: '+fmt(totalVal);
   g('tb-sai').innerHTML=items.length?items.map(function(s){
-    return '<tr><td style="color:var(--t2);font-size:12px">'+fd(s.date)+'</td>'+
+    return '<tr>'+
+      '<td style="color:var(--t2);font-size:12px">'+fd(s.date)+'</td>'+
       '<td style="font-weight:500">'+esc(s.desc)+'</td>'+
       '<td><span class="badge bg-red">'+esc(s.cat)+'</span></td>'+
       '<td style="font-weight:700;color:var(--red)">-'+fmt(s.val)+'</td>'+
       '<td>'+(s.ori?'<span class="badge bg-muted">'+esc(s.ori)+'</span>':'<span style="color:var(--t3)">—</span>')+'</td>'+
       '<td><div style="display:flex;gap:6px">'+
-      (!s.auto?'<button class="btn btn-edit btn-sm" onclick="editIt(\'sai\',\''+escq(s.id)+'\')">Editar</button>':'')+
+      '<button class="btn btn-edit btn-sm" onclick="editIt(\'sai\',\''+escq(s.id)+'\')">Editar</button>'+
       '<button class="btn btn-del btn-sm" onclick="delIt(\'sai\',\''+escq(s.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
-  }).join(''):emptr(6,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">trending_down</span>Nenhuma saída neste mês');
+  }).join(''):emptr(6,'Nenhum registro encontrado');
 }
 
-// SALDO
 function rSal(){
   var d=ud(); if(!d) return;
   var ent=d.ent.filter(function(e){return inM(e.date);});
@@ -1661,14 +1717,14 @@ function pgParc(id){
   var pg=c.pars.filter(function(x){return x.pg;}).length;
   d.sai.push({id:uid(),date:prox.pd,desc:c.name+' ('+pg+'/'+c.pars.length+')',cat:c.cat||'Parcela',val:prox.val,ori:'Parcela',auto:true});
   if(c.pars.every(function(x){return x.pg;})) c.st='quitado';
-  sud(d); toast('Parcela paga — saída registrada!','ok'); rParc();
+  sud(d, function(){ toast('Parcela paga — saída registrada!','ok'); rParc(); });
 }
 function canParc(id){
   cf('Cancelar conta?','Deseja marcar esta conta como cancelada?',function(){
     var d=ud();
     var c=d.parc.find(function(p){return p.id===id;});
     if(c) c.st='cancelado';
-    sud(d); rParc(); toast('Conta cancelada.','ok');
+    sud(d, function(){ rParc(); toast('Conta cancelada.','ok'); });
   });
 }
 
@@ -1703,7 +1759,7 @@ function updPlan(id){
   if(v===null) return;
   var n=parseFloat(v.replace(',','.'));
   if(isNaN(n)) return;
-  p.cur=n; sud(d); rPlan(); toast('Atualizado!','ok');
+  p.cur=n; sud(d, function(){ rPlan(); toast('Atualizado!','ok'); });
 }
 
 // INVESTIMENTOS
@@ -1750,13 +1806,13 @@ function addCat(type){
   if(!n||!n.trim()) return;
   var d=ud();
   if(d.cats[type].indexOf(n.trim())>=0){toast('Categoria já existe!','err');return;}
-  d.cats[type].push(n.trim()); sud(d); rCats(); toast('Categoria criada!','ok');
+  d.cats[type].push(n.trim()); sud(d, function(){ rCats(); toast('Categoria criada!','ok'); });
 }
 function delCat(type,name){
   cf('Excluir categoria?','Deseja excluir "'+name+'"?',function(){
     var d=ud();
     d.cats[type]=d.cats[type].filter(function(c){return c!==name;});
-    sud(d); rCats(); toast('Removida.','ok');
+    sud(d, function(){ rCats(); toast('Removida.','ok'); });
   });
 }
 
@@ -1859,9 +1915,7 @@ function saveModal(){
       if(ii){ii.name=iname;ii.type=fv('ftype');ii.inst=fv('finst');ii.val=ival;ii.yld=parseFloat(fv('fyld')||0);ii.date=fv('fdt');ii.obs=fv('fo');}
     } else { d.inv.push({id:uid(),name:iname,type:fv('ftype'),inst:fv('finst'),val:ival,yld:parseFloat(fv('fyld')||0),date:fv('fdt'),obs:fv('fo')}); }
   }
-  sud(d); closeModal();
-  toast(isE?'Atualizado!':'Criado!','ok');
-  render(S.page);
+  sud(d, function(){ closeModal(); toast(isE?'Atualizado!':'Criado!','ok'); render(S.page); });
 }
 
 function editIt(type,id){
@@ -1876,7 +1930,7 @@ function delIt(type,id){
     var map={ent:'ent',sai:'sai',parc:'parc',plan:'plans',inv:'inv'};
     var k=map[type];
     if(k) d[k]=d[k].filter(function(x){return x.id!==id;});
-    sud(d); toast('Excluído.','ok'); render(S.page);
+    sud(d, function(){ toast('Excluído.','ok'); render(S.page); });
   });
 }
 
@@ -1897,133 +1951,19 @@ function toast(msg,type){
 // SIDEBAR
 function toggleSb(){ g('sidebar').classList.toggle('open'); g('sbOverlay').classList.toggle('open'); }
 function closeSb(){ g('sidebar').classList.remove('open'); g('sbOverlay').classList.remove('open'); }
-// ===== INIT =====
-window.addEventListener('load', function(){
-  var s = localStorage.getItem('ftS');
-  if(s){
-    S.user = s;
-    // Reuse existing anonymous session or create one
-    var cur = fauth.currentUser;
-    var p = cur ? Promise.resolve(cur) : fauth.signInAnonymously().then(function(r){ return r.user; });
-    p.then(function(user){
-      S.firebaseUid = user.uid;
-      // Save uid first, then verify it was saved, then read user data
-      return fdb.ref('accounts/'+s+'/uid').set(user.uid).then(function(){
-        return fdb.ref('accounts/'+s+'/uid').once('value');
-      }).then(function(uidSnap){
-        return fdb.ref('accounts/'+s).once('value');
-      });
-    }).then(function(snap){
-      var acc = snap.val();
-      if(acc){
-        S.accName = acc.n; S.isAdmin = (acc.role==='admin');
-        if(acc.firstAccess){
-          g('changePassScreen').style.display = 'flex';
-          updMonth(); return;
-        }
-        loadUD(function(data){
-          if(data) showApp(acc.n);
-          else { localStorage.removeItem('ftS'); g('loginScreen').style.display='flex'; updMonth(); }
-        });
-      } else {
-        localStorage.removeItem('ftS');
-        g('loginScreen').style.display = 'flex'; updMonth();
-      }
-    }).catch(function(){
-      g('loginScreen').style.display = 'flex'; updMonth();
-    });
-    return;
-  }
-  g('loginScreen').style.display = 'flex';
-  updMonth();
-});
 
-document.addEventListener('keydown', function(e){
-  if(e.key==='Enter'){
-    var ls=g('loginScreen'), rs=g('registerScreen');
-    if(ls&&ls.style.display==='flex') doLogin();
-    else if(rs&&rs.style.display==='flex') doRegister();
-  }
-  if(e.key==='Escape'){ closeModal(); closeCf(); }
-});
-
-function doLogin(){
-  var u=g('loginUser').value.trim(), p=g('loginPass').value;
-  if(!u||!p){showErr('loginError','Preencha todos os campos.');return;}
-  showErr('loginError','');
-  var btn=document.querySelector('#loginScreen .auth-btn');
-  btn.textContent='Entrando...'; btn.disabled=true;
-
-  var hashed;
-  // 1) Hash da senha
-  hashPass(p).then(function(h){
-    hashed=h;
-    // 2) Garantir sessao Firebase anonima ativa
-    if(fauth.currentUser) return fauth.currentUser;
-    return fauth.signInAnonymously().then(function(r){ return r.user; });
-  }).then(function(user){
-    S.firebaseUid = user.uid;
-    // 3) Salvar uid na conta (regra: uid nao existe ainda => permitido)
-    // Ler a conta primeiro para verificar senha ANTES de salvar uid
-    return fdb.ref('accounts/'+u).once('value');
-  }).then(function(snap){
-    var acc=snap.val();
-    var ok=acc&&(acc.p===hashed||acc.p===bto(p));
-    if(!acc||!ok){
-      btn.textContent='Entrar'; btn.disabled=false;
-      showErr('loginError','Usuario ou senha incorretos.');
-      return;
-    }
-    // 4) Senha correta: salvar uid na conta para as regras funcionarem
-    var updates={uid:S.firebaseUid};
-    if(acc.p===bto(p)) updates.p=hashed; // migra btoa->sha256
-    S.user=u; S.accName=acc.n; S.isAdmin=(acc.role==='admin');
-    localStorage.setItem('ftS',u);
-    return fdb.ref('accounts/'+u).update(updates).then(function(){
-      // Verificar que uid foi salvo corretamente antes de carregar dados
-      return fdb.ref('accounts/'+u+'/uid').once('value');
-    }).then(function(uidSnap){
-      btn.textContent='Entrar'; btn.disabled=false;
-      if(acc.firstAccess){
-        g('loginScreen').style.display='none';
-        g('changePassScreen').style.display='flex';
-        return;
-      }
-      loadUD(function(data){ if(data) showApp(acc.n); });
-    });
-  }).catch(function(e){
-    btn.textContent='Entrar'; btn.disabled=false;
-    showErr('loginError','Erro: '+e.message);
-  });
-}
-
-function doChangePass(){
-  var np=g('cpNewPass').value, cp=g('cpConfPass').value;
-  if(!np||np.length<4){showErr('changePassError','Minimo 4 caracteres.');return;}
-  if(np!==cp){showErr('changePassError','Senhas nao coincidem.');return;}
-  var btn=document.querySelector('#changePassScreen .auth-btn');
-  btn.textContent='Salvando...'; btn.disabled=true;
-  fauth.currentUser.updatePassword(np).then(function(){
-    return fdb.ref('accounts/'+S.user).update({firstAccess:false});
-  }).then(function(){
-    btn.textContent='Salvar senha e entrar'; btn.disabled=false;
-    g('changePassScreen').style.display='none';
-    hideEl('changePassError');
-    loadUD(function(data){ if(data) showApp(S.accName||S.user); });
-  }).catch(function(e){
-    btn.textContent='Salvar senha e entrar'; btn.disabled=false;
-    showErr('changePassError','Erro: '+e.message);
-  });
-}
+// SIDEBAR
+function toggleSb(){ g('sidebar').classList.toggle('open'); g('sbOverlay').classList.toggle('open'); }
+function closeSb(){ g('sidebar').classList.remove('open'); g('sbOverlay').classList.remove('open'); }
 
 // CRIAR ACESSO PARA CLIENTE
 function openCreateAccess(){
-  var title=g('mTitle'),body=g('mBody'),foot=g('mFoot'),wrap=g('mainModal');
-  if(!title||!body||!foot||!wrap){alert('Erro: recarregue a pagina.');return;}
+  var title=g('mTitle'), body=g('mBody'), foot=g('mFoot'), wrap=g('mainModal');
+  if(!title||!body||!foot||!wrap){ alert('Erro: recarregue a pagina.'); return; }
   title.textContent='Criar acesso para cliente';
   body.innerHTML=
     '<div style="background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);border-radius:10px;padding:12px 14px;font-size:12px;color:#00C896;margin-bottom:16px;line-height:1.6">'+
-    'O cliente recebera usuario e senha temporaria. No primeiro login tera que criar senha propria.</div>'+
+    'O cliente recebera usuario e senha temporaria. No primeiro acesso tera que criar uma senha pessoal.</div>'+
     '<div class="field"><label>Nome completo *</label><input id="ca-name" placeholder="Ex: Joao Silva" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>'+
     '<div class="field"><label>Usuario (sem espacos) *</label><input id="ca-user" placeholder="Ex: joaosilva" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>'+
     '<div class="field"><label>Senha temporaria *</label><input id="ca-pass" type="text" value="1234" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>';
@@ -2035,88 +1975,136 @@ function openCreateAccess(){
 }
 
 function saveCreateAccess(){
-  var name=(g('ca-name').value||'').trim();
-  var user=(g('ca-user').value||'').trim().replace(/[^a-zA-Z0-9_]/g,'');
-  var pass=(g('ca-pass').value||'');
-  if(!name||!user||!pass){toast('Preencha todos os campos.','err');return;}
-  var btn=g('mFoot').querySelector('.btn-primary');
-  if(btn){btn.textContent='Criando...';btn.disabled=true;}
+  var name=(g('ca-name')?g('ca-name').value.trim():'');
+  var user=(g('ca-user')?g('ca-user').value.trim().replace(/[^a-zA-Z0-9_]/g,''):'');
+  var pass=(g('ca-pass')?g('ca-pass').value:'');
   var savedPass=pass;
-  var email=toEmail(user);
+  if(!name||!user||!pass){toast('Preencha todos os campos.','err');return;}
+  var btn=g('mFoot')?g('mFoot').querySelector('.btn-primary'):null;
+  if(btn){btn.textContent='Criando...';btn.disabled=true;}
   fdb.ref('accounts/'+user).once('value').then(function(snap){
     if(snap.val()){
       if(btn){btn.textContent='Criar acesso';btn.disabled=false;}
       toast('Usuario "'+user+'" ja existe!','err');
       throw new Error('CANCEL');
     }
-    return fauth.createUserWithEmailAndPassword(email,pass);
-  }).then(function(){
-    return fdb.ref('accounts/'+user).set({n:name,role:'user',firstAccess:true,createdBy:S.user});
+    return hashPass(pass);
+  }).then(function(hashed){
+    return fdb.ref('accounts/'+user).set({n:name,p:hashed,firstAccess:true,role:'user',createdBy:S.user});
   }).then(function(){
     if(btn){btn.textContent='Criar acesso';btn.disabled=false;}
     closeModal();
-    toast('Acesso criado! Usuario: '+user+' | Senha: '+savedPass,'ok',8000);
+    toast('Acesso criado! Usuario: '+user+' Senha: '+savedPass,'ok',8000);
   }).catch(function(e){
     if(btn){btn.textContent='Criar acesso';btn.disabled=false;}
     if(e.message!=='CANCEL') toast('Erro: '+e.message,'err');
   });
 }
 
-// EXPORTACAO PDF
+// PERFIL
+function rPerfil(){
+  fdb.ref('accounts/'+S.user).once('value').then(function(snap){
+    var acc=snap.val()||{};
+    if(g('perfil-nome')) g('perfil-nome').textContent=acc.n||S.user;
+    if(g('perfil-user')) g('perfil-user').textContent=S.user;
+    if(g('perfil-avatar')) g('perfil-avatar').textContent=(acc.n||S.user).charAt(0).toUpperCase();
+  });
+}
+
+function salvarSenha(){
+  var atual=g('p-atual').value, nova=g('p-nova').value, conf=g('p-conf').value;
+  if(!atual||!nova||!conf){showErr('p-err','Preencha todos os campos.');return;}
+  if(nova.length<4){showErr('p-err','Nova senha muito curta.');return;}
+  if(nova!==conf){showErr('p-err','Senhas não coincidem.');return;}
+  var btn=document.querySelector('#page-perfil .btn-primary');
+  btn.textContent='Salvando...'; btn.disabled=true;
+  hashPass(atual).then(function(hAtual){
+    return fdb.ref('accounts/'+S.user+'/p').once('value').then(function(snap){
+      if(snap.val()!==hAtual&&snap.val()!==bto(atual)) throw new Error('Senha atual incorreta.');
+      return hashPass(nova);
+    });
+  }).then(function(hNova){
+    return fdb.ref('accounts/'+S.user+'/p').set(hNova);
+  }).then(function(){
+    btn.textContent='Salvar nova senha'; btn.disabled=false;
+    g('p-atual').value=''; g('p-nova').value=''; g('p-conf').value='';
+    hideEl('p-err'); toast('Senha alterada!','ok');
+  }).catch(function(e){
+    btn.textContent='Salvar nova senha'; btn.disabled=false;
+    showErr('p-err',e.message);
+  });
+}
+
+// EXPORTAÇÃO PDF
 function exportPDF(){
-  var d=ud(); if(!d){toast('Sem dados.','err');return;}
+  var d=ud(); if(!d){toast('Nenhum dado carregado.','err');return;}
   var ent=d.ent.filter(function(e){return inM(e.date);});
   var sai=d.sai.filter(function(s){return inM(s.date);});
-  var tE=sum(ent),tS=sum(sai),sal=tE-tS;
+  var tE=ent.reduce(function(a,e){return a+parseFloat(e.val||0);},0);
+  var tS=sai.reduce(function(a,s){return a+parseFloat(s.val||0);},0);
+  var sal=tE-tS;
   var mes=MONTHS[S.month]+' '+S.year;
   var catT={};
   sai.forEach(function(s){catT[s.cat]=(catT[s.cat]||0)+parseFloat(s.val||0);});
-  var COLORS_P=['#00C896','#4D9CFF','#FF5E5E','#FFB547','#A78BFA','#F06292'];
-  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Fintrack '+mes+'</title>'+
-    '<style>body{font-family:Arial,sans-serif;padding:32px;color:#1a1a2e}'+
-    'h1{color:#00C896;font-size:22px;margin-bottom:4px}.sub{color:#888;font-size:13px;margin-bottom:24px}'+
-    '.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}'+
-    '.card{border:1.5px solid #f0f0f0;border-radius:10px;padding:16px}'+
-    '.cl{font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px}'+
+  var CPDF=['#00C896','#4D9CFF','#FF5E5E','#FFB547','#A78BFA','#F06292'];
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Fintrack - '+mes+'</title>'+
+    '<style>body{font-family:Arial,sans-serif;color:#1a1a2e;margin:0;padding:32px}'+
+    'h1{font-size:22px;font-weight:800;color:#00C896;margin-bottom:4px}.sub{font-size:13px;color:#888;margin-bottom:28px}'+
+    '.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}'+
+    '.card{border:1.5px solid #f0f0f0;border-radius:10px;padding:16px}.cl{font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px}'+
     '.cv{font-size:20px;font-weight:800}.g{color:#00C896}.r{color:#FF5E5E}'+
-    'h2{font-size:14px;font-weight:700;margin:20px 0 10px;border-bottom:1px solid #eee;padding-bottom:6px}'+
-    'table{width:100%;border-collapse:collapse;font-size:12px}'+
-    'th{background:#f8f8f8;padding:8px 10px;text-align:left;font-size:10px;text-transform:uppercase;color:#888}'+
+    'h2{font-size:14px;font-weight:700;margin:20px 0 10px;border-bottom:1px solid #f0f0f0;padding-bottom:6px}'+
+    'table{width:100%;border-collapse:collapse;font-size:12px}th{text-align:left;padding:8px 10px;background:#f8f8f8;font-size:10px;text-transform:uppercase;color:#888}'+
     'td{padding:8px 10px;border-bottom:1px solid #f5f5f5}'+
-    '.footer{margin-top:40px;font-size:10px;color:#aaa;text-align:center;border-top:1px solid #eee;padding-top:12px}'+
+    '.cr{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px}'+
+    '.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}.bar{flex:1;height:6px;background:#f0f0f0;border-radius:3px}'+
+    '.bf{height:6px;border-radius:3px}.ft{margin-top:40px;font-size:10px;color:#aaa;text-align:center;border-top:1px solid #f0f0f0;padding-top:12px}'+
     '</style></head><body>'+
-    '<h1>Fintrack</h1><div class="sub">Relatorio — '+mes+' | Gerado em '+new Date().toLocaleDateString('pt-BR')+'</div>'+
+    '<h1>&#9733; Fintrack</h1><div class="sub">Relatório - '+mes+' | '+new Date().toLocaleDateString('pt-BR')+'</div>'+
     '<div class="cards">'+
     '<div class="card"><div class="cl">Entradas</div><div class="cv g">'+fmt(tE)+'</div></div>'+
-    '<div class="card"><div class="cl">Saidas</div><div class="cv r">'+fmt(tS)+'</div></div>'+
+    '<div class="card"><div class="cl">Saídas</div><div class="cv r">'+fmt(tS)+'</div></div>'+
     '<div class="card"><div class="cl">Saldo</div><div class="cv '+(sal>=0?'g':'r')+'">'+fmt(sal)+'</div></div>'+
     '</div>';
-  if(ent.length) html+='<h2>Entradas</h2><table><tr><th>Data</th><th>Descricao</th><th>Categoria</th><th>Valor</th></tr>'+
-    ent.map(function(e){return '<tr><td>'+fd(e.date)+'</td><td>'+esc(e.desc)+'</td><td>'+esc(e.cat)+'</td><td style="color:#00C896;font-weight:700">'+fmt(e.val)+'</td></tr>';}).join('')+'</table>';
-  if(sai.length) html+='<h2>Saidas</h2><table><tr><th>Data</th><th>Descricao</th><th>Categoria</th><th>Valor</th></tr>'+
-    sai.map(function(s){return '<tr><td>'+fd(s.date)+'</td><td>'+esc(s.desc)+'</td><td>'+esc(s.cat)+'</td><td style="color:#FF5E5E;font-weight:700">'+fmt(s.val)+'</td></tr>';}).join('')+'</table>';
+  if(ent.length){ html+='<h2>Entradas</h2><table><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th></tr>'+ent.map(function(e){return '<tr><td>'+fd(e.date)+'</td><td>'+esc(e.desc)+'</td><td>'+esc(e.cat)+'</td><td style="color:#00C896;font-weight:700">'+fmt(e.val)+'</td></tr>';}).join('')+'</table>'; }
+  if(sai.length){ html+='<h2>Saídas</h2><table><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th></tr>'+sai.map(function(s){return '<tr><td>'+fd(s.date)+'</td><td>'+esc(s.desc)+'</td><td>'+esc(s.cat)+'</td><td style="color:#FF5E5E;font-weight:700">'+fmt(s.val)+'</td></tr>';}).join('')+'</table>'; }
   var catItems=Object.entries(catT).sort(function(a,b){return b[1]-a[1];});
   if(catItems.length){
     html+='<h2>Gastos por Categoria</h2>';
-    catItems.forEach(function(item,i){
-      var pct=tS>0?(item[1]/tS*100).toFixed(1):0;
-      html+='<div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px">'+
-        '<div style="width:10px;height:10px;border-radius:50%;background:'+COLORS_P[i%COLORS_P.length]+'"></div>'+
-        '<span style="width:120px">'+esc(item[0])+'</span>'+
-        '<span style="width:40px">'+pct+'%</span>'+
-        '<span style="font-weight:700">'+fmt(item[1])+'</span></div>';
-    });
+    catItems.forEach(function(item,i){ var pct=tS>0?(item[1]/tS*100).toFixed(1):0; html+='<div class="cr"><div class="dot" style="background:'+CPDF[i%CPDF.length]+'"></div><span style="width:120px">'+esc(item[0])+'</span><div class="bar"><div class="bf" style="width:'+pct+'%;background:'+CPDF[i%CPDF.length]+'"></div></div><span style="width:40px;text-align:right">'+pct+'%</span><span style="width:90px;text-align:right;font-weight:700">'+fmt(item[1])+'</span></div>'; });
   }
-  html+='<div class="footer">Fintrack — dh815.github.io/fintrack</div></body></html>';
+  html+='<div class="ft">Fintrack - Controle Financeiro | dh815.github.io/fintrack</div></body></html>';
   var w=window.open('','_blank'); w.document.write(html); w.document.close();
   setTimeout(function(){w.print();},500);
 }
 
-// SIDEBAR
-function toggleSb(){ g('sidebar').classList.toggle('open'); g('sbOverlay').classList.toggle('open'); }
-function closeSb(){ g('sidebar').classList.remove('open'); g('sbOverlay').classList.remove('open'); }
-
 // INIT
+window.addEventListener('load',function(){
+  var s=localStorage.getItem('ftS');
+  if(s){
+    S.user=s;
+    fdb.ref('accounts/'+s).once('value').then(function(snap){
+      var acc=snap.val();
+      if(acc){
+        S.accName=acc.n; S.isAdmin=(acc.role==='admin');
+        if(acc.firstAccess){ g('changePassScreen').style.display='flex'; updMonth(); return; }
+        loadUD(function(data){
+          if(data) showApp(acc.n);
+          else { localStorage.removeItem('ftS'); g('loginScreen').style.display='flex'; updMonth(); }
+        });
+      } else {
+        localStorage.removeItem('ftS');
+        g('loginScreen').style.display='flex'; updMonth();
+      }
+    }).catch(function(){
+      g('loginScreen').style.display='flex'; updMonth();
+    });
+    return;
+  }
+  g('loginScreen').style.display='flex';
+  updMonth();
+});
+
 document.addEventListener('keydown',function(e){
   if(e.key==='Enter'){
     var ls=g('loginScreen'),rs=g('registerScreen');
@@ -2125,18 +2113,6 @@ document.addEventListener('keydown',function(e){
   }
   if(e.key==='Escape'){ closeModal(); closeCf(); }
 });
-
-
-// INIT
-document.addEventListener('keydown',function(e){
-  if(e.key==='Enter'){
-    var ls=g('loginScreen'),rs=g('registerScreen');
-    if(ls&&ls.style.display==='flex') doLogin();
-    else if(rs&&rs.style.display==='flex') doRegister();
-  }
-  if(e.key==='Escape'){ closeModal(); closeCf(); }
-});
-
 </script>
 </body>
 </html>
