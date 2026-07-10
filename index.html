@@ -917,8 +917,25 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
               <span class="panel-title">Contas &amp; Parcelas</span>
               <button class="btn btn-primary" onclick="openModal('parcela',null)">+ Nova conta</button>
             </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--border)">
+              <input id="parc-busca" oninput="rParc()" placeholder="&#128269; Buscar descri&#231;&#227;o..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
+              <select id="parc-cat" onchange="rParc()" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todas categorias</option></select>
+              <select id="parc-venc" onchange="rParc()" style="flex:1;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
+                <option value="">Todos vencimentos</option>
+                <option value="mes">Vence este m&#234;s</option>
+                <option value="prox">Pr&#243;ximos 30 dias</option>
+                <option value="atrasado">Atrasados</option>
+              </select>
+              <select id="parc-status" onchange="rParc()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
+                <option value="">Todos status</option>
+                <option value="ativo">Ativos</option>
+                <option value="quitado">Quitados</option>
+                <option value="cancelado">Cancelados</option>
+              </select>
+            </div>
+            <div style="padding:4px 20px 6px;font-size:11px;color:var(--t3)" id="parc-info"></div>
             <div class="table-wrap">
-              <table><thead><tr><th>Descri&#231;&#227;o</th><th>Categoria</th><th>Total</th><th>Progresso</th><th>Pr&#243;x. Venc.</th><th>Status</th><th>A&#231;&#245;es</th></tr></thead>
+              <table><thead><tr><th>Descri&#231;&#227;o</th><th>Categoria</th><th>Total</th><th>Valor/M&#234;s</th><th>Progresso</th><th>Pr&#243;x. Venc.</th><th>Status</th><th>A&#231;&#245;es</th></tr></thead>
               <tbody id="tb-parc"></tbody></table>
             </div>
           </div>
@@ -1726,19 +1743,64 @@ function rSal(){
 
 // PARCELAS
 function rParc(){
-  var d=ud(); if(!d) return;
-  g('tb-parc').innerHTML=d.parc.length?d.parc.map(function(p){
+  var d=ud(); if(!d||!d.parc) return;
+
+  // Populate category select
+  var catSel=g('parc-cat');
+  if(catSel){
+    var cats=[]; d.parc.forEach(function(p){ if(cats.indexOf(p.cat)<0) cats.push(p.cat); });
+    var cur=catSel.value;
+    catSel.innerHTML='<option value="">Todas categorias</option>'+
+      cats.sort().map(function(ct){ return '<option value="'+esc(ct)+'"'+(cur===ct?' selected':'')+'>'+esc(ct)+'</option>'; }).join('');
+    catSel.value=cur;
+  }
+
+  var busca=g('parc-busca')?g('parc-busca').value.toLowerCase().trim():'';
+  var filtCat=g('parc-cat')?g('parc-cat').value:'';
+  var filtVenc=g('parc-venc')?g('parc-venc').value:'';
+  var filtStatus=g('parc-status')?g('parc-status').value:'';
+  var hoje=new Date(); hoje.setHours(0,0,0,0);
+  var em30=new Date(hoje); em30.setDate(em30.getDate()+30);
+
+  var lista=d.parc.filter(function(p){
+    if(busca && p.name.toLowerCase().indexOf(busca)<0) return false;
+    if(filtCat && p.cat!==filtCat) return false;
+    if(filtStatus && p.st!==filtStatus) return false;
+    if(filtVenc){
+      var prox=p.pars.find(function(x){return !x.pg;});
+      if(!prox) return false;
+      var dv=new Date(prox.date+'T12:00:00');
+      if(filtVenc==='mes' && (dv.getMonth()!==hoje.getMonth()||dv.getFullYear()!==hoje.getFullYear())) return false;
+      if(filtVenc==='prox' && (dv<hoje||dv>em30)) return false;
+      if(filtVenc==='atrasado' && dv>=hoje) return false;
+    }
+    return true;
+  });
+
+  var totalAberto=lista.filter(function(p){return p.st==='ativo';}).reduce(function(a,p){
+    return a+p.pars.filter(function(x){return !x.pg;}).reduce(function(s,x){return s+parseFloat(x.val||0);},0);
+  },0);
+
+  if(g('parc-info')) g('parc-info').textContent=lista.length+' conta(s) — Total em aberto: '+fmt(totalAberto);
+
+  g('tb-parc').innerHTML=lista.length?lista.map(function(p){
     var pg=p.pars.filter(function(x){return x.pg;}).length;
     var tot=p.pars.length;
     var prox=p.pars.find(function(x){return !x.pg;});
     var pct=(pg/tot*100).toFixed(0);
     var scls=p.st==='ativo'?'bg-blue':p.st==='cancelado'?'bg-red':'bg-teal';
+    // Valor da parcela do mes atual
+    var valMes=p.pars.filter(function(x){return !x.pg && inM(x.date);}).reduce(function(a,x){return a+parseFloat(x.val||0);},0);
+    // Verificar atraso
+    var atrasada=false;
+    if(prox){ var dv=new Date(prox.date+'T12:00:00'); dv.setHours(0,0,0,0); atrasada=(dv<hoje&&p.st==='ativo'); }
     return '<tr>'+
       '<td style="font-weight:600">'+esc(p.name)+'</td>'+
       '<td><span class="badge bg-yellow">'+esc(p.cat)+'</span></td>'+
       '<td style="font-weight:700">'+fmt(p.tot)+'</td>'+
+      '<td style="font-weight:700;color:'+(valMes>0?'var(--yellow)':'var(--t3)')+'">'+( valMes>0?fmt(valMes):'—')+'</td>'+
       '<td><div class="parc-progress"><div class="prog-wrap" style="flex:1"><div class="prog-fill" style="width:'+pct+'%;background:var(--blue)"></div></div><span class="parc-count">'+pg+'/'+tot+'</span></div></td>'+
-      '<td style="font-size:12px;color:var(--t2)">'+(prox?fd(prox.date):'<span style="color:var(--teal)">Quitado</span>')+'</td>'+
+      '<td style="font-size:12px;color:'+(atrasada?'var(--red)':'var(--t2)')+'">'+(prox?'<span title="'+(atrasada?'ATRASADA':fd(prox.date))+'">'+(atrasada?'⚠️ ':'')+fd(prox.date)+'</span>':'<span style="color:var(--teal)">Quitado</span>')+'</td>'+
       '<td><span class="badge '+scls+'">'+p.st+'</span></td>'+
       '<td><div style="display:flex;gap:5px;flex-wrap:wrap">'+
       (prox&&p.st==='ativo'?'<button class="btn btn-pay btn-sm" onclick="pgParc(\''+escq(p.id)+'\')">Pagar</button>':'')+
@@ -1746,7 +1808,7 @@ function rParc(){
       '<button class="btn btn-warn btn-sm" onclick="canParc(\''+escq(p.id)+'\')"><span class="mi" style="font-size:13px">block</span></button>'+
       '<button class="btn btn-del btn-sm" onclick="delIt(\'parc\',\''+escq(p.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
-  }).join(''):emptr(7,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">receipt_long</span>Nenhuma parcela cadastrada');
+  }).join(''):emptr(8,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">receipt_long</span>Nenhuma parcela encontrada');
 }
 function pgParc(id){
   var d=ud();
