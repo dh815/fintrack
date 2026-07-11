@@ -1126,26 +1126,40 @@ function showLoading(show){
 }
 
 // ===== AUTH (via Firestore accounts collection) =====
+async function hashPass(s){
+  var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+}
+
 function doLogin(){
   var u=g('loginUser').value.trim(), p=g('loginPass').value;
   if(!u||!p){showErr('loginError','Preencha todos os campos.');return;}
   showErr('loginError','');
   var btn = document.querySelector('#loginScreen .auth-btn');
   btn.textContent='Entrando...'; btn.disabled=true;
-  fdb.ref('accounts/'+u).once('value').then(function(snap){
+  var hashed;
+  hashPass(p).then(function(h){
+    hashed=h;
+    return fdb.ref('accounts/'+u).once('value');
+  }).then(function(snap){
     btn.textContent='Entrar'; btn.disabled=false;
-    var acc = snap.val();
-    if(!acc||acc.p!==bto(p)){
-      showErr('loginError','Usuário ou senha incorretos.');return;
-    }
-    S.user=u;
+    var acc=snap.val();
+    // Aceita SHA-256 e btoa (para contas antigas)
+    var ok=acc&&(acc.p===hashed||acc.p===bto(p));
+    if(!acc||!ok){showErr('loginError','Usuário ou senha incorretos.');return;}
+    // Migra btoa para SHA-256 automaticamente
+    if(acc.p===bto(p)) fdb.ref('accounts/'+u+'/p').set(hashed).catch(function(){});
+    S.user=u; S.accName=acc.n; S.isAdmin=(acc.role==='admin');
     localStorage.setItem('ftS',u);
-    loadUD(function(data){
-      if(data) showApp(acc.n);
-    });
+    if(acc.firstAccess){
+      g('loginScreen').style.display='none';
+      g('changePassScreen').style.display='flex';
+      return;
+    }
+    loadUD(function(data){ if(data) showApp(acc.n); });
   }).catch(function(e){
     btn.textContent='Entrar'; btn.disabled=false;
-    showErr('loginError','Erro de conexão: '+e.message);
+    showErr('loginError','Erro: '+e.message);
   });
 }
 
@@ -1161,7 +1175,9 @@ function doRegister(){
       btn.textContent='Criar conta'; btn.disabled=false;
       showErr('registerError','Usuário já existe.');return;
     }
-    return fdb.ref('accounts/'+u).set({n:n,p:bto(p)});
+    return hashPass(p).then(function(h){
+      return fdb.ref('accounts/'+u).set({n:n,p:h});
+    });
   }).then(function(){
     btn.textContent='Criar conta'; btn.disabled=false;
     toast('Conta criada! Faça login.','ok');
@@ -1185,9 +1201,17 @@ function showApp(n){
   g('loginScreen').style.display='none'; g('registerScreen').style.display='none';
   g('appScreen').style.display='block';
   g('sbName').textContent=n; g('sbAvatar').textContent=n.charAt(0).toUpperCase();
+  // Mostrar botao criar acesso so para admin
+  var btn=g('btnCriarAcesso');
+  if(btn) btn.style.display=(S.isAdmin?'flex':'none');
   updMonth(); nav('dashboard');
 }
 function bto(s){ try{ return btoa(unescape(encodeURIComponent(s))); }catch(e){ return btoa(s); } }
+
+async function hashPass(s){
+  var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+}
 
 // ===== SAVE WRAPPER (all saves now go to Firestore) =====
 function saveAndRender(data){
@@ -2170,6 +2194,7 @@ window.addEventListener('load',function(){
     fdb.ref('accounts/'+s).once('value').then(function(snap){
       var acc=snap.val();
       if(acc){
+        S.accName=acc.n; S.isAdmin=(acc.role==='admin');
         loadUD(function(data){
           if(data) showApp(acc.n);
           else { g('loginScreen').style.display='flex'; updMonth(); }
