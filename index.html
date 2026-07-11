@@ -883,7 +883,12 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
           <div class="panel">
             <div class="panel-head">
               <span class="panel-title">Sa&#237;das</span>
-              <button class="btn btn-primary" onclick="openModal('saida',null)">+ Nova sa&#237;da</button>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-ghost" onclick="abrirScanner()" style="display:flex;align-items:center;gap:6px">
+                  <span class="mi" style="font-size:15px">photo_camera</span>Escanear cupom
+                </button>
+                <button class="btn btn-primary" onclick="openModal('saida',null)">+ Nova sa&#237;da</button>
+              </div>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--border)">
               <input id="sai-busca" oninput="rSai()" placeholder="&#128269; Buscar descri&#231;&#227;o..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
