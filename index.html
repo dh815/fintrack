@@ -767,7 +767,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 <div id="loadingBar" style="display:none;position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--blue));z-index:9999;animation:loadpulse 1.2s ease-in-out infinite"></div>
 
 <!-- LOGIN -->
-<div class="auth-screen" id="loginScreen">
+<div class="auth-screen" id="loginScreen" style="display:flex">
   <div class="auth-card">
     <div class="auth-logo">
       <div class="auth-logo-icon"><span class="mi">auto_awesome</span></div>
@@ -789,7 +789,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 </div>
 
 <!-- REGISTER -->
-<div class="auth-screen" id="registerScreen">
+<div class="auth-screen" id="registerScreen" style="display:none">
   <div class="auth-card">
     <div class="auth-logo">
       <div class="auth-logo-icon"><span class="mi">person_add</span></div>
@@ -818,8 +818,26 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
   </div>
 </div>
 
+<!-- TROCAR SENHA -->
+<div class="auth-screen" id="changePassScreen" style="display:none">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon"><span class="mi">lock_reset</span></div>
+      <h1>Criar sua <span>senha</span></h1>
+      <p>Defina uma senha pessoal para continuar</p>
+    </div>
+    <div style="background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);border-radius:10px;padding:12px 16px;font-size:12px;color:#00C896;margin-bottom:20px;line-height:1.6">
+      &#128274; Primeiro acesso. Escolha uma senha segura.
+    </div>
+    <div class="auth-field"><label>Nova senha</label><input type="password" id="cpNewPass" placeholder="M&#237;nimo 4 caracteres"></div>
+    <div class="auth-field"><label>Confirmar senha</label><input type="password" id="cpConfPass" placeholder="Repita a senha"></div>
+    <button class="auth-btn" onclick="doChangePass()">Salvar senha e entrar</button>
+    <div class="auth-error" id="changePassError"></div>
+  </div>
+</div>
+
 <!-- APP -->
-<div id="appScreen">
+<div id="appScreen" style="display:none">
   <div class="sb-overlay" id="sbOverlay" onclick="closeSb()"></div>
   <div class="app">
     <!-- SIDEBAR -->
