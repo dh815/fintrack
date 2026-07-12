@@ -656,58 +656,87 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 
 /* ===== RESPONSIVE — MOBILE ONLY (desktop intocado) ===== */
 @media(max-width:768px){
-  /* Sidebar */
+
+  /* ---- Sidebar ---- */
   .sidebar { transform: translateX(-100%); }
   .sidebar.open { transform: translateX(0); }
   .sb-overlay.open { display: block; }
   .main { margin-left: 0; }
   .menu-btn { display: flex; }
 
-  /* Topbar */
+  /* ---- Topbar ---- */
   .topbar { padding: 0 14px; height: 54px; }
-  .page-title { font-size: 16px; }
+  .page-title { font-size: 17px; }
 
-  /* Seletor de mês compacto mas legível */
-  .month-nav { padding: 3px 4px; }
+  /* ---- Seletor de mês compacto e legível ---- */
+  .month-nav { padding: 3px 4px; gap: 0; }
   .month-nav button { padding: 3px 5px; }
   .month-nav button .mi { font-size: 16px !important; }
-  .month-nav span { min-width: 60px; font-size: 12px; font-weight: 700; padding: 0 2px; }
+  .month-nav span { min-width: 60px; font-size: 13px; font-weight: 700; padding: 0 2px; }
 
-  /* Content */
-  .content { padding: 14px; padding-bottom: 88px; }
+  /* ---- Content ---- */
+  .content { padding: 14px; padding-bottom: 90px; }
 
-  /* Métricas 2 colunas legíveis */
+  /* ---- Métricas 2 colunas legíveis ---- */
   .metrics { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-  .metric { padding: 16px 14px; border-radius: 12px; }
-  .metric-icon { width: 36px; height: 36px; border-radius: 10px; margin-bottom: 12px; }
-  .metric-icon .mi { font-size: 20px; }
-  .metric-label { font-size: 10px; margin-bottom: 6px; }
-  .metric-value { font-size: 18px; }
-  .metric-sub { font-size: 11px; margin-top: 5px; }
+  .metric { padding: 14px; border-radius: 12px; }
+  .metric-icon { width: 34px; height: 34px; border-radius: 9px; margin-bottom: 10px; }
+  .metric-icon .mi { font-size: 18px; }
+  .metric-label { font-size: 10px; letter-spacing: .5px; margin-bottom: 5px; }
+  .metric-value { font-size: 19px; letter-spacing: -0.5px; }
+  .metric-sub { font-size: 11px; margin-top: 4px; }
 
-  /* Dashboard grid */
+  /* ---- Dashboard grids ---- */
   .dash-grid { grid-template-columns: 1fr; }
   .chart-grid { grid-template-columns: 1fr; }
 
-  /* Panels */
+  /* ---- Panels ---- */
   .panel { border-radius: 12px; margin-bottom: 12px; }
-  .panel-head { padding: 14px 16px; }
-  .panel-title { font-size: 14px; }
+  .panel-head { padding: 13px 14px; }
+  .panel-title { font-size: 13px; }
 
-  /* Botões no panel-head */
+  /* ---- Botões no panel-head ---- */
   .panel-head .btn-ghost { padding: 6px 10px; font-size: 12px; }
   .panel-head .btn-primary { padding: 7px 12px; font-size: 12px; }
 
-  /* Tabelas com scroll horizontal */
+  /* ---- Tabelas com scroll horizontal ---- */
   .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   table { min-width: 520px; }
   th { font-size: 11px; padding: 10px 12px; }
   td { padding: 12px 12px; font-size: 13px; }
 
-  /* Form fields */
+  /* ---- Form fields ---- */
   .field-row { grid-template-columns: 1fr; }
 
-  /* Bottom Navigation */
+  /* ---- Filtros 2 colunas ---- */
+  div[style*="display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px"] {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    padding: 10px 12px !important;
+  }
+  div[style*="display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px"] input:first-child,
+  div[style*="display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px"] input[placeholder*="Buscar"] {
+    grid-column: 1 / -1;
+  }
+  div[style*="display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px"] input,
+  div[style*="display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px"] select {
+    padding: 9px 10px !important;
+    font-size: 13px !important;
+    min-width: unset !important;
+  }
+
+  /* ---- Botões de ação nas tabelas menores ---- */
+  .btn-sm { padding: 5px 9px; font-size: 11px; }
+  .btn-edit, .btn-del, .btn-pay, .btn-warn { padding: 5px 9px; font-size: 11px; }
+
+  /* ---- Auth ---- */
+  .auth-card { padding: 36px 24px; }
+  .auth-logo h1 { font-size: 22px; }
+  .auth-field input { padding: 13px 16px; font-size: 15px; }
+  .auth-btn { padding: 15px; font-size: 15px; }
+
+  /* ---- Bottom Navigation ---- */
   .bottom-nav {
     display: flex !important;
     background: var(--s1);
@@ -718,21 +747,29 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
     z-index: 95;
   }
   .bn-item {
-    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
-    padding: 6px 4px; border: none; background: none; cursor: pointer;
-    color: var(--t3); font-size: 10px; font-weight: 500; font-family: inherit;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 4px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--t3);
+    font-size: 10px;
+    font-weight: 500;
+    font-family: inherit;
     transition: color .15s;
   }
   .bn-item.active { color: var(--teal); }
   .bn-item .mi { font-size: 24px; }
-
-  /* Auth */
-  .auth-card { padding: 36px 28px; }
 }
 
 @media(max-width:480px){
   .metrics { grid-template-columns: 1fr 1fr; }
-  .month-nav span { min-width: 54px; font-size: 11px; }
+  .month-nav span { min-width: 56px; font-size: 12px; }
+  .content { padding: 12px; padding-bottom: 90px; }
 }
 
 </style>
