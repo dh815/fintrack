@@ -2187,6 +2187,128 @@ function salvarDoScanner(){
   sud(d,function(){fecharScanner();toast('Saída salva!','ok');if(S.page==='saidas')rSai();if(S.page==='dashboard')rDash();});
 }
 
+
+// ===== SCANNER DE BOLETOS/PARCELAMENTOS =====
+function abrirScannerBoleto(){
+  CLAUDE_KEY = localStorage.getItem('ft_api_key')||'';
+  g('scannerBoletoModal').style.display='flex';
+  g('sb-upload').style.display='block';
+  g('sb-preview').style.display='none';
+  g('sb-loading').style.display='none';
+  g('sb-result').style.display='none';
+  g('sb-error').style.display='none';
+  g('sb-obs').style.display='none';
+  g('sb-setup').style.display=CLAUDE_KEY?'none':'block';
+  g('sb-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button>'+(CLAUDE_KEY?'<button class="btn btn-ghost" onclick="document.getElementById(\'sb-input\').click()">&#128247; Nova foto</button>':'');
+  var d=ud(); if(!d) return;
+  var sel=g('sb-cat');
+  if(sel) sel.innerHTML=d.cats.saida.map(function(cat){return '<option value="'+esc(cat)+'">'+esc(cat)+'</option>';}).join('');
+}
+
+function salvarChaveApiBoleto(){
+  var key=g('sb-api-key').value.trim();
+  if(!key||!key.startsWith('sk-ant-')){toast('Chave inválida.','err');return;}
+  localStorage.setItem('ft_api_key',key);
+  CLAUDE_KEY=key;
+  g('sb-setup').style.display='none';
+  g('sb-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button><button class="btn btn-ghost" onclick="document.getElementById(\'sb-input\').click()">&#128247; Nova foto</button>';
+  toast('Chave salva!','ok');
+}
+
+function fecharScannerBoleto(){
+  g('scannerBoletoModal').style.display='none';
+  var inp=g('sb-input'); if(inp) inp.value='';
+}
+
+function boletoScannerDrop(e){
+  e.preventDefault();
+  g('sb-upload').style.borderColor='var(--border)';
+  var file=e.dataTransfer.files[0];
+  if(file&&file.type.startsWith('image/')) processarBoleto(file);
+}
+
+function processarBoleto(file){
+  if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    g('sb-img').src=ev.target.result;
+    g('sb-upload').style.display='none';
+    g('sb-preview').style.display='block';
+    g('sb-loading').style.display='block';
+    g('sb-result').style.display='none';
+    g('sb-error').style.display='none';
+    g('sb-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button>';
+    analisarBoletoComClaude(ev.target.result.split(',')[1], file.type||'image/jpeg');
+  };
+  reader.readAsDataURL(file);
+}
+
+function analisarBoletoComClaude(base64, mediaType){
+  var hoje=new Date().toISOString().slice(0,10);
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':CLAUDE_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:500,messages:[{role:'user',content:[
+      {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
+      {type:'text',text:'Analise este documento. Responda SOMENTE com JSON: {"nome":"empresa ou loja","valor_total":0.00,"num_parcelas":1,"valor_parcela":0.00,"primeiro_vencimento":"YYYY-MM-DD","categoria":"Outros","obs":"detalhes"}. valor_total e valor_parcela: decimal com ponto. primeiro_vencimento: YYYY-MM-DD ou use '+hoje+'. num_parcelas: 1 se pagamento unico. categoria: Alimentacao/Transporte/Moradia/Saude/Lazer/Educacao/Vestuario/Assinaturas/Empresa/Automoveis/Outros'}
+    ]}]})
+  }).then(function(r){return r.json();}).then(function(data){
+    g('sb-loading').style.display='none';
+    if(data.error){mostrarErroBoleto('Erro API: '+data.error.message);return;}
+    var texto=data.content[0].text.trim().replace(/```json|```/g,'').trim();
+    var res=JSON.parse(texto);
+    // Preenche campos
+    g('sb-nome').value=res.nome||'';
+    g('sb-valor').value=res.valor_total||res.valor_parcela||'';
+    g('sb-venc').value=res.primeiro_vencimento||hoje;
+    g('sb-parc').value=res.num_parcelas||1;
+    g('sb-vparc').value=res.valor_parcela||'';
+    if(res.obs){g('sb-obs').textContent=res.obs;g('sb-obs').style.display='block';}
+    // Categoria
+    var catMap={'Alimentacao':'Alimentação','Alimentação':'Alimentação','Transporte':'Transporte','Moradia':'Moradia','Saude':'Saúde','Saúde':'Saúde','Lazer':'Lazer','Educacao':'Educação','Educação':'Educação','Vestuario':'Vestuário','Vestuário':'Vestuário','Assinaturas':'Assinaturas','Empresa':'Empresa','Automoveis':'Automoveis','Outros':'Outros'};
+    var sel=g('sb-cat'); var catMapped=catMap[res.categoria]||res.categoria||'Outros';
+    for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===catMapped){sel.selectedIndex=i;break;}}
+    g('sb-result').style.display='block';
+    g('sb-foot').innerHTML=
+      '<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button>'+
+      '<button class="btn btn-ghost" onclick="document.getElementById(\'sb-input\').click()">&#128247; Nova foto</button>'+
+      '<button class="btn btn-primary" onclick="salvarDoBoleto()"><span class="mi" style="font-size:14px;vertical-align:middle">save</span> Salvar parcela</button>';
+  }).catch(function(e){g('sb-loading').style.display='none';mostrarErroBoleto('Erro: '+e.message);});
+}
+
+function mostrarErroBoleto(msg){
+  g('sb-error').textContent=msg;g('sb-error').style.display='block';
+  g('sb-upload').style.display='block';g('sb-preview').style.display='none';
+  g('sb-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button><button class="btn btn-ghost" onclick="document.getElementById(\'sb-input\').click()">&#128247; Tentar novamente</button>';
+}
+
+function salvarDoBoleto(){
+  var nome=g('sb-nome').value.trim();
+  var valor=parseFloat(g('sb-valor').value);
+  var venc=g('sb-venc').value;
+  var nparc=parseInt(g('sb-parc').value)||1;
+  var vparc=parseFloat(g('sb-vparc').value)||0;
+  var cat=g('sb-cat').value;
+  if(!nome||isNaN(valor)||!venc){toast('Preencha os campos obrigatórios.','err');return;}
+  var d=ud(); if(!d) return;
+  // Usar valor da parcela se informado, senao dividir total
+  var vp = vparc>0 ? vparc : parseFloat((valor/nparc).toFixed(2));
+  var pars=[];
+  for(var i=0;i<nparc;i++){
+    var dd=new Date(venc+'T12:00:00');
+    dd.setMonth(dd.getMonth()+i);
+    pars.push({seq:i+1, date:dd.toISOString().slice(0,10), val:vp, pg:false});
+  }
+  d.parc.push({id:uid(), name:nome, cat:cat, tot:valor, pars:pars, st:'ativo'});
+  sud(d,function(){
+    fecharScannerBoleto();
+    toast('Parcela cadastrada!','ok');
+    if(S.page==='parcelas') rParc();
+    if(S.page==='dashboard') rDash();
+  });
+}
+
+
 // SIDEBAR
 function toggleSb(){ g('sidebar').classList.toggle('open'); g('sbOverlay').classList.toggle('open'); }
 function closeSb(){ g('sidebar').classList.remove('open'); g('sbOverlay').classList.remove('open'); }
@@ -2274,5 +2396,74 @@ document.addEventListener('keydown',function(e){
     </div>
   </div>
 </div>
+
+<!-- SCANNER BOLETO MODAL -->
+<div class="modal-wrap" id="scannerBoletoModal" style="display:none;align-items:center;justify-content:center">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head">
+      <span class="modal-title">&#128196; Escanear boleto / parcelamento</span>
+      <button class="modal-x" onclick="fecharScannerBoleto()"><span class="mi" style="font-size:16px">close</span></button>
+    </div>
+    <div class="modal-body">
+      <div id="sb-setup" style="display:none;background:rgba(77,156,255,.08);border:1px solid rgba(77,156,255,.2);border-radius:12px;padding:20px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:8px">&#128272; Configure sua chave API</div>
+        <div style="font-size:12px;color:var(--t2);margin-bottom:12px;line-height:1.6">Obtenha em <b>console.anthropic.com</b> &#8594; API Keys</div>
+        <div style="display:flex;gap:8px">
+          <input id="sb-api-key" type="password" placeholder="sk-ant-api03-..." style="flex:1;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
+          <button class="btn btn-primary" onclick="salvarChaveApiBoleto()">Salvar</button>
+        </div>
+      </div>
+      <div id="sb-upload" style="border:2px dashed var(--border);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:border-color .2s;margin-bottom:16px"
+        onclick="if(!CLAUDE_KEY){g('sb-setup').style.display='block';return;}document.getElementById('sb-input').click()"
+        ondragover="event.preventDefault();this.style.borderColor='var(--teal)'"
+        ondragleave="this.style.borderColor='var(--border)'"
+        ondrop="boletoScannerDrop(event)">
+        <span class="mi" style="font-size:44px;color:var(--t3);display:block;margin-bottom:10px">document_scanner</span>
+        <div style="font-size:14px;font-weight:600;color:var(--t1);margin-bottom:4px">Foto do boleto ou documento de parcelamento</div>
+        <div style="font-size:12px;color:var(--t3)">A IA vai identificar nome, valor, parcelas e vencimento</div>
+        <input type="file" id="sb-input" accept="image/*" capture="environment" style="display:none" onchange="processarBoleto(this.files[0])">
+      </div>
+      <div id="sb-preview" style="display:none;margin-bottom:16px">
+        <img id="sb-img" style="width:100%;border-radius:10px;max-height:220px;object-fit:contain;background:var(--s2)">
+      </div>
+      <div id="sb-loading" style="display:none;text-align:center;padding:20px">
+        <div style="font-size:13px;color:var(--teal);margin-bottom:8px">&#129302; Lendo documento com IA...</div>
+        <div style="height:4px;background:var(--s2);border-radius:2px;overflow:hidden"><div style="height:4px;background:var(--teal);border-radius:2px;animation:loadpulse 1.2s ease-in-out infinite;width:60%"></div></div>
+      </div>
+      <div id="sb-result" style="display:none">
+        <div style="font-size:12px;font-weight:700;color:var(--teal);margin-bottom:14px">&#10003; Dados identificados — confirme e salve</div>
+        <div class="field"><label>Nome da conta / loja *</label>
+          <input id="sb-nome" placeholder="Ex: Magazine Luiza" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field"><label>Valor total (R$) *</label>
+            <input id="sb-valor" type="number" step="0.01" placeholder="0,00" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none">
+          </div>
+          <div class="field"><label>Valor por parcela (R$)</label>
+            <input id="sb-vparc" type="number" step="0.01" placeholder="Automático" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field"><label>N&#250;mero de parcelas *</label>
+            <input id="sb-parc" type="number" min="1" value="1" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none">
+          </div>
+          <div class="field"><label>1&#186; vencimento *</label>
+            <input id="sb-venc" type="date" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none">
+          </div>
+        </div>
+        <div class="field"><label>Categoria</label>
+          <select id="sb-cat" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></select>
+        </div>
+        <div id="sb-obs" style="display:none;font-size:11px;color:var(--t3);padding:10px 14px;background:var(--s2);border-radius:8px;line-height:1.6;margin-top:-8px;margin-bottom:4px"></div>
+      </div>
+      <div id="sb-error" style="display:none;background:rgba(255,94,94,.1);border:1px solid rgba(255,94,94,.2);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--red)"></div>
+    </div>
+    <div class="modal-foot" id="sb-foot">
+      <button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('sb-input').click()">&#128247; Nova foto</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
