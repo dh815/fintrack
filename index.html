@@ -1635,10 +1635,48 @@ function emptr(cols,msg){ return '<tr><td colspan="'+cols+'">'+empt(msg)+'</td><
 
 // ENTRADAS
 function rEnt(){
-  var d=ud(); if(!d) return;
-  var items=d.ent.filter(function(e){return inM(e.date);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  var d=ud(); if(!d||!d.ent) return;
+  // Atualiza categorias no select
+  var catSel=g('ent-cat');
+  if(catSel){
+    var cats=[]; d.ent.forEach(function(e){ if(cats.indexOf(e.cat)<0) cats.push(e.cat); });
+    var cur=catSel.value;
+    catSel.innerHTML='<option value="">Todas categorias</option>'+cats.sort().map(function(ct){ return '<option value="'+esc(ct)+'"'+(cur===ct?' selected':'')+'>'+esc(ct)+'</option>'; }).join('');
+    catSel.value=cur;
+  }
+  var busca=g('ent-busca')?g('ent-busca').value.toLowerCase().trim():'';
+  var filtCat=g('ent-cat')?g('ent-cat').value:'';
+  var de=g('ent-de')?g('ent-de').value:'';
+  var ate=g('ent-ate')?g('ent-ate').value:'';
+  var temFiltro=busca||filtCat||de||ate;
+  var items=d.ent.filter(function(e){
+    if(!temFiltro && !inM(e.date)) return false;
+    if(busca && e.desc.toLowerCase().indexOf(busca)<0) return false;
+    if(filtCat && e.cat!==filtCat) return false;
+    if(de && e.date<de) return false;
+    if(ate && e.date>ate) return false;
+    return true;
+  }).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  var totalVal=items.reduce(function(a,e){return a+parseFloat(e.val||0);},0);
+  if(g('ent-info')) g('ent-info').textContent=items.length+' registro(s) — Total: '+fmt(totalVal);
+  // Mobile cards
+  var mc=g('mc-ent');
+  if(mc) mc.innerHTML=items.length?items.map(function(e){
+    return '<div class="mc-item">'+
+      '<div class="mc-top">'+
+        '<div><div class="mc-name">'+esc(e.desc)+'</div>'+
+        '<div class="mc-sub"><span>'+fd(e.date)+'</span><span class="badge bg-teal">'+esc(e.cat)+'</span></div></div>'+
+        '<div class="mc-val" style="color:var(--teal)">+'+fmt(e.val)+'</div>'+
+      '</div>'+
+      '<div class="mc-bot">'+
+        '<button class="btn btn-edit btn-sm" onclick="editIt(\'ent\',\''+escq(e.id)+'\')">Editar</button>'+
+        '<button class="btn btn-del btn-sm" onclick="delIt(\'ent\',\''+escq(e.id)+'\')"><span class="mi" style="font-size:14px">delete</span></button>'+
+      '</div></div>';
+  }).join(''):'<div style="text-align:center;padding:40px;color:var(--t3)">Nenhum registro</div>';
+  // Tabela desktop
   g('tb-ent').innerHTML=items.length?items.map(function(e){
-    return '<tr><td style="color:var(--t2);font-size:12px">'+fd(e.date)+'</td>'+
+    return '<tr>'+
+      '<td style="color:var(--t2);font-size:12px">'+fd(e.date)+'</td>'+
       '<td style="font-weight:500">'+esc(e.desc)+'</td>'+
       '<td><span class="badge bg-teal">'+esc(e.cat)+'</span></td>'+
       '<td style="font-weight:700;color:var(--teal)">+'+fmt(e.val)+'</td>'+
@@ -1651,21 +1689,58 @@ function rEnt(){
 
 // SAIDAS
 function rSai(){
-  var d=ud(); if(!d) return;
-  var items=d.sai.filter(function(s){return inM(s.date);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  var d=ud(); if(!d||!d.sai) return;
+  // Atualiza categorias no select
+  var catSel=g('sai-cat');
+  if(catSel){
+    var cats=[]; d.sai.forEach(function(s){ if(cats.indexOf(s.cat)<0) cats.push(s.cat); });
+    var cur=catSel.value;
+    catSel.innerHTML='<option value="">Todas categorias</option>'+cats.sort().map(function(ct){ return '<option value="'+esc(ct)+'"'+(cur===ct?' selected':'')+'>'+esc(ct)+'</option>'; }).join('');
+    catSel.value=cur;
+  }
+  var busca=g('sai-busca')?g('sai-busca').value.toLowerCase().trim():'';
+  var filtCat=g('sai-cat')?g('sai-cat').value:'';
+  var de=g('sai-de')?g('sai-de').value:'';
+  var ate=g('sai-ate')?g('sai-ate').value:'';
+  var temFiltro=busca||filtCat||de||ate;
+  var items=d.sai.filter(function(s){
+    if(!temFiltro && !inM(s.date)) return false;
+    if(busca && s.desc.toLowerCase().indexOf(busca)<0) return false;
+    if(filtCat && s.cat!==filtCat) return false;
+    if(de && s.date<de) return false;
+    if(ate && s.date>ate) return false;
+    return true;
+  }).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  var totalVal=items.reduce(function(a,s){return a+parseFloat(s.val||0);},0);
+  if(g('sai-info')) g('sai-info').textContent=items.length+' registro(s) — Total: '+fmt(totalVal);
+  // Mobile cards
+  var mc=g('mc-sai');
+  if(mc) mc.innerHTML=items.length?items.map(function(s){
+    return '<div class="mc-item">'+
+      '<div class="mc-top">'+
+        '<div><div class="mc-name">'+esc(s.desc)+'</div>'+
+        '<div class="mc-sub"><span>'+fd(s.date)+'</span><span class="badge bg-red">'+esc(s.cat)+'</span>'+(s.ori?'<span class="badge bg-muted">'+esc(s.ori)+'</span>':'')+'</div></div>'+
+        '<div class="mc-val" style="color:var(--red)">-'+fmt(s.val)+'</div>'+
+      '</div>'+
+      '<div class="mc-bot">'+
+        '<button class="btn btn-edit btn-sm" onclick="editIt(\'sai\',\''+escq(s.id)+'\')">Editar</button>'+
+        '<button class="btn btn-del btn-sm" onclick="delIt(\'sai\',\''+escq(s.id)+'\')"><span class="mi" style="font-size:14px">delete</span></button>'+
+      '</div></div>';
+  }).join(''):'<div style="text-align:center;padding:40px;color:var(--t3)">Nenhum registro</div>';
+  // Tabela desktop
   g('tb-sai').innerHTML=items.length?items.map(function(s){
-    return '<tr><td style="color:var(--t2);font-size:12px">'+fd(s.date)+'</td>'+
+    return '<tr>'+
+      '<td style="color:var(--t2);font-size:12px">'+fd(s.date)+'</td>'+
       '<td style="font-weight:500">'+esc(s.desc)+'</td>'+
       '<td><span class="badge bg-red">'+esc(s.cat)+'</span></td>'+
       '<td style="font-weight:700;color:var(--red)">-'+fmt(s.val)+'</td>'+
-      '<td>'+(s.ori?'<span class="badge bg-muted">'+esc(s.ori)+'</span>':'<span style="color:var(--t3)">—</span>')+'</td>'+
+      '<td>'+(s.ori?'<span class="badge bg-muted">'+esc(s.ori)+'</span>':'—')+'</td>'+
       '<td><div style="display:flex;gap:6px">'+
       '<button class="btn btn-edit btn-sm" onclick="editIt(\'sai\',\''+escq(s.id)+'\')">Editar</button>'+
       '<button class="btn btn-del btn-sm" onclick="delIt(\'sai\',\''+escq(s.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
   }).join(''):emptr(6,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">trending_down</span>Nenhuma saída neste mês');
 }
-
 // SALDO
 function rSal(){
   var d=ud(); if(!d) return;
@@ -1692,27 +1767,90 @@ function rSal(){
 
 // PARCELAS
 function rParc(){
-  var d=ud(); if(!d) return;
-  g('tb-parc').innerHTML=d.parc.length?d.parc.map(function(p){
+  var d=ud(); if(!d||!d.parc) return;
+  // Atualiza categorias no select
+  var catSel=g('parc-cat');
+  if(catSel){
+    var cats=[]; d.parc.forEach(function(p){ if(cats.indexOf(p.cat)<0) cats.push(p.cat); });
+    var cur=catSel.value;
+    catSel.innerHTML='<option value="">Todas categorias</option>'+cats.sort().map(function(ct){ return '<option value="'+esc(ct)+'"'+(cur===ct?' selected':'')+'>'+esc(ct)+'</option>'; }).join('');
+    catSel.value=cur;
+  }
+  var busca=g('parc-busca')?g('parc-busca').value.toLowerCase().trim():'';
+  var filtCat=g('parc-cat')?g('parc-cat').value:'';
+  var filtVenc=g('parc-venc')?g('parc-venc').value:'';
+  var filtStatus=g('parc-status')?g('parc-status').value:'';
+  var hoje=new Date(); hoje.setHours(0,0,0,0);
+  var em30=new Date(hoje); em30.setDate(em30.getDate()+30);
+  var lista=d.parc.filter(function(p){
+    if(busca && p.name.toLowerCase().indexOf(busca)<0) return false;
+    if(filtCat && p.cat!==filtCat) return false;
+    if(filtStatus && p.st!==filtStatus) return false;
+    if(filtVenc){
+      var prox=p.pars.find(function(x){return !x.pg;});
+      if(!prox) return filtVenc==='quitado';
+      var dv=new Date(prox.date+'T12:00:00'); dv.setHours(0,0,0,0);
+      if(filtVenc==='mes' && (dv.getMonth()!==hoje.getMonth()||dv.getFullYear()!==hoje.getFullYear())) return false;
+      if(filtVenc==='prox' && (dv<hoje||dv>em30)) return false;
+      if(filtVenc==='atrasado' && dv>=hoje) return false;
+    }
+    return true;
+  });
+  var totalAberto=lista.filter(function(p){return p.st==='ativo';}).reduce(function(a,p){
+    return a+p.pars.filter(function(x){return !x.pg;}).reduce(function(s,x){return s+parseFloat(x.val||0);},0);
+  },0);
+  if(g('parc-info')) g('parc-info').textContent=lista.length+' conta(s) — Total em aberto: '+fmt(totalAberto);
+  // Mobile cards
+  var mc=g('mc-parc');
+  if(mc) mc.innerHTML=lista.length?lista.map(function(p){
+    var pg=p.pars.filter(function(x){return x.pg;}).length;
+    var tot=p.pars.length;
+    var prox=p.pars.find(function(x){return !x.pg;});
+    var pct=Math.round(pg/tot*100);
+    var atrasada=false;
+    if(prox){var dv=new Date(prox.date+'T12:00:00');dv.setHours(0,0,0,0);atrasada=(dv<hoje&&p.st==='ativo');}
+    var valMes=p.pars.filter(function(x){return !x.pg&&inM(x.date);}).reduce(function(a,x){return a+parseFloat(x.val||0);},0);
+    var borderCol=atrasada?'var(--red)':p.st==='quitado'?'var(--teal)':'var(--border)';
+    return '<div class="mc-item" style="border-left:3px solid '+borderCol+'">'+
+      '<div class="mc-top">'+
+        '<div><div class="mc-name">'+esc(p.name)+'</div>'+
+        '<div class="mc-sub"><span class="badge bg-yellow">'+esc(p.cat)+'</span><span class="badge '+(p.st==='ativo'?'bg-blue':p.st==='quitado'?'bg-teal':'bg-red')+'">'+p.st+'</span></div></div>'+
+        '<div style="text-align:right"><div class="mc-val" style="color:var(--yellow)">'+fmt(p.tot)+'</div>'+(valMes>0?'<div style="font-size:11px;color:var(--t3)">'+fmt(valMes)+'/mês</div>':'')+'</div>'+
+      '</div>'+
+      '<div class="mc-prog"><div class="mc-pf" style="width:'+pct+'%;background:var(--blue)"></div></div>'+
+      '<div class="mc-meta"><span style="color:'+(atrasada?'var(--red)':'var(--t3)')+'">'+(atrasada?'⚠️ ':'')+(prox?fd(prox.date):'Quitado')+'</span><span>'+pg+'/'+tot+' parcelas</span></div>'+
+      '<div class="mc-bot">'+
+        (prox&&p.st==='ativo'?'<button class="btn btn-pay btn-sm" onclick="pgParc(\''+escq(p.id)+'\')">Pagar</button>':'')+
+        '<button class="btn btn-edit btn-sm" onclick="editIt(\'parc\',\''+escq(p.id)+'\')"><span class="mi" style="font-size:13px">edit</span></button>'+
+        '<button class="btn btn-warn btn-sm" onclick="canParc(\''+escq(p.id)+'\')"><span class="mi" style="font-size:13px">block</span></button>'+
+        '<button class="btn btn-del btn-sm" onclick="delIt(\'parc\',\''+escq(p.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
+      '</div></div>';
+  }).join(''):'<div style="text-align:center;padding:40px;color:var(--t3)">Nenhuma parcela</div>';
+  // Tabela desktop
+  g('tb-parc').innerHTML=lista.length?lista.map(function(p){
     var pg=p.pars.filter(function(x){return x.pg;}).length;
     var tot=p.pars.length;
     var prox=p.pars.find(function(x){return !x.pg;});
     var pct=(pg/tot*100).toFixed(0);
     var scls=p.st==='ativo'?'bg-blue':p.st==='cancelado'?'bg-red':'bg-teal';
+    var valMes=p.pars.filter(function(x){return !x.pg&&inM(x.date);}).reduce(function(a,x){return a+parseFloat(x.val||0);},0);
+    var atrasada=false;
+    if(prox){var dv=new Date(prox.date+'T12:00:00');dv.setHours(0,0,0,0);atrasada=(dv<hoje&&p.st==='ativo');}
     return '<tr>'+
       '<td style="font-weight:600">'+esc(p.name)+'</td>'+
       '<td><span class="badge bg-yellow">'+esc(p.cat)+'</span></td>'+
       '<td style="font-weight:700">'+fmt(p.tot)+'</td>'+
+      '<td style="font-weight:700;color:'+(valMes>0?'var(--yellow)':'var(--t3)')+'">'+( valMes>0?fmt(valMes):'—')+'</td>'+
       '<td><div class="parc-progress"><div class="prog-wrap" style="flex:1"><div class="prog-fill" style="width:'+pct+'%;background:var(--blue)"></div></div><span class="parc-count">'+pg+'/'+tot+'</span></div></td>'+
-      '<td style="font-size:12px;color:var(--t2)">'+(prox?fd(prox.date):'<span style="color:var(--teal)">Quitado</span>')+'</td>'+
+      '<td style="font-size:12px;color:'+(atrasada?'var(--red)':'var(--t2)')+'">'+(prox?(atrasada?'⚠️ ':'')+fd(prox.date):'<span style="color:var(--teal)">Quitado</span>')+'</td>'+
       '<td><span class="badge '+scls+'">'+p.st+'</span></td>'+
       '<td><div style="display:flex;gap:5px;flex-wrap:wrap">'+
-      (prox&&p.st==='ativo'?'<button class="btn btn-pay btn-sm" onclick="pgParc(\''+escq(p.id)+'\')">Pagar</button>':'')+
-      '<button class="btn btn-edit btn-sm" onclick="editIt(\'parc\',\''+escq(p.id)+'\')"><span class="mi" style="font-size:13px">edit</span></button>'+
-      '<button class="btn btn-warn btn-sm" onclick="canParc(\''+escq(p.id)+'\')"><span class="mi" style="font-size:13px">block</span></button>'+
-      '<button class="btn btn-del btn-sm" onclick="delIt(\'parc\',\''+escq(p.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
+        (prox&&p.st==='ativo'?'<button class="btn btn-pay btn-sm" onclick="pgParc(\''+escq(p.id)+'\')">Pagar</button>':'')+
+        '<button class="btn btn-edit btn-sm" onclick="editIt(\'parc\',\''+escq(p.id)+'\')"><span class="mi" style="font-size:13px">edit</span></button>'+
+        '<button class="btn btn-warn btn-sm" onclick="canParc(\''+escq(p.id)+'\')"><span class="mi" style="font-size:13px">block</span></button>'+
+        '<button class="btn btn-del btn-sm" onclick="delIt(\'parc\',\''+escq(p.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
-  }).join(''):emptr(7,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">receipt_long</span>Nenhuma parcela cadastrada');
+  }).join(''):emptr(8,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">receipt_long</span>Nenhuma parcela encontrada');
 }
 function pgParc(id){
   var d=ud();
