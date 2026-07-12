@@ -1345,6 +1345,21 @@ function showApp(n){
 }
 function bto(s){ try{ return btoa(unescape(encodeURIComponent(s))); }catch(e){ return btoa(s); } }
 
+function toast(msg,type){
+  var t=g('toast'); t.textContent=msg; t.className='show '+(type||'');
+  clearTimeout(t._t); t._t=setTimeout(function(){t.className='';},3000);
+}
+
+
+
+// ===== SCANNER DE CUPONS =====
+var CLAUDE_KEY = localStorage.getItem('ft_api_key')||'';
+
+// SIDEBAR
+function toggleSb(){ g('sidebar').classList.toggle('open'); g('sbOverlay').classList.toggle('open'); }
+function closeSb(){ g('sidebar').classList.remove('open'); g('sbOverlay').classList.remove('open'); }
+
+
 async function hashPass(s){
   var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
   return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
@@ -2307,15 +2322,6 @@ function cf(title,text,cb){
 function closeCf(){ g('confirmWrap').classList.remove('open'); }
 
 // TOAST
-function toast(msg,type){
-  var t=g('toast'); t.textContent=msg; t.className='show '+(type||'');
-  clearTimeout(t._t); t._t=setTimeout(function(){t.className='';},3000);
-}
-
-
-
-// ===== SCANNER DE CUPONS =====
-var CLAUDE_KEY = localStorage.getItem('ft_api_key')||'';
 
 function abrirScanner(){
   CLAUDE_KEY = localStorage.getItem('ft_api_key')||'';
@@ -2633,9 +2639,6 @@ function salvarSenha(){
   }).catch(function(e){ btn.textContent='Salvar nova senha'; btn.disabled=false; showErr('p-err',e.message); });
 }
 
-// SIDEBAR
-function toggleSb(){ g('sidebar').classList.toggle('open'); g('sbOverlay').classList.toggle('open'); }
-function closeSb(){ g('sidebar').classList.remove('open'); g('sbOverlay').classList.remove('open'); }
 
 // INIT
 window.addEventListener('load',function(){
