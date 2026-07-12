@@ -309,7 +309,6 @@ body {
   transition: all .15s;
 }
 .sb-logout:hover { background: var(--red-dim); color: var(--red); }
-.bottom-nav { display: none; }
 .sb-overlay {
   display: none;
   position: fixed; inset: 0;
@@ -654,101 +653,9 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 .chart-tab.active { background: var(--s3); color: var(--t1); }
 @media(max-width:768px){ .chart-grid { grid-template-columns: 1fr; } }
 
-/* ===== RESPONSIVE — MOBILE ONLY (desktop intocado) ===== */
-@media(max-width:768px){
-
-  /* ---- Sidebar ---- */
-  .sidebar { transform: translateX(-100%); }
-  .sidebar.open { transform: translateX(0); }
-  .sb-overlay.open { display: block; }
-  .main { margin-left: 0; }
-  .menu-btn { display: flex; }
-
-  /* ---- Topbar ---- */
-  .topbar { padding: 0 16px; height: 56px; }
-  .page-title { font-size: 18px; }
-
-  /* ---- Seletor de mês ---- */
-  .month-nav { padding: 4px 5px; }
-  .month-nav button { padding: 4px 6px; }
-  .month-nav button .mi { font-size: 16px !important; }
-  .month-nav span { min-width: 62px; font-size: 13px; font-weight: 700; padding: 0 2px; }
-
-  /* ---- Content ---- */
-  .content { padding: 14px; padding-bottom: 100px; }
-
-  /* ---- Métricas ---- */
-  .metrics { grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-  .metric { padding: 16px 14px; border-radius: 14px; }
-  .metric-icon { width: 40px; height: 40px; border-radius: 10px; margin-bottom: 12px; }
-  .metric-icon .mi { font-size: 22px; }
-  .metric-label { font-size: 11px; letter-spacing: .5px; margin-bottom: 6px; }
-  .metric-value { font-size: 22px; letter-spacing: -0.5px; }
-  .metric-sub { font-size: 12px; margin-top: 5px; }
-
-  /* ---- Dashboard grid ---- */
-  .dash-grid { grid-template-columns: 1fr; }
-  .chart-grid { grid-template-columns: 1fr; }
-
-  /* ---- Panels ---- */
-  .panel { border-radius: 14px; margin-bottom: 14px; }
-  .panel-head { padding: 16px; }
-  .panel-title { font-size: 15px; }
-  .panel-head .btn-ghost { padding: 8px 12px; font-size: 13px; }
-  .panel-head .btn-primary { padding: 9px 14px; font-size: 13px; }
-
-  /* ---- Esconde tabela no mobile, mostra cards ---- */
-  .table-wrap { display: none !important; }
-  .mobile-cards { display: block !important; }
-
-  /* ---- Form fields ---- */
-  .field-row { grid-template-columns: 1fr; }
-
-  /* ---- Filtros ---- */
-  .filter-wrap input,
-  .filter-wrap select { padding: 12px 14px !important; font-size: 14px !important; border-radius: 10px !important; }
-
-  /* ---- Auth ---- */
-  .auth-card { padding: 40px 28px; }
-  .auth-logo h1 { font-size: 24px; }
-  .auth-field label { font-size: 14px; }
-  .auth-field input { padding: 15px 16px; font-size: 16px; }
-  .auth-btn { padding: 16px; font-size: 16px; }
-
-  /* ---- Bottom Navigation ---- */
-  .bottom-nav {
-    display: flex !important;
-    background: var(--s1);
-    border-top: 1px solid var(--border);
-    padding: 8px 0 env(safe-area-inset-bottom, 20px);
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    z-index: 95;
-  }
-  .bn-item {
-    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
-    padding: 6px 4px; border: none; background: none; cursor: pointer;
-    color: var(--t3); font-size: 11px; font-weight: 500; font-family: inherit;
-    transition: color .15s;
-  }
-  .bn-item.active { color: var(--teal); }
-  .bn-item .mi { font-size: 26px; }
-}
-
-@media(max-width:480px){
-  .metrics { grid-template-columns: 1fr 1fr; }
-  .month-nav span { min-width: 58px; font-size: 12px; }
-}
-
-/* ===== MOBILE CARDS — ocultos no desktop ===== */
+/* ===== RESPONSIVE — MOBILE ONLY ===== */
 .mobile-cards { display: none; padding: 8px 12px 4px; }
-.mc-item {
-  background: var(--s2);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 16px;
-  margin-bottom: 10px;
-}
+.mc-item { background: var(--s2); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 10px; }
 .mc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
 .mc-name { font-size: 16px; font-weight: 600; color: var(--t1); line-height: 1.3; }
 .mc-sub { font-size: 12px; color: var(--t3); margin-top: 4px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
@@ -757,6 +664,24 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 .mc-prog { background: var(--s3); border-radius: 100px; height: 5px; overflow: hidden; margin: 8px 0 4px; }
 .mc-pf { height: 100%; border-radius: 100px; }
 .mc-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--t3); margin-top: 6px; }
+.bottom-nav { display: none; }
+@keyframes loadpulse{0%{opacity:1}50%{opacity:.4}100%{opacity:1}}
+@media(max-width:768px){
+  .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } .sb-overlay.open { display: block; } .main { margin-left: 0; } .menu-btn { display: flex; }
+  .topbar { padding: 0 14px; height: 54px; } .page-title { font-size: 17px; }
+  .month-nav { padding: 3px 4px; } .month-nav button { padding: 3px 5px; } .month-nav button .mi { font-size: 16px !important; } .month-nav span { min-width: 60px; font-size: 13px; font-weight: 700; padding: 0 2px; }
+  .content { padding: 14px; padding-bottom: 90px; }
+  .metrics { grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; } .metric { padding: 16px 14px; border-radius: 14px; } .metric-icon { width: 40px; height: 40px; border-radius: 10px; margin-bottom: 12px; } .metric-icon .mi { font-size: 22px; } .metric-label { font-size: 11px; margin-bottom: 6px; } .metric-value { font-size: 22px; } .metric-sub { font-size: 12px; margin-top: 5px; }
+  .dash-grid { grid-template-columns: 1fr; } .chart-grid { grid-template-columns: 1fr; }
+  .panel { border-radius: 14px; margin-bottom: 12px; } .panel-head { padding: 14px 16px; } .panel-title { font-size: 15px; }
+  .panel-head .btn-ghost { padding: 6px 10px; font-size: 12px; } .panel-head .btn-primary { padding: 7px 12px; font-size: 12px; }
+  .table-wrap { display: none !important; } .mobile-cards { display: block !important; }
+  .field-row { grid-template-columns: 1fr; } .auth-card { padding: 40px 28px; } .auth-field input { padding: 15px 16px; font-size: 16px; } .auth-btn { padding: 16px; font-size: 16px; }
+  .bottom-nav { display: flex !important; background: var(--s1); border-top: 1px solid var(--border); padding: 8px 0 env(safe-area-inset-bottom, 20px); position: fixed; bottom: 0; left: 0; right: 0; z-index: 95; }
+  .bn-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 4px; border: none; background: none; cursor: pointer; color: var(--t3); font-size: 11px; font-weight: 500; font-family: inherit; transition: color .15s; }
+  .bn-item.active { color: var(--teal); } .bn-item .mi { font-size: 26px; }
+}
+@media(max-width:480px){ .month-nav span { min-width: 56px; font-size: 12px; } }
 
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -764,6 +689,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 </head>
 <body>
 <div id="toast"></div>
+<div id="loadingBar" style="display:none;position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#00C896,#4D9CFF);z-index:9999;animation:loadpulse 1.2s ease-in-out infinite"></div>
 <div id="loadingBar" style="display:none;position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--blue));z-index:9999;animation:loadpulse 1.2s ease-in-out infinite"></div>
 
 <!-- LOGIN -->
@@ -821,16 +747,10 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 <!-- TROCAR SENHA -->
 <div class="auth-screen" id="changePassScreen" style="display:none">
   <div class="auth-card">
-    <div class="auth-logo">
-      <div class="auth-logo-icon"><span class="mi">lock_reset</span></div>
-      <h1>Criar sua <span>senha</span></h1>
-      <p>Defina uma senha pessoal para continuar</p>
-    </div>
-    <div style="background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);border-radius:10px;padding:12px 16px;font-size:12px;color:#00C896;margin-bottom:20px;line-height:1.6">
-      &#128274; Primeiro acesso. Escolha uma senha segura.
-    </div>
+    <div class="auth-logo"><div class="auth-logo-icon"><span class="mi">lock_reset</span></div><h1>Criar sua <span>senha</span></h1><p>Defina uma senha pessoal</p></div>
+    <div style="background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);border-radius:10px;padding:12px;font-size:12px;color:#00C896;margin-bottom:20px">&#128274; Primeiro acesso. Escolha uma senha segura.</div>
     <div class="auth-field"><label>Nova senha</label><input type="password" id="cpNewPass" placeholder="M&#237;nimo 4 caracteres"></div>
-    <div class="auth-field"><label>Confirmar senha</label><input type="password" id="cpConfPass" placeholder="Repita a senha"></div>
+    <div class="auth-field"><label>Confirmar</label><input type="password" id="cpConfPass" placeholder="Repita a senha"></div>
     <button class="auth-btn" onclick="doChangePass()">Salvar senha e entrar</button>
     <div class="auth-error" id="changePassError"></div>
   </div>
@@ -867,8 +787,9 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
       </nav>
       <div class="sb-foot">
         <button class="sb-logout" style="color:var(--blue);margin-bottom:4px" onclick="exportarDados()"><span class="mi" style="font-size:16px">download</span>Exportar backup</button>
-        <button class="sb-logout" style="color:var(--yellow);margin-bottom:6px" onclick="importarDados()"><span class="mi" style="font-size:16px">upload</span>Importar backup</button>
-        <button class="sb-logout" style="color:var(--t3);margin-bottom:4px;font-size:12px" onclick="localStorage.removeItem('ft_api_key');toast('Chave API removida.','ok')"><span class="mi" style="font-size:14px">key</span>Reset chave scanner</button>
+        <button class="sb-logout" style="color:var(--yellow);margin-bottom:4px" onclick="importarDados()"><span class="mi" style="font-size:16px">upload</span>Importar backup</button>
+        <button class="sb-logout" id="btnCriarAcesso" style="color:var(--teal);margin-bottom:4px;display:none" onclick="openCreateAccess()"><span class="mi" style="font-size:16px">person_add</span>Criar acesso</button>
+        <button class="sb-logout" style="color:var(--t3);margin-bottom:4px;font-size:12px" onclick="localStorage.removeItem('ft_api_key');toast('Chave removida.','ok')"><span class="mi" style="font-size:14px">key</span>Reset chave scanner</button>
         <button class="sb-logout" onclick="doLogout()"><span class="mi" style="font-size:16px">logout</span>Sair da conta</button>
       </div>
     </aside>
@@ -880,7 +801,8 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
           <button class="menu-btn" onclick="toggleSb()"><span class="mi" style="font-size:22px">menu</span></button>
           <div class="page-title" id="pageTitle">Dashboard</div>
         </div>
-        <div class="month-nav">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="month-nav">
           <button onclick="chMonth(-1)"><span class="mi" style="font-size:18px">chevron_left</span></button>
           <span id="monthLbl">-</span>
           <button onclick="chMonth(1)"><span class="mi" style="font-size:18px">chevron_right</span></button>
@@ -970,13 +892,8 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
               <span class="panel-title">Entradas</span>
               <button class="btn btn-primary" onclick="openModal('entrada',null)">+ Nova entrada</button>
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--border)">
-              <input id="ent-busca" oninput="rEnt()" placeholder="&#128269; Buscar descri&#231;&#227;o..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
-              <select id="ent-cat" onchange="rEnt()" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todas categorias</option></select>
-              <input id="ent-de" type="date" onchange="rEnt()" title="Data inicial" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
-              <input id="ent-ate" type="date" onchange="rEnt()" title="Data final" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
-            </div>
-            <div style="padding:4px 20px 6px;font-size:11px;color:var(--t3)" id="ent-info"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--border)"><input id="ent-busca" oninput="rEnt()" placeholder="&#128269; Buscar..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><select id="ent-cat" onchange="rEnt()" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todas categorias</option></select><input id="ent-de" type="date" onchange="rEnt()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><input id="ent-ate" type="date" onchange="rEnt()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"></div>
+            <div style="padding:4px 16px 6px;font-size:11px;color:var(--t3)" id="ent-info"></div>
             <div class="mobile-cards" id="mc-ent"></div>
             <div class="table-wrap">
               <table><thead><tr><th>Data</th><th>Descri&#231;&#227;o</th><th>Categoria</th><th>Valor</th><th>A&#231;&#245;es</th></tr></thead>
@@ -990,20 +907,10 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
           <div class="panel">
             <div class="panel-head">
               <span class="panel-title">Sa&#237;das</span>
-              <div style="display:flex;gap:8px">
-                <button class="btn btn-ghost" onclick="abrirScanner()" style="display:flex;align-items:center;gap:6px">
-                  <span class="mi" style="font-size:15px">photo_camera</span>Escanear cupom
-                </button>
-                <button class="btn btn-primary" onclick="openModal('saida',null)">+ Nova sa&#237;da</button>
-              </div>
+              <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="abrirScanner()" style="display:flex;align-items:center;gap:6px"><span class="mi" style="font-size:15px">photo_camera</span>Escanear cupom</button><button class="btn btn-primary" onclick="openModal('saida',null)">+ Nova sa&#237;da</button></div>
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--border)">
-              <input id="sai-busca" oninput="rSai()" placeholder="&#128269; Buscar descri&#231;&#227;o..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
-              <select id="sai-cat" onchange="rSai()" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todas categorias</option></select>
-              <input id="sai-de" type="date" onchange="rSai()" title="Data inicial" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
-              <input id="sai-ate" type="date" onchange="rSai()" title="Data final" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
-            </div>
-            <div style="padding:4px 20px 6px;font-size:11px;color:var(--t3)" id="sai-info"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--border)"><input id="sai-busca" oninput="rSai()" placeholder="&#128269; Buscar..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><select id="sai-cat" onchange="rSai()" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todas categorias</option></select><input id="sai-de" type="date" onchange="rSai()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><input id="sai-ate" type="date" onchange="rSai()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"></div>
+            <div style="padding:4px 16px 6px;font-size:11px;color:var(--t3)" id="sai-info"></div>
             <div class="mobile-cards" id="mc-sai"></div>
             <div class="table-wrap">
               <table><thead><tr><th>Data</th><th>Descri&#231;&#227;o</th><th>Categoria</th><th>Valor</th><th>Origem</th><th>A&#231;&#245;es</th></tr></thead>
@@ -1029,30 +936,10 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
           <div class="panel">
             <div class="panel-head">
               <span class="panel-title">Contas &amp; Parcelas</span>
-              <div style="display:flex;gap:8px">
-                <button class="btn btn-ghost" onclick="abrirScannerBoleto()" style="display:flex;align-items:center;gap:6px">
-                  <span class="mi" style="font-size:15px">document_scanner</span>Escanear boleto
-                </button>
-                <button class="btn btn-primary" onclick="openModal('parcela',null)">+ Nova conta</button>
-              </div>
+              <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="abrirScannerBoleto()" style="display:flex;align-items:center;gap:6px"><span class="mi" style="font-size:15px">document_scanner</span>Escanear boleto</button><button class="btn btn-primary" onclick="openModal('parcela',null)">+ Nova conta</button></div>
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--border)">
-              <input id="parc-busca" oninput="rParc()" placeholder="&#128269; Buscar descri&#231;&#227;o..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
-              <select id="parc-cat" onchange="rParc()" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todas categorias</option></select>
-              <select id="parc-venc" onchange="rParc()" style="flex:1;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
-                <option value="">Todos vencimentos</option>
-                <option value="mes">Vence este m&#234;s</option>
-                <option value="prox">Pr&#243;ximos 30 dias</option>
-                <option value="atrasado">Atrasados</option>
-              </select>
-              <select id="parc-status" onchange="rParc()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
-                <option value="">Todos status</option>
-                <option value="ativo">Ativos</option>
-                <option value="quitado">Quitados</option>
-                <option value="cancelado">Cancelados</option>
-              </select>
-            </div>
-            <div style="padding:4px 20px 6px;font-size:11px;color:var(--t3)" id="parc-info"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--border)"><input id="parc-busca" oninput="rParc()" placeholder="&#128269; Buscar..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><select id="parc-cat" onchange="rParc()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todas categorias</option></select><select id="parc-venc" onchange="rParc()" style="flex:1;min-width:140px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todos vencimentos</option><option value="mes">Vence este m&#234;s</option><option value="prox">Pr&#243;ximos 30 dias</option><option value="atrasado">Atrasados</option></select><select id="parc-status" onchange="rParc()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todos status</option><option value="ativo">Ativos</option><option value="quitado">Quitados</option><option value="cancelado">Cancelados</option></select></div>
+            <div style="padding:4px 16px 6px;font-size:11px;color:var(--t3)" id="parc-info"></div>
             <div class="mobile-cards" id="mc-parc"></div>
             <div class="table-wrap">
               <table><thead><tr><th>Descri&#231;&#227;o</th><th>Categoria</th><th>Total</th><th>Valor/M&#234;s</th><th>Progresso</th><th>Pr&#243;x. Venc.</th><th>Status</th><th>A&#231;&#245;es</th></tr></thead>
@@ -1085,28 +972,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
         </div>
 
         <!-- PERFIL -->
-        <div class="page" id="page-perfil">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:700px">
-            <div class="panel">
-              <div class="panel-head"><span class="panel-title">Dados da conta</span></div>
-              <div style="padding:20px">
-                <div id="perfil-avatar" style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#07090F;margin-bottom:16px">?</div>
-                <div id="perfil-nome" style="font-size:18px;font-weight:700;margin-bottom:4px">-</div>
-                <div style="font-size:13px;color:var(--t2)">Usu&#225;rio: <b id="perfil-user">-</b></div>
-              </div>
-            </div>
-            <div class="panel">
-              <div class="panel-head"><span class="panel-title">Trocar senha</span></div>
-              <div style="padding:20px">
-                <div class="field"><label>Senha atual</label><input type="password" id="p-atual" placeholder="••••••••"></div>
-                <div class="field"><label>Nova senha</label><input type="password" id="p-nova" placeholder="M&#237;nimo 4 caracteres"></div>
-                <div class="field"><label>Confirmar nova senha</label><input type="password" id="p-conf" placeholder="Repita a senha"></div>
-                <div class="auth-error" id="p-err" style="margin-bottom:12px"></div>
-                <button class="btn btn-primary" style="width:100%" onclick="salvarSenha()">Salvar nova senha</button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div class="page" id="page-perfil"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:700px"><div class="panel"><div class="panel-head"><span class="panel-title">Dados da conta</span></div><div style="padding:20px"><div id="perfil-avatar" style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#07090F;margin-bottom:16px">?</div><div id="perfil-nome" style="font-size:18px;font-weight:700;margin-bottom:4px">-</div><div style="font-size:13px;color:var(--t2)">Usu&#225;rio: <b id="perfil-user">-</b></div></div></div><div class="panel"><div class="panel-head"><span class="panel-title">Trocar senha</span></div><div style="padding:20px"><div class="field"><label>Senha atual</label><input type="password" id="p-atual" placeholder="••••••••"></div><div class="field"><label>Nova senha</label><input type="password" id="p-nova" placeholder="M&#237;nimo 4 caracteres"></div><div class="field"><label>Confirmar</label><input type="password" id="p-conf" placeholder="Repita a senha"></div><div class="auth-error" id="p-err" style="margin-bottom:12px"></div><button class="btn btn-primary" style="width:100%" onclick="salvarSenha()">Salvar nova senha</button></div></div></div></div>
 
         <!-- CATEGORIAS -->
         <div class="page" id="page-categorias">
@@ -1127,24 +993,12 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
       </div>
     </main>
   </div>
-
-  <!-- BOTTOM NAV — mobile only, escondido no desktop via CSS -->
   <nav class="bottom-nav" id="bottomNav">
-    <button class="bn-item" data-p="dashboard" onclick="nav('dashboard')">
-      <span class="mi">dashboard</span><span>Início</span>
-    </button>
-    <button class="bn-item" data-p="entradas" onclick="nav('entradas')">
-      <span class="mi">trending_up</span><span>Entradas</span>
-    </button>
-    <button class="bn-item" data-p="saidas" onclick="nav('saidas')">
-      <span class="mi">trending_down</span><span>Saídas</span>
-    </button>
-    <button class="bn-item" data-p="parcelas" onclick="nav('parcelas')">
-      <span class="mi">receipt_long</span><span>Parcelas</span>
-    </button>
-    <button class="bn-item" data-p="menu" onclick="toggleSb()">
-      <span class="mi">menu</span><span>Mais</span>
-    </button>
+    <button class="bn-item" data-p="dashboard" onclick="nav('dashboard')"><span class="mi">dashboard</span><span>In&#237;cio</span></button>
+    <button class="bn-item" data-p="entradas" onclick="nav('entradas')"><span class="mi">trending_up</span><span>Entradas</span></button>
+    <button class="bn-item" data-p="saidas" onclick="nav('saidas')"><span class="mi">trending_down</span><span>Sa&#237;das</span></button>
+    <button class="bn-item" data-p="parcelas" onclick="nav('parcelas')"><span class="mi">receipt_long</span><span>Parcelas</span></button>
+    <button class="bn-item" data-p="menu" onclick="toggleSb()"><span class="mi">menu</span><span>Mais</span></button>
   </nav>
 </div>
 
@@ -1201,77 +1055,39 @@ function loadUD(cb){
   getUserRef().once('value').then(function(snap){
     var data = snap.val();
     if(data){
-      // Garantir que todos os arrays existem
-      if(!data.ent) data.ent=[];
-      if(!data.sai) data.sai=[];
-      if(!data.parc) data.parc=[];
-      if(!data.plans) data.plans=[];
-      if(!data.inv) data.inv=[];
-      if(!data.cats) data.cats={entrada:['Salário','Outros'],saida:['Alimentação','Transporte','Moradia','Saúde','Lazer','Educação','Vestuário','Parcela','Assinaturas','Outros'],investimento:['Renda Fixa','Renda Variável','Outros']};
       _cache = data;
-      // Atualiza backup local
-      try{ localStorage.setItem('ftBK_'+S.user, JSON.stringify({d:data,t:Date.now()})); }catch(e){}
     } else {
-      // Tenta recuperar do backup local
-      var bk=getBackup();
-      if(bk&&bk.d&&bk.d.ent){
-        _cache=bk.d;
-        getUserRef().set(_cache);
-        toast('Dados recuperados do backup local!','ok');
-      } else {
-        _cache = {ent:[],sai:[],parc:[],plans:[],inv:[],cats:{
-          entrada:['Salário','Freelance','Aluguel','Investimento','Bônus','Outros'],
-          saida:['Alimentação','Transporte','Moradia','Saúde','Lazer','Educação','Vestuário','Parcela','Assinaturas','Outros'],
-          investimento:['Renda Fixa','Renda Variável','FIIs','Ações','Criptomoedas','Poupança','Tesouro Direto','Outros']
-        }};
-        getUserRef().set(_cache);
-      }
+      _cache = {ent:[],sai:[],parc:[],plans:[],inv:[],cats:{
+        entrada:['Salário','Freelance','Aluguel','Investimento','Bônus','Outros'],
+        saida:['Alimentação','Transporte','Moradia','Saúde','Lazer','Educação','Vestuário','Parcela','Assinaturas','Outros'],
+        investimento:['Renda Fixa','Renda Variável','FIIs','Ações','Criptomoedas','Poupança','Tesouro Direto','Outros']
+      }};
+      getUserRef().set(_cache);
     }
     showLoading(false);
     cb(_cache);
   }).catch(function(e){
     showLoading(false);
-    // Firebase falhou - tenta backup local
-    var bk=getBackup();
-    if(bk&&bk.d){
-      _cache=bk.d;
-      toast('Usando backup local (Firebase offline)','err');
-      cb(_cache);
-    } else {
-      toast('Erro ao carregar: '+e.message,'err');
-      cb(null);
-    }
+    toast('Erro ao carregar dados: '+e.message,'err');
+    cb(null);
   });
 }
 
 function sud(data, cb){
   _cache = data;
-  // Backup automatico local
   try{ localStorage.setItem('ftBK_'+S.user, JSON.stringify({d:data,t:Date.now()})); }catch(e){}
-  getUserRef().set(data).then(function(){
-    if(cb) cb();
-  }).catch(function(e){
-    toast('Erro ao salvar: '+e.message,'err');
-  });
+  getUserRef().set(data).then(function(){ if(cb) cb(); }).catch(function(e){ toast('Erro ao salvar: '+e.message,'err'); });
 }
-
-function getBackup(){
-  try{ var b=localStorage.getItem('ftBK_'+S.user); return b?JSON.parse(b):null; }catch(e){ return null; }
-}
-
+function getBackup(){ try{ var b=localStorage.getItem('ftBK_'+S.user); return b?JSON.parse(b):null; }catch(e){ return null; } }
 function exportarDados(){
   var d=ud(); if(!d){toast('Sem dados.','err');return;}
   var blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');
-  a.href=url; a.download='fintrack-'+S.user+'-'+new Date().toISOString().slice(0,10)+'.json';
-  a.click(); URL.revokeObjectURL(url);
+  var url=URL.createObjectURL(blob); var a=document.createElement('a');
+  a.href=url; a.download='fintrack-'+S.user+'-'+new Date().toISOString().slice(0,10)+'.json'; a.click(); URL.revokeObjectURL(url);
   toast('Backup exportado!','ok');
 }
-
 function importarDados(){
-  var input=document.createElement('input');
-  input.type='file'; input.accept='.json';
+  var input=document.createElement('input'); input.type='file'; input.accept='.json';
   input.onchange=function(e){
     var file=e.target.files[0]; if(!file) return;
     var reader=new FileReader();
@@ -1279,10 +1095,8 @@ function importarDados(){
       try{
         var data=JSON.parse(ev.target.result);
         if(!data.ent||!data.sai){toast('Arquivo invalido.','err');return;}
-        cf('Importar dados?','Isso vai SUBSTITUIR seus dados atuais pelo backup. Confirma?',function(){
-          sud(data,function(){ render(S.page); toast('Dados importados!','ok'); });
-        });
-      }catch(ex){ toast('Erro ao ler arquivo.','err'); }
+        cf('Importar dados?','Substituir dados atuais pelo backup?',function(){ sud(data,function(){ render(S.page); toast('Importado!','ok'); }); });
+      }catch(ex){ toast('Erro ao ler.','err'); }
     };
     reader.readAsText(file);
   };
@@ -1295,41 +1109,25 @@ function showLoading(show){
 }
 
 // ===== AUTH (via Firestore accounts collection) =====
-async function hashPass(s){
-  var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
-  return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
-}
-
 function doLogin(){
   var u=g('loginUser').value.trim(), p=g('loginPass').value;
   if(!u||!p){showErr('loginError','Preencha todos os campos.');return;}
   showErr('loginError','');
-  var btn = document.querySelector('#loginScreen .auth-btn');
+  var btn=document.querySelector('#loginScreen .auth-btn');
   btn.textContent='Entrando...'; btn.disabled=true;
   var hashed;
-  hashPass(p).then(function(h){
-    hashed=h;
-    return fdb.ref('accounts/'+u).once('value');
-  }).then(function(snap){
+  hashPass(p).then(function(h){ hashed=h; return fdb.ref('accounts/'+u).once('value'); })
+  .then(function(snap){
     btn.textContent='Entrar'; btn.disabled=false;
     var acc=snap.val();
-    // Aceita SHA-256 e btoa (para contas antigas)
     var ok=acc&&(acc.p===hashed||acc.p===bto(p));
     if(!acc||!ok){showErr('loginError','Usuário ou senha incorretos.');return;}
-    // Migra btoa para SHA-256 automaticamente
     if(acc.p===bto(p)) fdb.ref('accounts/'+u+'/p').set(hashed).catch(function(){});
     S.user=u; S.accName=acc.n; S.isAdmin=(acc.role==='admin');
     localStorage.setItem('ftS',u);
-    if(acc.firstAccess){
-      g('loginScreen').style.display='none';
-      g('changePassScreen').style.display='flex';
-      return;
-    }
+    if(acc.firstAccess){ g('loginScreen').style.display='none'; g('changePassScreen').style.display='flex'; return; }
     loadUD(function(data){ if(data) showApp(acc.n); });
-  }).catch(function(e){
-    btn.textContent='Entrar'; btn.disabled=false;
-    showErr('loginError','Erro: '+e.message);
-  });
+  }).catch(function(e){ btn.textContent='Entrar'; btn.disabled=false; showErr('loginError','Erro: '+e.message); });
 }
 
 function doRegister(){
@@ -1344,9 +1142,7 @@ function doRegister(){
       btn.textContent='Criar conta'; btn.disabled=false;
       showErr('registerError','Usuário já existe.');return;
     }
-    return hashPass(p).then(function(h){
-      return fdb.ref('accounts/'+u).set({n:n,p:h});
-    });
+    return fdb.ref('accounts/'+u).set({n:n,p:bto(p)});
   }).then(function(){
     btn.textContent='Criar conta'; btn.disabled=false;
     toast('Conta criada! Faça login.','ok');
@@ -1358,9 +1154,10 @@ function doRegister(){
 }
 
 function doLogout(){
-  S.user=null; _cache=null;
+  S.user=null; S.accName=null; _cache=null;
   localStorage.removeItem('ftS');
   g('appScreen').style.display='none';
+  g('changePassScreen').style.display='none';
   g('loginScreen').style.display='flex';
   g('loginUser').value=''; g('loginPass').value='';
 }
@@ -1368,30 +1165,13 @@ function showRegister(){ g('loginScreen').style.display='none'; g('registerScree
 function showLogin(){ g('registerScreen').style.display='none'; g('loginScreen').style.display='flex'; }
 function showApp(n){
   g('loginScreen').style.display='none'; g('registerScreen').style.display='none';
+  g('changePassScreen').style.display='none';
   g('appScreen').style.display='block';
   g('sbName').textContent=n; g('sbAvatar').textContent=n.charAt(0).toUpperCase();
-  // Mostrar botao criar acesso so para admin
-  var btn=g('btnCriarAcesso');
-  if(btn) btn.style.display=(S.isAdmin?'flex':'none');
+  fdb.ref('accounts/'+S.user+'/role').once('value').then(function(snap){ var btn=g('btnCriarAcesso'); if(btn) btn.style.display=(snap.val()==='admin'?'flex':'none'); });
   updMonth(); nav('dashboard');
 }
 function bto(s){ try{ return btoa(unescape(encodeURIComponent(s))); }catch(e){ return btoa(s); } }
-
-function toast(msg,type){
-  var t=g('toast'); t.textContent=msg; t.className='show '+(type||'');
-  clearTimeout(t._t); t._t=setTimeout(function(){t.className='';},3000);
-}
-
-
-
-// ===== SCANNER DE CUPONS =====
-var CLAUDE_KEY = localStorage.getItem('ft_api_key')||'';
-
-// SIDEBAR
-function toggleSb(){ g('sidebar').classList.toggle('open'); g('sbOverlay').classList.toggle('open'); }
-function closeSb(){ g('sidebar').classList.remove('open'); g('sbOverlay').classList.remove('open'); }
-
-
 async function hashPass(s){
   var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
   return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
@@ -1408,10 +1188,8 @@ function nav(p){
   S.page=p;
   document.querySelectorAll('.sb-item').forEach(function(el){ el.classList.toggle('active',el.getAttribute('data-p')===p); });
   document.querySelectorAll('.page').forEach(function(el){ el.classList.remove('active'); });
-  var pg=g('page-'+p);
-  if(pg) pg.classList.add('active');
+  var pg=g('page-'+p); if(pg) pg.classList.add('active');
   g('pageTitle').textContent=PTITLES[p]||p;
-  // Atualiza bottom nav mobile
   document.querySelectorAll('.bn-item').forEach(function(el){ el.classList.toggle('active',el.getAttribute('data-p')===p); });
   closeSb(); render(p);
 }
@@ -1430,11 +1208,8 @@ function render(p){
 // MONTH
 function updMonth(){
   var el=g('monthLbl'); if(!el) return;
-  if(window.innerWidth<=768){
-    el.textContent=MONTHS[S.month].slice(0,3)+'/'+String(S.year).slice(2);
-  } else {
-    el.textContent=MONTHS[S.month]+' '+S.year;
-  }
+  if(window.innerWidth<=768){ el.textContent=MONTHS[S.month].slice(0,3)+'/'+String(S.year).slice(2); }
+  else { el.textContent=MONTHS[S.month]+' '+S.year; }
 }
 function chMonth(d){
   S.month+=d;
@@ -1860,31 +1635,8 @@ function emptr(cols,msg){ return '<tr><td colspan="'+cols+'">'+empt(msg)+'</td><
 
 // ENTRADAS
 function rEnt(){
-  var d=ud(); if(!d||!d.ent) return;
-  // Populate category select
-  var catSel=g('ent-cat');
-  if(catSel){
-    var cats=[]; d.ent.forEach(function(e){ if(cats.indexOf(e.cat)<0) cats.push(e.cat); });
-    var cur=catSel.value;
-    catSel.innerHTML='<option value="">Todas categorias</option>'+
-      cats.sort().map(function(ct){ return '<option value="'+esc(ct)+'"'+(cur===ct?' selected':'')+'>'+esc(ct)+'</option>'; }).join('');
-    catSel.value=cur;
-  }
-  var busca=g('ent-busca')?g('ent-busca').value.toLowerCase().trim():'';
-  var filtCat=g('ent-cat')?g('ent-cat').value:'';
-  var de=g('ent-de')?g('ent-de').value:'';
-  var ate=g('ent-ate')?g('ent-ate').value:'';
-  var temFiltro=busca||filtCat||de||ate;
-  var items=d.ent.filter(function(e){
-    if(!temFiltro && !inM(e.date)) return false;
-    if(busca && e.desc.toLowerCase().indexOf(busca)<0) return false;
-    if(filtCat && e.cat!==filtCat) return false;
-    if(de && e.date<de) return false;
-    if(ate && e.date>ate) return false;
-    return true;
-  }).sort(function(a,b){ return new Date(b.date)-new Date(a.date); });
-  var totalVal=items.reduce(function(a,e){return a+parseFloat(e.val||0);},0);
-  if(g('ent-info')) g('ent-info').textContent=items.length+' registro(s) — Total: '+fmt(totalVal);
+  var d=ud(); if(!d) return;
+  var items=d.ent.filter(function(e){return inM(e.date);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
   g('tb-ent').innerHTML=items.length?items.map(function(e){
     return '<tr><td style="color:var(--t2);font-size:12px">'+fd(e.date)+'</td>'+
       '<td style="font-weight:500">'+esc(e.desc)+'</td>'+
@@ -1895,53 +1647,12 @@ function rEnt(){
       '<button class="btn btn-del btn-sm" onclick="delIt(\'ent\',\''+escq(e.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
   }).join(''):emptr(5,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">trending_up</span>Nenhuma entrada neste mês');
-  // Mobile cards
-  var mc=g('mc-ent');
-  if(mc){
-    mc.innerHTML=items.length?items.map(function(e){
-      return '<div class="mc-item">'+
-        '<div class="mc-top">'+
-          '<div>'+
-            '<div class="mc-name">'+esc(e.desc)+'</div>'+
-            '<div class="mc-sub"><span>'+fd(e.date)+'</span><span class="badge bg-teal">'+esc(e.cat)+'</span></div>'+
-          '</div>'+
-          '<div class="mc-val" style="color:var(--teal)">+'+fmt(e.val)+'</div>'+
-        '</div>'+
-        '<div class="mc-bot">'+
-          '<button class="btn btn-edit btn-sm" onclick="editIt(\'ent\',\''+escq(e.id)+'\')">Editar</button>'+
-          '<button class="btn btn-del btn-sm" onclick="delIt(\'ent\',\''+escq(e.id)+'\')"><span class="mi" style="font-size:14px">delete</span></button>'+
-        '</div>'+
-      '</div>';
-    }).join(''):('<div style="text-align:center;padding:48px 20px;color:var(--t3)">Nenhum registro</div>');
-  }
 }
 
+// SAIDAS
 function rSai(){
-  var d=ud(); if(!d||!d.sai) return;
-  // Populate category select
-  var catSel=g('sai-cat');
-  if(catSel){
-    var cats=[]; d.sai.forEach(function(s){ if(cats.indexOf(s.cat)<0) cats.push(s.cat); });
-    var cur=catSel.value;
-    catSel.innerHTML='<option value="">Todas categorias</option>'+
-      cats.sort().map(function(ct){ return '<option value="'+esc(ct)+'"'+(cur===ct?' selected':'')+'>'+esc(ct)+'</option>'; }).join('');
-    catSel.value=cur;
-  }
-  var busca=g('sai-busca')?g('sai-busca').value.toLowerCase().trim():'';
-  var filtCat=g('sai-cat')?g('sai-cat').value:'';
-  var de=g('sai-de')?g('sai-de').value:'';
-  var ate=g('sai-ate')?g('sai-ate').value:'';
-  var temFiltro=busca||filtCat||de||ate;
-  var items=d.sai.filter(function(s){
-    if(!temFiltro && !inM(s.date)) return false;
-    if(busca && s.desc.toLowerCase().indexOf(busca)<0) return false;
-    if(filtCat && s.cat!==filtCat) return false;
-    if(de && s.date<de) return false;
-    if(ate && s.date>ate) return false;
-    return true;
-  }).sort(function(a,b){ return new Date(b.date)-new Date(a.date); });
-  var totalVal=items.reduce(function(a,s){return a+parseFloat(s.val||0);},0);
-  if(g('sai-info')) g('sai-info').textContent=items.length+' registro(s) — Total: '+fmt(totalVal);
+  var d=ud(); if(!d) return;
+  var items=d.sai.filter(function(s){return inM(s.date);}).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
   g('tb-sai').innerHTML=items.length?items.map(function(s){
     return '<tr><td style="color:var(--t2);font-size:12px">'+fd(s.date)+'</td>'+
       '<td style="font-weight:500">'+esc(s.desc)+'</td>'+
@@ -1953,29 +1664,11 @@ function rSai(){
       '<button class="btn btn-del btn-sm" onclick="delIt(\'sai\',\''+escq(s.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
   }).join(''):emptr(6,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">trending_down</span>Nenhuma saída neste mês');
-  // Mobile cards
-  var mcs=g('mc-sai');
-  if(mcs){
-    mcs.innerHTML=items.length?items.map(function(s){
-      return '<div class="mc-item">'+
-        '<div class="mc-top">'+
-          '<div>'+
-            '<div class="mc-name">'+esc(s.desc)+'</div>'+
-            '<div class="mc-sub"><span>'+fd(s.date)+'</span><span class="badge bg-red">'+esc(s.cat)+'</span>'+(s.ori?'<span class="badge bg-muted">'+esc(s.ori)+'</span>':'')+'</div>'+
-          '</div>'+
-          '<div class="mc-val" style="color:var(--red)">-'+fmt(s.val)+'</div>'+
-        '</div>'+
-        '<div class="mc-bot">'+
-          '<button class="btn btn-edit btn-sm" onclick="editIt(\'sai\',\''+escq(s.id)+'\')">Editar</button>'+
-          '<button class="btn btn-del btn-sm" onclick="delIt(\'sai\',\''+escq(s.id)+'\')"><span class="mi" style="font-size:14px">delete</span></button>'+
-        '</div>'+
-      '</div>';
-    }).join(''):('<div style="text-align:center;padding:48px 20px;color:var(--t3)">Nenhum registro</div>');
-  }
+}
 
-
+// SALDO
 function rSal(){
-  var d=ud(); if(!d||!d.ent||!d.sai) return;
+  var d=ud(); if(!d) return;
   var ent=d.ent.filter(function(e){return inM(e.date);});
   var sai=d.sai.filter(function(s){return inM(s.date);});
   var tE=sum(ent),tS=sum(sai),sal=tE-tS;
@@ -1999,64 +1692,19 @@ function rSal(){
 
 // PARCELAS
 function rParc(){
-  var d=ud(); if(!d||!d.parc) return;
-
-  // Populate category select
-  var catSel=g('parc-cat');
-  if(catSel){
-    var cats=[]; d.parc.forEach(function(p){ if(cats.indexOf(p.cat)<0) cats.push(p.cat); });
-    var cur=catSel.value;
-    catSel.innerHTML='<option value="">Todas categorias</option>'+
-      cats.sort().map(function(ct){ return '<option value="'+esc(ct)+'"'+(cur===ct?' selected':'')+'>'+esc(ct)+'</option>'; }).join('');
-    catSel.value=cur;
-  }
-
-  var busca=g('parc-busca')?g('parc-busca').value.toLowerCase().trim():'';
-  var filtCat=g('parc-cat')?g('parc-cat').value:'';
-  var filtVenc=g('parc-venc')?g('parc-venc').value:'';
-  var filtStatus=g('parc-status')?g('parc-status').value:'';
-  var hoje=new Date(); hoje.setHours(0,0,0,0);
-  var em30=new Date(hoje); em30.setDate(em30.getDate()+30);
-
-  var lista=d.parc.filter(function(p){
-    if(busca && p.name.toLowerCase().indexOf(busca)<0) return false;
-    if(filtCat && p.cat!==filtCat) return false;
-    if(filtStatus && p.st!==filtStatus) return false;
-    if(filtVenc){
-      var prox=p.pars.find(function(x){return !x.pg;});
-      if(!prox) return false;
-      var dv=new Date(prox.date+'T12:00:00');
-      if(filtVenc==='mes' && (dv.getMonth()!==hoje.getMonth()||dv.getFullYear()!==hoje.getFullYear())) return false;
-      if(filtVenc==='prox' && (dv<hoje||dv>em30)) return false;
-      if(filtVenc==='atrasado' && dv>=hoje) return false;
-    }
-    return true;
-  });
-
-  var totalAberto=lista.filter(function(p){return p.st==='ativo';}).reduce(function(a,p){
-    return a+p.pars.filter(function(x){return !x.pg;}).reduce(function(s,x){return s+parseFloat(x.val||0);},0);
-  },0);
-
-  if(g('parc-info')) g('parc-info').textContent=lista.length+' conta(s) — Total em aberto: '+fmt(totalAberto);
-
-  g('tb-parc').innerHTML=lista.length?lista.map(function(p){
+  var d=ud(); if(!d) return;
+  g('tb-parc').innerHTML=d.parc.length?d.parc.map(function(p){
     var pg=p.pars.filter(function(x){return x.pg;}).length;
     var tot=p.pars.length;
     var prox=p.pars.find(function(x){return !x.pg;});
     var pct=(pg/tot*100).toFixed(0);
     var scls=p.st==='ativo'?'bg-blue':p.st==='cancelado'?'bg-red':'bg-teal';
-    // Valor da parcela do mes atual
-    var valMes=p.pars.filter(function(x){return !x.pg && inM(x.date);}).reduce(function(a,x){return a+parseFloat(x.val||0);},0);
-    // Verificar atraso
-    var atrasada=false;
-    if(prox){ var dv=new Date(prox.date+'T12:00:00'); dv.setHours(0,0,0,0); atrasada=(dv<hoje&&p.st==='ativo'); }
     return '<tr>'+
       '<td style="font-weight:600">'+esc(p.name)+'</td>'+
       '<td><span class="badge bg-yellow">'+esc(p.cat)+'</span></td>'+
       '<td style="font-weight:700">'+fmt(p.tot)+'</td>'+
-      '<td style="font-weight:700;color:'+(valMes>0?'var(--yellow)':'var(--t3)')+'">'+( valMes>0?fmt(valMes):'—')+'</td>'+
       '<td><div class="parc-progress"><div class="prog-wrap" style="flex:1"><div class="prog-fill" style="width:'+pct+'%;background:var(--blue)"></div></div><span class="parc-count">'+pg+'/'+tot+'</span></div></td>'+
-      '<td style="font-size:12px;color:'+(atrasada?'var(--red)':'var(--t2)')+'">'+(prox?'<span title="'+(atrasada?'ATRASADA':fd(prox.date))+'">'+(atrasada?'⚠️ ':'')+fd(prox.date)+'</span>':'<span style="color:var(--teal)">Quitado</span>')+'</td>'+
+      '<td style="font-size:12px;color:var(--t2)">'+(prox?fd(prox.date):'<span style="color:var(--teal)">Quitado</span>')+'</td>'+
       '<td><span class="badge '+scls+'">'+p.st+'</span></td>'+
       '<td><div style="display:flex;gap:5px;flex-wrap:wrap">'+
       (prox&&p.st==='ativo'?'<button class="btn btn-pay btn-sm" onclick="pgParc(\''+escq(p.id)+'\')">Pagar</button>':'')+
@@ -2064,49 +1712,8 @@ function rParc(){
       '<button class="btn btn-warn btn-sm" onclick="canParc(\''+escq(p.id)+'\')"><span class="mi" style="font-size:13px">block</span></button>'+
       '<button class="btn btn-del btn-sm" onclick="delIt(\'parc\',\''+escq(p.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
-  }).join(''):emptr(8,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">receipt_long</span>Nenhuma parcela encontrada');
+  }).join(''):emptr(7,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">receipt_long</span>Nenhuma parcela cadastrada');
 }
-  // Mobile cards
-  var mcp=g('mc-parc');
-  if(mcp){
-    mcp.innerHTML=lista.length?lista.map(function(p){
-      var pg=p.pars.filter(function(x){return x.pg;}).length;
-      var tot=p.pars.length;
-      var prox=p.pars.find(function(x){return !x.pg;});
-      var pct=Math.round(pg/tot*100);
-      var hoje2=new Date(); hoje2.setHours(0,0,0,0);
-      var atrasada=false;
-      if(prox){var dv2=new Date(prox.date+'T12:00:00');dv2.setHours(0,0,0,0);atrasada=(dv2<hoje2&&p.st==='ativo');}
-      var valMes2=p.pars.filter(function(x){return !x.pg&&inM(x.date);}).reduce(function(a,x){return a+parseFloat(x.val||0);},0);
-      var scls=p.st==='ativo'?'bg-blue':p.st==='cancelado'?'bg-red':'bg-teal';
-      var borderCol=atrasada?'var(--red)':p.st==='quitado'?'var(--teal)':'var(--border)';
-      return '<div class="mc-item" style="border-left:3px solid '+borderCol+'">'+
-        '<div class="mc-top">'+
-          '<div>'+
-            '<div class="mc-name">'+esc(p.name)+'</div>'+
-            '<div class="mc-sub"><span class="badge bg-yellow">'+esc(p.cat)+'</span><span class="badge '+scls+'">'+p.st+'</span></div>'+
-          '</div>'+
-          '<div style="text-align:right">'+
-            '<div class="mc-val" style="color:var(--yellow)">'+fmt(p.tot)+'</div>'+
-            (valMes2>0?'<div style="font-size:12px;color:var(--t3);margin-top:2px">'+fmt(valMes2)+'/mês</div>':'')+
-          '</div>'+
-        '</div>'+
-        '<div class="mc-prog"><div class="mc-pf" style="width:'+pct+'%;background:var(--blue)"></div></div>'+
-        '<div class="mc-meta">'+
-          '<span style="color:'+(atrasada?'var(--red)':'var(--t3)')+'">'+(atrasada?'⚠️ ':'')+(prox?fd(prox.date):'Quitado')+'</span>'+
-          '<span>'+pg+'/'+tot+' parcelas</span>'+
-        '</div>'+
-        '<div class="mc-bot">'+
-          (prox&&p.st==='ativo'?'<button class="btn btn-pay btn-sm" onclick="pgParc(\''+escq(p.id)+'\')">Pagar</button>':'')+
-          '<button class="btn btn-edit btn-sm" onclick="editIt(\'parc\',\''+escq(p.id)+'\')"><span class="mi" style="font-size:14px">edit</span></button>'+
-          '<button class="btn btn-warn btn-sm" onclick="canParc(\''+escq(p.id)+'\')"><span class="mi" style="font-size:14px">block</span></button>'+
-          '<button class="btn btn-del btn-sm" onclick="delIt(\'parc\',\''+escq(p.id)+'\')"><span class="mi" style="font-size:14px">delete</span></button>'+
-        '</div>'+
-      '</div>';
-    }).join(''):('<div style="text-align:center;padding:48px 20px;color:var(--t3)">Nenhuma parcela</div>');
-  }
-
-
 function pgParc(id){
   var d=ud();
   var c=d.parc.find(function(p){return p.id===id;});
@@ -2130,7 +1737,7 @@ function canParc(id){
 
 // PLANEJAMENTO
 function rPlan(){
-  var d=ud(); if(!d||!d.plans) return;
+  var d=ud(); if(!d) return;
   g('p-list').innerHTML=d.plans.length?d.plans.map(function(p){
     var pct=Math.min(100,((p.cur||0)/p.tgt*100));
     return '<div class="plan-card">'+
@@ -2164,7 +1771,7 @@ function updPlan(id){
 
 // INVESTIMENTOS
 function rInv(){
-  var d=ud(); if(!d||!d.inv) return;
+  var d=ud(); if(!d) return;
   var total=sum(d.inv);
   var rend=d.inv.reduce(function(a,i){return a+parseFloat(i.yld||0);},0);
   g('i-metrics').innerHTML=
@@ -2192,7 +1799,7 @@ function rInv(){
 
 // CATEGORIAS
 function rCats(){
-  var d=ud(); if(!d||!d.cats) return;
+  var d=ud(); if(!d) return;
   var map={entrada:'cg-ent',saida:'cg-sai',investimento:'cg-inv'};
   Object.keys(map).forEach(function(type){
     g(map[type]).innerHTML=d.cats[type].map(function(c){
@@ -2355,293 +1962,47 @@ function cf(title,text,cb){
 function closeCf(){ g('confirmWrap').classList.remove('open'); }
 
 // TOAST
-
-function abrirScanner(){
-  CLAUDE_KEY = localStorage.getItem('ft_api_key')||'';
-  g('scannerModal').style.display='flex';
-  g('scanner-upload-area').style.display='block';
-  g('scanner-preview').style.display='none';
-  g('scanner-loading').style.display='none';
-  g('scanner-result').style.display='none';
-  g('scanner-error').style.display='none';
-  g('sc-obs').style.display='none';
-  g('scanner-setup').style.display=CLAUDE_KEY?'none':'block';
-  g('scanner-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScanner()">Cancelar</button>'+(CLAUDE_KEY?'<button class="btn btn-ghost" onclick="document.getElementById(\'scanner-input\').click()">&#128247; Nova foto</button>':'');
-  var d=ud(); if(!d) return;
-  var sel=g('sc-cat');
-  if(sel) sel.innerHTML=d.cats.saida.map(function(cat){return '<option value="'+esc(cat)+'">'+esc(cat)+'</option>';}).join('');
-}
-
-function salvarChaveApi(){
-  var key=g('api-key-input').value.trim();
-  if(!key||!key.startsWith('sk-ant-')){toast('Chave inválida. Deve começar com sk-ant-','err');return;}
-  localStorage.setItem('ft_api_key', key);
-  CLAUDE_KEY=key;
-  g('scanner-setup').style.display='none';
-  g('scanner-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScanner()">Cancelar</button><button class="btn btn-ghost" onclick="document.getElementById(\'scanner-input\').click()">&#128247; Nova foto</button>';
-  toast('Chave salva! Agora tire uma foto.','ok');
-}
-function fecharScanner(){
-  g('scannerModal').style.display='none';
-  var inp=g('scanner-input'); if(inp) inp.value='';
-}
-function scannerDrop(e){
-  e.preventDefault();
-  g('scanner-upload-area').style.borderColor='var(--border)';
-  var file=e.dataTransfer.files[0];
-  if(file&&file.type.startsWith('image/')) processarImagem(file);
-}
-function processarImagem(file){
-  if(!file) return;
-  var reader=new FileReader();
-  reader.onload=function(ev){
-    g('scanner-img').src=ev.target.result;
-    g('scanner-upload-area').style.display='none';
-    g('scanner-preview').style.display='block';
-    g('scanner-loading').style.display='block';
-    g('scanner-result').style.display='none';
-    g('scanner-error').style.display='none';
-    g('scanner-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScanner()">Cancelar</button>';
-    analisarComClaude(ev.target.result.split(',')[1], file.type||'image/jpeg');
-  };
-  reader.readAsDataURL(file);
-}
-function analisarComClaude(base64, mediaType){
-  var hoje=new Date().toISOString().slice(0,10);
-  fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':CLAUDE_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:300,messages:[{role:'user',content:[
-      {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
-      {type:'text',text:'Analise este cupom/nota. Responda SOMENTE com JSON:\n{"descricao":"estabelecimento","valor":0.00,"data":"YYYY-MM-DD","categoria":"Alimentacao","itens":"resumo"}\nvalor: decimal com ponto. data: YYYY-MM-DD ou use '+hoje+'. categoria: Alimentacao/Transporte/Moradia/Saude/Lazer/Educacao/Vestuario/Outros'}
-    ]}]})
-  }).then(function(r){return r.json();}).then(function(data){
-    g('scanner-loading').style.display='none';
-    if(data.error){mostrarErroScanner('Erro API: '+data.error.message);return;}
-    var texto=data.content[0].text.trim().replace(/```json|```/g,'').trim();
-    var res=JSON.parse(texto);
-    g('sc-desc').value=res.descricao||'';
-    g('sc-valor').value=res.valor||'';
-    g('sc-data').value=res.data||hoje;
-    if(res.itens){g('sc-obs').textContent='Itens: '+res.itens;g('sc-obs').style.display='block';}
-    // Map category
-    var catMap={'Alimentacao':'Alimentação','Alimentação':'Alimentação','Transporte':'Transporte','Moradia':'Moradia','Saude':'Saúde','Saúde':'Saúde','Lazer':'Lazer','Educacao':'Educação','Educação':'Educação','Vestuario':'Vestuário','Vestuário':'Vestuário','Outros':'Outros'};
-    var sel=g('sc-cat'); var catMapped=catMap[res.categoria]||'Outros';
-    for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===catMapped){sel.selectedIndex=i;break;}}
-    g('scanner-result').style.display='block';
-    g('scanner-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScanner()">Cancelar</button><button class="btn btn-ghost" onclick="document.getElementById(\'scanner-input\').click()">&#128247; Nova foto</button><button class="btn btn-primary" onclick="salvarDoScanner()"><span class="mi" style="font-size:14px;vertical-align:middle">save</span> Salvar saída</button>';
-  }).catch(function(e){g('scanner-loading').style.display='none';mostrarErroScanner('Erro: '+e.message);});
-}
-function mostrarErroScanner(msg){
-  g('scanner-error').textContent=msg;g('scanner-error').style.display='block';
-  g('scanner-upload-area').style.display='block';g('scanner-preview').style.display='none';
-  g('scanner-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScanner()">Cancelar</button><button class="btn btn-ghost" onclick="document.getElementById(\'scanner-input\').click()">&#128247; Tentar novamente</button>';
-}
-function salvarDoScanner(){
-  var desc=g('sc-desc').value.trim(),valor=parseFloat(g('sc-valor').value),data=g('sc-data').value,cat=g('sc-cat').value;
-  if(!desc||isNaN(valor)||!data){toast('Preencha todos os campos.','err');return;}
-  var d=ud(); if(!d) return;
-  d.sai.push({id:uid(),desc:desc,val:valor,date:data,cat:cat,ori:'Scanner'});
-  sud(d,function(){fecharScanner();toast('Saída salva!','ok');if(S.page==='saidas')rSai();if(S.page==='dashboard')rDash();});
+function toast(msg,type){
+  var t=g('toast'); t.textContent=msg; t.className='show '+(type||'');
+  clearTimeout(t._t); t._t=setTimeout(function(){t.className='';},3000);
 }
 
 
-// ===== SCANNER DE BOLETOS/PARCELAMENTOS =====
-function abrirScannerBoleto(){
-  CLAUDE_KEY = localStorage.getItem('ft_api_key')||'';
-  g('scannerBoletoModal').style.display='flex';
-  g('sb-upload').style.display='block';
-  g('sb-preview').style.display='none';
-  g('sb-loading').style.display='none';
-  g('sb-result').style.display='none';
-  g('sb-error').style.display='none';
-  g('sb-obs').style.display='none';
-  g('sb-setup').style.display=CLAUDE_KEY?'none':'block';
-  g('sb-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button>'+(CLAUDE_KEY?'<button class="btn btn-ghost" onclick="document.getElementById(\'sb-input\').click()">&#128247; Nova foto</button>':'');
-  var d=ud(); if(!d) return;
-  var sel=g('sb-cat');
-  if(sel) sel.innerHTML=d.cats.saida.map(function(cat){return '<option value="'+esc(cat)+'">'+esc(cat)+'</option>';}).join('');
+// SIDEBAR
+function toggleSb(){ g('sidebar').classList.toggle('open'); g('sbOverlay').classList.toggle('open'); }
+function closeSb(){ g('sidebar').classList.remove('open'); g('sbOverlay').classList.remove('open'); }
+
+
+function doChangePass(){
+  var np=g('cpNewPass').value,cp=g('cpConfPass').value;
+  if(!np||np.length<4){showErr('changePassError','Mínimo 4 caracteres.');return;}
+  if(np!==cp){showErr('changePassError','Senhas não coincidem.');return;}
+  var btn=document.querySelector('#changePassScreen .auth-btn'); btn.textContent='Salvando...'; btn.disabled=true;
+  hashPass(np).then(function(h){ return fdb.ref('accounts/'+S.user).update({p:h,firstAccess:false}); })
+  .then(function(){ btn.textContent='Salvar senha e entrar'; btn.disabled=false; g('changePassScreen').style.display='none'; g('cpNewPass').value=''; g('cpConfPass').value=''; loadUD(function(data){ if(data) showApp(S.accName||S.user); }); })
+  .catch(function(e){ btn.textContent='Salvar senha e entrar'; btn.disabled=false; showErr('changePassError','Erro: '+e.message); });
 }
-
-function salvarChaveApiBoleto(){
-  var key=g('sb-api-key').value.trim();
-  if(!key||!key.startsWith('sk-ant-')){toast('Chave inválida.','err');return;}
-  localStorage.setItem('ft_api_key',key);
-  CLAUDE_KEY=key;
-  g('sb-setup').style.display='none';
-  g('sb-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button><button class="btn btn-ghost" onclick="document.getElementById(\'sb-input\').click()">&#128247; Nova foto</button>';
-  toast('Chave salva!','ok');
-}
-
-function fecharScannerBoleto(){
-  g('scannerBoletoModal').style.display='none';
-  var inp=g('sb-input'); if(inp) inp.value='';
-}
-
-function boletoScannerDrop(e){
-  e.preventDefault();
-  g('sb-upload').style.borderColor='var(--border)';
-  var file=e.dataTransfer.files[0];
-  if(file&&file.type.startsWith('image/')) processarBoleto(file);
-}
-
-function processarBoleto(file){
-  if(!file) return;
-  var reader=new FileReader();
-  reader.onload=function(ev){
-    g('sb-img').src=ev.target.result;
-    g('sb-upload').style.display='none';
-    g('sb-preview').style.display='block';
-    g('sb-loading').style.display='block';
-    g('sb-result').style.display='none';
-    g('sb-error').style.display='none';
-    g('sb-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button>';
-    analisarBoletoComClaude(ev.target.result.split(',')[1], file.type||'image/jpeg');
-  };
-  reader.readAsDataURL(file);
-}
-
-function analisarBoletoComClaude(base64, mediaType){
-  var hoje=new Date().toISOString().slice(0,10);
-  fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':CLAUDE_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:500,messages:[{role:'user',content:[
-      {type:'image',source:{type:'base64',media_type:mediaType,data:base64}},
-      {type:'text',text:'Analise este documento. Responda SOMENTE com JSON: {"nome":"empresa ou loja","valor_total":0.00,"num_parcelas":1,"valor_parcela":0.00,"primeiro_vencimento":"YYYY-MM-DD","categoria":"Outros","obs":"detalhes"}. valor_total e valor_parcela: decimal com ponto. primeiro_vencimento: YYYY-MM-DD ou use '+hoje+'. num_parcelas: 1 se pagamento unico. categoria: Alimentacao/Transporte/Moradia/Saude/Lazer/Educacao/Vestuario/Assinaturas/Empresa/Automoveis/Outros'}
-    ]}]})
-  }).then(function(r){return r.json();}).then(function(data){
-    g('sb-loading').style.display='none';
-    if(data.error){mostrarErroBoleto('Erro API: '+data.error.message);return;}
-    var texto=data.content[0].text.trim().replace(/```json|```/g,'').trim();
-    var res=JSON.parse(texto);
-    // Preenche campos
-    g('sb-nome').value=res.nome||'';
-    g('sb-valor').value=res.valor_total||res.valor_parcela||'';
-    g('sb-venc').value=res.primeiro_vencimento||hoje;
-    g('sb-parc').value=res.num_parcelas||1;
-    g('sb-vparc').value=res.valor_parcela||'';
-    if(res.obs){g('sb-obs').textContent=res.obs;g('sb-obs').style.display='block';}
-    // Categoria
-    var catMap={'Alimentacao':'Alimentação','Alimentação':'Alimentação','Transporte':'Transporte','Moradia':'Moradia','Saude':'Saúde','Saúde':'Saúde','Lazer':'Lazer','Educacao':'Educação','Educação':'Educação','Vestuario':'Vestuário','Vestuário':'Vestuário','Assinaturas':'Assinaturas','Empresa':'Empresa','Automoveis':'Automoveis','Outros':'Outros'};
-    var sel=g('sb-cat'); var catMapped=catMap[res.categoria]||res.categoria||'Outros';
-    for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===catMapped){sel.selectedIndex=i;break;}}
-    g('sb-result').style.display='block';
-    g('sb-foot').innerHTML=
-      '<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button>'+
-      '<button class="btn btn-ghost" onclick="document.getElementById(\'sb-input\').click()">&#128247; Nova foto</button>'+
-      '<button class="btn btn-primary" onclick="salvarDoBoleto()"><span class="mi" style="font-size:14px;vertical-align:middle">save</span> Salvar parcela</button>';
-  }).catch(function(e){g('sb-loading').style.display='none';mostrarErroBoleto('Erro: '+e.message);});
-}
-
-function mostrarErroBoleto(msg){
-  g('sb-error').textContent=msg;g('sb-error').style.display='block';
-  g('sb-upload').style.display='block';g('sb-preview').style.display='none';
-  g('sb-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button><button class="btn btn-ghost" onclick="document.getElementById(\'sb-input\').click()">&#128247; Tentar novamente</button>';
-}
-
-function salvarDoBoleto(){
-  var nome=g('sb-nome').value.trim();
-  var valor=parseFloat(g('sb-valor').value);
-  var venc=g('sb-venc').value;
-  var nparc=parseInt(g('sb-parc').value)||1;
-  var vparc=parseFloat(g('sb-vparc').value)||0;
-  var cat=g('sb-cat').value;
-  if(!nome||isNaN(valor)||!venc){toast('Preencha os campos obrigatórios.','err');return;}
-  var d=ud(); if(!d) return;
-  // Usar valor da parcela se informado, senao dividir total
-  var vp = vparc>0 ? vparc : parseFloat((valor/nparc).toFixed(2));
-  var pars=[];
-  for(var i=0;i<nparc;i++){
-    var dd=new Date(venc+'T12:00:00');
-    dd.setMonth(dd.getMonth()+i);
-    pars.push({seq:i+1, date:dd.toISOString().slice(0,10), val:vp, pg:false});
-  }
-  d.parc.push({id:uid(), name:nome, cat:cat, tot:valor, pars:pars, st:'ativo'});
-  sud(d,function(){
-    fecharScannerBoleto();
-    toast('Parcela cadastrada!','ok');
-    if(S.page==='parcelas') rParc();
-    if(S.page==='dashboard') rDash();
-  });
-}
-
-
-
-// EXPORTAR PDF
-function exportPDF(){
-  var d=ud(); if(!d){toast('Sem dados.','err');return;}
-  var ent=d.ent.filter(function(e){return inM(e.date);});
-  var sai=d.sai.filter(function(s){return inM(s.date);});
-  var tE=ent.reduce(function(a,e){return a+parseFloat(e.val||0);},0);
-  var tS=sai.reduce(function(a,s){return a+parseFloat(s.val||0);},0);
-  var sal=tE-tS; var mes=MONTHS[S.month]+' '+S.year;
-  var catT={}; sai.forEach(function(s){catT[s.cat]=(catT[s.cat]||0)+parseFloat(s.val||0);});
-  var PC=['#00C896','#4D9CFF','#FF5E5E','#FFB547','#A78BFA','#F06292'];
-  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Fintrack - '+mes+'</title>'+
-    '<style>body{font-family:Arial,sans-serif;color:#1a1a2e;padding:32px}h1{color:#00C896;font-size:22px}.sub{color:#888;font-size:13px;margin-bottom:28px}'+
-    '.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}.card{border:1.5px solid #f0f0f0;border-radius:10px;padding:16px}'+
-    '.cl{font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px}.cv{font-size:20px;font-weight:800}.g{color:#00C896}.r{color:#FF5E5E}'+
-    'h2{font-size:14px;font-weight:700;margin:20px 0 10px;border-bottom:1px solid #f0f0f0;padding-bottom:6px}'+
-    'table{width:100%;border-collapse:collapse;font-size:12px}th{text-align:left;padding:8px 10px;background:#f8f8f8;font-size:10px;text-transform:uppercase;color:#888}'+
-    'td{padding:8px 10px;border-bottom:1px solid #f5f5f5}.cr{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px}'+
-    '.dot{width:10px;height:10px;border-radius:50%}.bar{flex:1;height:6px;background:#f0f0f0;border-radius:3px}.bf{height:6px;border-radius:3px}'+
-    '.ft{margin-top:40px;font-size:10px;color:#aaa;text-align:center;border-top:1px solid #f0f0f0;padding-top:12px}</style></head><body>'+
-    '<h1>Fintrack</h1><div class="sub">'+mes+' | '+new Date().toLocaleDateString('pt-BR')+'</div>'+
-    '<div class="cards"><div class="card"><div class="cl">Entradas</div><div class="cv g">'+fmt(tE)+'</div></div>'+
-    '<div class="card"><div class="cl">Saidas</div><div class="cv r">'+fmt(tS)+'</div></div>'+
-    '<div class="card"><div class="cl">Saldo</div><div class="cv '+(sal>=0?'g':'r')+'">'+fmt(sal)+'</div></div></div>';
-  if(ent.length) html+='<h2>Entradas</h2><table><tr><th>Data</th><th>Descricao</th><th>Categoria</th><th>Valor</th></tr>'+ent.map(function(e){return '<tr><td>'+fd(e.date)+'</td><td>'+esc(e.desc)+'</td><td>'+esc(e.cat)+'</td><td style="color:#00C896;font-weight:700">'+fmt(e.val)+'</td></tr>';}).join('')+'</table>';
-  if(sai.length) html+='<h2>Saidas</h2><table><tr><th>Data</th><th>Descricao</th><th>Categoria</th><th>Valor</th></tr>'+sai.map(function(s){return '<tr><td>'+fd(s.date)+'</td><td>'+esc(s.desc)+'</td><td>'+esc(s.cat)+'</td><td style="color:#FF5E5E;font-weight:700">'+fmt(s.val)+'</td></tr>';}).join('')+'</table>';
-  var ci=Object.entries(catT).sort(function(a,b){return b[1]-a[1];});
-  if(ci.length){ html+='<h2>Gastos por Categoria</h2>'; ci.forEach(function(item,i){ var pct=tS>0?(item[1]/tS*100).toFixed(1):0; html+='<div class="cr"><div class="dot" style="background:'+PC[i%PC.length]+'"></div><span style="width:120px">'+esc(item[0])+'</span><div class="bar"><div class="bf" style="width:'+pct+'%;background:'+PC[i%PC.length]+'"></div></div><span style="width:40px;text-align:right">'+pct+'%</span><span style="width:90px;text-align:right;font-weight:700">'+fmt(item[1])+'</span></div>'; }); }
-  html+='<div class="ft">Fintrack - dh815.github.io/fintrack</div></body></html>';
-  var w=window.open('','_blank'); w.document.write(html); w.document.close();
-  setTimeout(function(){w.print();},500);
-}
-
-// CRIAR ACESSO
 function openCreateAccess(){
   var title=g('mTitle'),body=g('mBody'),foot=g('mFoot'),wrap=g('mainModal');
-  if(!title||!body||!foot||!wrap){alert('Erro: recarregue a pagina.');return;}
+  if(!title||!body||!foot||!wrap){alert('Erro: recarregue.');return;}
   title.textContent='Criar acesso para cliente';
-  body.innerHTML='<div style="background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);border-radius:10px;padding:12px;font-size:12px;color:#00C896;margin-bottom:16px">O cliente recebera usuario e senha temporaria. No primeiro acesso devera criar sua senha pessoal.</div>'+
-    '<div class="field"><label>Nome completo *</label><input id="ca-name" placeholder="Ex: Joao Silva" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>'+
-    '<div class="field"><label>Usuario *</label><input id="ca-user" placeholder="Ex: joaosilva" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>'+
-    '<div class="field"><label>Senha temporaria *</label><input id="ca-pass" type="text" value="1234" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>';
+  body.innerHTML='<div class="field"><label>Nome *</label><input id="ca-name" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none" placeholder="Nome completo"></div>'+
+    '<div class="field"><label>Usuário *</label><input id="ca-user" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none" placeholder="sem espaços"></div>'+
+    '<div class="field"><label>Senha temporária *</label><input id="ca-pass" type="text" value="1234" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>';
   foot.innerHTML='<button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveCreateAccess()">Criar acesso</button>';
-  wrap.classList.add('open');
-  setTimeout(function(){ var el=g('ca-name'); if(el) el.focus(); },150);
+  wrap.classList.add('open'); setTimeout(function(){ var el=g('ca-name'); if(el) el.focus(); },150);
 }
-
 function saveCreateAccess(){
-  var name=(g('ca-name')?g('ca-name').value.trim():'');
-  var user=(g('ca-user')?g('ca-user').value.trim().replace(/[^a-zA-Z0-9_]/g,''):'');
-  var pass=(g('ca-pass')?g('ca-pass').value:'');
-  var savedPass=pass;
-  if(!name||!user||!pass){toast('Preencha todos os campos.','err');return;}
-  var btn=g('mFoot')?g('mFoot').querySelector('.btn-primary'):null;
-  if(btn){btn.textContent='Criando...';btn.disabled=true;}
+  var name=g('ca-name')?g('ca-name').value.trim():'', user=g('ca-user')?g('ca-user').value.trim().replace(/[^a-zA-Z0-9_]/g,''):'', pass=g('ca-pass')?g('ca-pass').value:'', savedPass=pass;
+  if(!name||!user||!pass){toast('Preencha todos.','err');return;}
+  var btn=g('mFoot')?g('mFoot').querySelector('.btn-primary'):null; if(btn){btn.textContent='Criando...';btn.disabled=true;}
   fdb.ref('accounts/'+user).once('value').then(function(snap){
-    if(snap.val()){
-      if(btn){btn.textContent='Criar acesso';btn.disabled=false;}
-      toast('Usuario "'+user+'" ja existe!','err');
-      throw new Error('CANCEL');
-    }
+    if(snap.val()){if(btn){btn.textContent='Criar acesso';btn.disabled=false;}toast('Usuário já existe!','err');throw new Error('CANCEL');}
     return hashPass(pass);
-  }).then(function(h){
-    return fdb.ref('accounts/'+user).set({n:name,p:h,firstAccess:true,role:'user',createdBy:S.user});
-  }).then(function(){
-    if(btn){btn.textContent='Criar acesso';btn.disabled=false;}
-    closeModal();
-    toast('Acesso criado! Usuario: '+user+' Senha: '+savedPass,'ok',8000);
-  }).catch(function(e){
-    if(btn){btn.textContent='Criar acesso';btn.disabled=false;}
-    if(e.message!=='CANCEL') toast('Erro: '+e.message,'err');
-  });
+  }).then(function(h){ return fdb.ref('accounts/'+user).set({n:name,p:h,firstAccess:true,role:'user',createdBy:S.user}); })
+  .then(function(){ if(btn){btn.textContent='Criar acesso';btn.disabled=false;} closeModal(); toast('Acesso criado! Usuário: '+user+' Senha: '+savedPass,'ok',8000); })
+  .catch(function(e){ if(btn){btn.textContent='Criar acesso';btn.disabled=false;} if(e.message!=='CANCEL') toast('Erro: '+e.message,'err'); });
 }
-
-// PERFIL
 function rPerfil(){
   fdb.ref('accounts/'+S.user).once('value').then(function(snap){
     var acc=snap.val()||{};
@@ -2650,28 +2011,85 @@ function rPerfil(){
     if(g('perfil-avatar')) g('perfil-avatar').textContent=(acc.n||S.user).charAt(0).toUpperCase();
   });
 }
-
 function salvarSenha(){
   var atual=g('p-atual').value,nova=g('p-nova').value,conf=g('p-conf').value;
-  if(!atual||!nova||!conf){showErr('p-err','Preencha todos os campos.');return;}
-  if(nova.length<4){showErr('p-err','Senha muito curta.');return;}
-  if(nova!==conf){showErr('p-err','Senhas nao coincidem.');return;}
-  var btn=document.querySelector('#page-perfil .btn-primary');
-  btn.textContent='Salvando...'; btn.disabled=true;
-  hashPass(atual).then(function(hAtual){
-    return fdb.ref('accounts/'+S.user+'/p').once('value').then(function(snap){
-      if(snap.val()!==hAtual&&snap.val()!==bto(atual)) throw new Error('Senha atual incorreta.');
-      return hashPass(nova);
-    });
-  }).then(function(hNova){
-    return fdb.ref('accounts/'+S.user+'/p').set(hNova);
-  }).then(function(){
-    btn.textContent='Salvar nova senha'; btn.disabled=false;
-    g('p-atual').value=''; g('p-nova').value=''; g('p-conf').value='';
-    hideEl('p-err'); toast('Senha alterada!','ok');
-  }).catch(function(e){ btn.textContent='Salvar nova senha'; btn.disabled=false; showErr('p-err',e.message); });
+  if(!atual||!nova||!conf){showErr('p-err','Preencha todos.');return;}
+  if(nova.length<4){showErr('p-err','Senha curta.');return;}
+  if(nova!==conf){showErr('p-err','Não coincidem.');return;}
+  var btn=document.querySelector('#page-perfil .btn-primary'); btn.textContent='Salvando...'; btn.disabled=true;
+  hashPass(atual).then(function(hA){ return fdb.ref('accounts/'+S.user+'/p').once('value').then(function(snap){ if(snap.val()!==hA&&snap.val()!==bto(atual)) throw new Error('Senha atual incorreta.'); return hashPass(nova); }); })
+  .then(function(hN){ return fdb.ref('accounts/'+S.user+'/p').set(hN); })
+  .then(function(){ btn.textContent='Salvar nova senha'; btn.disabled=false; g('p-atual').value=''; g('p-nova').value=''; g('p-conf').value=''; hideEl('p-err'); toast('Senha alterada!','ok'); })
+  .catch(function(e){ btn.textContent='Salvar nova senha'; btn.disabled=false; showErr('p-err',e.message); });
+}
+function exportPDF(){
+  var d=ud(); if(!d){toast('Sem dados.','err');return;}
+  var ent=d.ent.filter(function(e){return inM(e.date);});
+  var sai=d.sai.filter(function(s){return inM(s.date);});
+  var tE=ent.reduce(function(a,e){return a+parseFloat(e.val||0);},0);
+  var tS=sai.reduce(function(a,s){return a+parseFloat(s.val||0);},0);
+  var sal=tE-tS; var mes=MONTHS[S.month]+' '+S.year;
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Fintrack</title>'+
+    '<style>body{font-family:Arial,sans-serif;padding:32px}h1{color:#00C896}.sub{color:#888;font-size:13px;margin-bottom:28px}'+
+    '.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}.card{border:1px solid #f0f0f0;border-radius:10px;padding:16px}'+
+    '.cl{font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px}.cv{font-size:20px;font-weight:800}.g{color:#00C896}.r{color:#FF5E5E}'+
+    'h2{font-size:14px;font-weight:700;margin:20px 0 10px;border-bottom:1px solid #f0f0f0;padding-bottom:6px}'+
+    'table{width:100%;border-collapse:collapse;font-size:12px}th{text-align:left;padding:8px;background:#f8f8f8;font-size:10px;color:#888}td{padding:8px;border-bottom:1px solid #f5f5f5}</style></head><body>'+
+    '<h1>Fintrack</h1><div class="sub">'+mes+' | '+new Date().toLocaleDateString('pt-BR')+'</div>'+
+    '<div class="cards"><div class="card"><div class="cl">Entradas</div><div class="cv g">'+fmt(tE)+'</div></div>'+
+    '<div class="card"><div class="cl">Saídas</div><div class="cv r">'+fmt(tS)+'</div></div>'+
+    '<div class="card"><div class="cl">Saldo</div><div class="cv '+(sal>=0?'g':'r')+'">'+fmt(sal)+'</div></div></div>';
+  if(ent.length) html+='<h2>Entradas</h2><table><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th></tr>'+ent.map(function(e){return '<tr><td>'+fd(e.date)+'</td><td>'+esc(e.desc)+'</td><td>'+esc(e.cat)+'</td><td style="color:#00C896;font-weight:700">'+fmt(e.val)+'</td></tr>';}).join('')+'</table>';
+  if(sai.length) html+='<h2>Saídas</h2><table><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th></tr>'+sai.map(function(s){return '<tr><td>'+fd(s.date)+'</td><td>'+esc(s.desc)+'</td><td>'+esc(s.cat)+'</td><td style="color:#FF5E5E;font-weight:700">'+fmt(s.val)+'</td></tr>';}).join('')+'</table>';
+  html+='<div style="margin-top:40px;font-size:10px;color:#aaa;text-align:center">Fintrack - dh815.github.io/fintrack</div></body></html>';
+  var w=window.open('','_blank'); w.document.write(html); w.document.close(); setTimeout(function(){w.print();},500);
 }
 
+// END_OF_EXPORTPDF
+var CLAUDE_KEY=localStorage.getItem('ft_api_key')||'';
+function abrirScanner(){
+  CLAUDE_KEY=localStorage.getItem('ft_api_key')||'';
+  g('scannerModal').style.display='flex'; g('scanner-upload-area').style.display='block'; g('scanner-preview').style.display='none'; g('scanner-loading').style.display='none'; g('scanner-result').style.display='none'; g('scanner-error').style.display='none'; g('sc-obs').style.display='none';
+  g('scanner-setup').style.display=CLAUDE_KEY?'none':'block';
+  g('scanner-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScanner()">Cancelar</button>'+(CLAUDE_KEY?'<button class="btn btn-ghost" onclick="document.getElementById(\'scanner-input\').click()">&#128247; Nova foto</button>':'');
+  var d=ud(); if(!d) return; var sel=g('sc-cat'); if(sel) sel.innerHTML=d.cats.saida.map(function(cat){return '<option value="'+esc(cat)+'">'+esc(cat)+'</option>';}).join('');
+}
+function salvarChaveApi(){ var key=g('api-key-input').value.trim(); if(!key||!key.startsWith('sk-ant-')){toast('Chave inválida.','err');return;} localStorage.setItem('ft_api_key',key); CLAUDE_KEY=key; g('scanner-setup').style.display='none'; toast('Chave salva!','ok'); }
+function fecharScanner(){ g('scannerModal').style.display='none'; var inp=g('scanner-input'); if(inp) inp.value=''; }
+function scannerDrop(e){ e.preventDefault(); var file=e.dataTransfer.files[0]; if(file&&file.type.startsWith('image/')) processarImagem(file); }
+function processarImagem(file){
+  if(!file) return; var reader=new FileReader();
+  reader.onload=function(ev){ g('scanner-img').src=ev.target.result; g('scanner-upload-area').style.display='none'; g('scanner-preview').style.display='block'; g('scanner-loading').style.display='block'; g('scanner-result').style.display='none'; g('scanner-error').style.display='none'; g('scanner-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScanner()">Cancelar</button>'; analisarComClaude(ev.target.result.split(',')[1],file.type||'image/jpeg'); };
+  reader.readAsDataURL(file);
+}
+function analisarComClaude(base64,mediaType){
+  var hoje=new Date().toISOString().slice(0,10);
+  fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':CLAUDE_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:300,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mediaType,data:base64}},{type:'text',text:'Analise este cupom. JSON apenas: {"descricao":"loja","valor":0.00,"data":"YYYY-MM-DD","categoria":"Alimentacao","itens":"resumo"}. data: '+hoje+' se nao encontrar.'}]}]})})
+  .then(function(r){return r.json();}).then(function(data){ g('scanner-loading').style.display='none'; if(data.error){g('scanner-error').textContent='Erro: '+data.error.message;g('scanner-error').style.display='block';return;} var res=JSON.parse(data.content[0].text.trim().replace(/```json|```/g,'').trim()); g('sc-desc').value=res.descricao||''; g('sc-valor').value=res.valor||''; g('sc-data').value=res.data||hoje; if(res.itens){g('sc-obs').textContent='Itens: '+res.itens;g('sc-obs').style.display='block';} var sel=g('sc-cat'); var cm={'Alimentacao':'Alimentação','Transporte':'Transporte','Moradia':'Moradia','Saude':'Saúde','Lazer':'Lazer','Educacao':'Educação','Vestuario':'Vestuário','Outros':'Outros'}[res.categoria]||'Outros'; for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===cm){sel.selectedIndex=i;break;}} g('scanner-result').style.display='block'; g('scanner-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScanner()">Cancelar</button><button class="btn btn-ghost" onclick="document.getElementById(\'scanner-input\').click()">&#128247; Nova foto</button><button class="btn btn-primary" onclick="salvarDoScanner()">Salvar saída</button>'; })
+  .catch(function(e){g('scanner-loading').style.display='none';g('scanner-error').textContent='Erro: '+e.message;g('scanner-error').style.display='block';});
+}
+function salvarDoScanner(){ var desc=g('sc-desc').value.trim(),valor=parseFloat(g('sc-valor').value),data=g('sc-data').value,cat=g('sc-cat').value; if(!desc||isNaN(valor)||!data){toast('Preencha todos.','err');return;} var d=ud(); if(!d) return; d.sai.push({id:uid(),desc:desc,val:valor,date:data,cat:cat,ori:'Scanner'}); sud(d,function(){fecharScanner();toast('Saída salva!','ok');if(S.page==='saidas')rSai();if(S.page==='dashboard')rDash();}); }
+function abrirScannerBoleto(){
+  CLAUDE_KEY=localStorage.getItem('ft_api_key')||''; g('scannerBoletoModal').style.display='flex'; g('sb-upload').style.display='block'; g('sb-preview').style.display='none'; g('sb-loading').style.display='none'; g('sb-result').style.display='none'; g('sb-error').style.display='none'; g('sb-obs').style.display='none';
+  g('sb-setup').style.display=CLAUDE_KEY?'none':'block'; g('sb-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button>'+(CLAUDE_KEY?'<button class="btn btn-ghost" onclick="document.getElementById(\'sb-input\').click()">&#128247; Nova foto</button>':'');
+  var d=ud(); if(!d) return; var sel=g('sb-cat'); if(sel) sel.innerHTML=d.cats.saida.map(function(cat){return '<option value="'+esc(cat)+'">'+esc(cat)+'</option>';}).join('');
+}
+function salvarChaveApiBoleto(){ var key=g('sb-api-key').value.trim(); if(!key||!key.startsWith('sk-ant-')){toast('Inválida.','err');return;} localStorage.setItem('ft_api_key',key); CLAUDE_KEY=key; g('sb-setup').style.display='none'; toast('Chave salva!','ok'); }
+function fecharScannerBoleto(){ g('scannerBoletoModal').style.display='none'; var inp=g('sb-input'); if(inp) inp.value=''; }
+function boletoScannerDrop(e){ e.preventDefault(); var file=e.dataTransfer.files[0]; if(file&&file.type.startsWith('image/')) processarBoleto(file); }
+function processarBoleto(file){
+  if(!file) return; var reader=new FileReader();
+  reader.onload=function(ev){ g('sb-img').src=ev.target.result; g('sb-upload').style.display='none'; g('sb-preview').style.display='block'; g('sb-loading').style.display='block'; g('sb-result').style.display='none'; g('sb-error').style.display='none'; g('sb-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button>'; analisarBoletoComClaude(ev.target.result.split(',')[1],file.type||'image/jpeg'); };
+  reader.readAsDataURL(file);
+}
+function analisarBoletoComClaude(base64,mediaType){
+  var hoje=new Date().toISOString().slice(0,10);
+  fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':CLAUDE_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:400,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mediaType,data:base64}},{type:'text',text:'Analise este documento. JSON apenas: {"nome":"empresa","valor_total":0.00,"num_parcelas":1,"valor_parcela":0.00,"primeiro_vencimento":"YYYY-MM-DD","categoria":"Outros","obs":"detalhes"}. vencimento: '+hoje+' se nao encontrar.'}]}]})})
+  .then(function(r){return r.json();}).then(function(data){ g('sb-loading').style.display='none'; if(data.error){g('sb-error').textContent='Erro: '+data.error.message;g('sb-error').style.display='block';return;} var res=JSON.parse(data.content[0].text.trim().replace(/```json|```/g,'').trim()); g('sb-nome').value=res.nome||''; g('sb-valor').value=res.valor_total||res.valor_parcela||''; g('sb-venc').value=res.primeiro_vencimento||hoje; g('sb-parc').value=res.num_parcelas||1; g('sb-vparc').value=res.valor_parcela||''; if(res.obs){g('sb-obs').textContent=res.obs;g('sb-obs').style.display='block';} g('sb-result').style.display='block'; g('sb-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button><button class="btn btn-ghost" onclick="document.getElementById(\'sb-input\').click()">&#128247; Nova foto</button><button class="btn btn-primary" onclick="salvarDoBoleto()">Salvar parcela</button>'; })
+  .catch(function(e){g('sb-loading').style.display='none';g('sb-error').textContent='Erro: '+e.message;g('sb-error').style.display='block';});
+}
+function salvarDoBoleto(){ var nome=g('sb-nome').value.trim(),valor=parseFloat(g('sb-valor').value),venc=g('sb-venc').value,nparc=parseInt(g('sb-parc').value)||1,vparc=parseFloat(g('sb-vparc').value)||0,cat=g('sb-cat').value; if(!nome||isNaN(valor)||!venc){toast('Preencha os campos.','err');return;} var d=ud(); if(!d) return; var vp=vparc>0?vparc:parseFloat((valor/nparc).toFixed(2)); var pars=[]; for(var i=0;i<nparc;i++){var dd=new Date(venc+'T12:00:00');dd.setMonth(dd.getMonth()+i);pars.push({seq:i+1,date:dd.toISOString().slice(0,10),val:vp,pg:false});} d.parc.push({id:uid(),name:nome,cat:cat,tot:valor,pars:pars,st:'ativo'}); sud(d,function(){fecharScannerBoleto();toast('Parcela cadastrada!','ok');if(S.page==='parcelas')rParc();if(S.page==='dashboard')rDash();}); }
+window.addEventListener('resize',function(){updMonth();});
 
 // INIT
 window.addEventListener('load',function(){
@@ -2682,9 +2100,10 @@ window.addEventListener('load',function(){
       var acc=snap.val();
       if(acc){
         S.accName=acc.n; S.isAdmin=(acc.role==='admin');
+        if(acc.firstAccess){ g('changePassScreen').style.display='flex'; updMonth(); return; }
         loadUD(function(data){
           if(data) showApp(acc.n);
-          else { g('loginScreen').style.display='flex'; updMonth(); }
+          else { localStorage.removeItem('ftS'); g('loginScreen').style.display='flex'; updMonth(); }
         });
       } else {
         localStorage.removeItem('ftS');
@@ -2698,8 +2117,6 @@ window.addEventListener('load',function(){
     updMonth();
   }
 });
-window.addEventListener('resize', function(){ updMonth(); });
-
 document.addEventListener('keydown',function(e){
   if(e.key==='Enter'){
     var ls=g('loginScreen'),rs=g('registerScreen');
@@ -2708,123 +2125,60 @@ document.addEventListener('keydown',function(e){
   }
   if(e.key==='Escape'){ closeModal(); closeCf(); }
 });
-}
 </script>
 
-<!-- SCANNER MODAL -->
+<!-- SCANNER CUPOM -->
 <div class="modal-wrap" id="scannerModal" style="display:none;align-items:center;justify-content:center">
   <div class="modal" style="max-width:560px">
-    <div class="modal-head">
-      <span class="modal-title">&#128247; Escanear cupom / nota fiscal</span>
-      <button class="modal-x" onclick="fecharScanner()"><span class="mi" style="font-size:16px">close</span></button>
-    </div>
+    <div class="modal-head"><span class="modal-title">&#128247; Escanear cupom</span><button class="modal-x" onclick="fecharScanner()"><span class="mi" style="font-size:16px">close</span></button></div>
     <div class="modal-body">
-      <!-- Setup API Key -->
-      <div id="scanner-setup" style="display:none;background:rgba(77,156,255,.08);border:1px solid rgba(77,156,255,.2);border-radius:12px;padding:20px;margin-bottom:16px">
-        <div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:8px">&#128272; Configure sua chave API do Claude</div>
-        <div style="font-size:12px;color:var(--t2);margin-bottom:12px;line-height:1.6">A chave fica salva apenas no seu navegador, nunca é enviada a nenhum servidor. Obtenha em <b>console.anthropic.com</b> → API Keys</div>
-        <div style="display:flex;gap:8px">
-          <input id="api-key-input" type="password" placeholder="sk-ant-api03-..." style="flex:1;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
-          <button class="btn btn-primary" onclick="salvarChaveApi()">Salvar</button>
-        </div>
-      </div>
-      <div id="scanner-upload-area" style="border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:border-color .2s;margin-bottom:16px" onclick="if(!CLAUDE_KEY){g('scanner-setup').style.display='block';return;}document.getElementById('scanner-input').click()" ondragover="event.preventDefault();this.style.borderColor='var(--teal)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="scannerDrop(event)">
+      <div id="scanner-setup" style="display:none;background:rgba(77,156,255,.08);border:1px solid rgba(77,156,255,.2);border-radius:12px;padding:20px;margin-bottom:16px"><div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:8px">&#128272; Configure sua chave API</div><div style="font-size:12px;color:var(--t2);margin-bottom:12px">Obtenha em <b>console.anthropic.com</b></div><div style="display:flex;gap:8px"><input id="api-key-input" type="password" placeholder="sk-ant-api03-..." style="flex:1;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><button class="btn btn-primary" onclick="salvarChaveApi()">Salvar</button></div></div>
+      <div id="scanner-upload-area" style="border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;margin-bottom:16px" onclick="if(!CLAUDE_KEY){g('scanner-setup').style.display='block';return;}document.getElementById('scanner-input').click()" ondragover="event.preventDefault()" ondrop="scannerDrop(event)">
         <span class="mi" style="font-size:48px;color:var(--t3);display:block;margin-bottom:12px">photo_camera</span>
-        <div style="font-size:14px;font-weight:600;color:var(--t1);margin-bottom:6px">Toque para tirar foto ou selecionar imagem</div>
-        <div style="font-size:12px;color:var(--t3)">Cupom fiscal, nota, recibo — JPG ou PNG</div>
+        <div style="font-size:14px;font-weight:600;color:var(--t1);margin-bottom:6px">Toque para tirar foto</div>
+        <div style="font-size:12px;color:var(--t3)">Cupom fiscal, nota, recibo</div>
         <input type="file" id="scanner-input" accept="image/*" capture="environment" style="display:none" onchange="processarImagem(this.files[0])">
       </div>
-      <div id="scanner-preview" style="display:none;margin-bottom:16px">
-        <img id="scanner-img" style="width:100%;border-radius:10px;max-height:260px;object-fit:contain;background:var(--s2)">
-      </div>
-      <div id="scanner-loading" style="display:none;text-align:center;padding:24px">
-        <div style="font-size:13px;color:var(--teal);margin-bottom:8px">&#129302; Analisando com IA...</div>
-        <div style="height:4px;background:var(--s2);border-radius:2px;overflow:hidden"><div style="height:4px;background:var(--teal);border-radius:2px;animation:loadpulse 1.2s ease-in-out infinite;width:60%"></div></div>
-      </div>
+      <div id="scanner-preview" style="display:none;margin-bottom:16px"><img id="scanner-img" style="width:100%;border-radius:10px;max-height:260px;object-fit:contain;background:var(--s2)"></div>
+      <div id="scanner-loading" style="display:none;text-align:center;padding:20px"><div style="font-size:13px;color:var(--teal);margin-bottom:8px">&#129302; Analisando...</div><div style="height:4px;background:var(--s2);border-radius:2px;overflow:hidden"><div style="height:4px;background:var(--teal);border-radius:2px;animation:loadpulse 1.2s ease-in-out infinite;width:60%"></div></div></div>
       <div id="scanner-result" style="display:none">
-        <div style="font-size:12px;font-weight:700;color:var(--teal);margin-bottom:12px">&#10003; Dados identificados — confirme e salve</div>
+        <div style="font-size:12px;font-weight:700;color:var(--teal);margin-bottom:12px">&#10003; Dados identificados</div>
         <div class="field"><label>Descri&#231;&#227;o</label><input id="sc-desc" placeholder="Nome do estabelecimento" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="field"><label>Valor (R$)</label><input id="sc-valor" type="number" step="0.01" placeholder="0,00" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>
-          <div class="field"><label>Data</label><input id="sc-data" type="date" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>
-        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="field"><label>Valor (R$)</label><input id="sc-valor" type="number" step="0.01" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div><div class="field"><label>Data</label><input id="sc-data" type="date" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div></div>
         <div class="field"><label>Categoria</label><select id="sc-cat" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></select></div>
-        <div id="sc-obs" style="display:none;font-size:11px;color:var(--t3);padding:10px 14px;background:var(--s2);border-radius:8px;line-height:1.6;margin-top:-8px;margin-bottom:4px"></div>
+        <div id="sc-obs" style="display:none;font-size:11px;color:var(--t3);padding:10px 14px;background:var(--s2);border-radius:8px;line-height:1.6;margin-bottom:4px"></div>
       </div>
       <div id="scanner-error" style="display:none;background:rgba(255,94,94,.1);border:1px solid rgba(255,94,94,.2);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--red)"></div>
     </div>
-    <div class="modal-foot" id="scanner-foot">
-      <button class="btn btn-ghost" onclick="fecharScanner()">Cancelar</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('scanner-input').click()">&#128247; Nova foto</button>
-    </div>
+    <div class="modal-foot" id="scanner-foot"><button class="btn btn-ghost" onclick="fecharScanner()">Cancelar</button></div>
   </div>
 </div>
 
-<!-- SCANNER BOLETO MODAL -->
+<!-- SCANNER BOLETO -->
 <div class="modal-wrap" id="scannerBoletoModal" style="display:none;align-items:center;justify-content:center">
   <div class="modal" style="max-width:560px">
-    <div class="modal-head">
-      <span class="modal-title">&#128196; Escanear boleto / parcelamento</span>
-      <button class="modal-x" onclick="fecharScannerBoleto()"><span class="mi" style="font-size:16px">close</span></button>
-    </div>
+    <div class="modal-head"><span class="modal-title">&#128196; Escanear boleto / parcelamento</span><button class="modal-x" onclick="fecharScannerBoleto()"><span class="mi" style="font-size:16px">close</span></button></div>
     <div class="modal-body">
-      <div id="sb-setup" style="display:none;background:rgba(77,156,255,.08);border:1px solid rgba(77,156,255,.2);border-radius:12px;padding:20px;margin-bottom:16px">
-        <div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:8px">&#128272; Configure sua chave API</div>
-        <div style="font-size:12px;color:var(--t2);margin-bottom:12px;line-height:1.6">Obtenha em <b>console.anthropic.com</b> &#8594; API Keys</div>
-        <div style="display:flex;gap:8px">
-          <input id="sb-api-key" type="password" placeholder="sk-ant-api03-..." style="flex:1;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
-          <button class="btn btn-primary" onclick="salvarChaveApiBoleto()">Salvar</button>
-        </div>
-      </div>
-      <div id="sb-upload" style="border:2px dashed var(--border);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:border-color .2s;margin-bottom:16px"
-        onclick="if(!CLAUDE_KEY){g('sb-setup').style.display='block';return;}document.getElementById('sb-input').click()"
-        ondragover="event.preventDefault();this.style.borderColor='var(--teal)'"
-        ondragleave="this.style.borderColor='var(--border)'"
-        ondrop="boletoScannerDrop(event)">
+      <div id="sb-setup" style="display:none;background:rgba(77,156,255,.08);border:1px solid rgba(77,156,255,.2);border-radius:12px;padding:20px;margin-bottom:16px"><div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:8px">&#128272; Configure sua chave API</div><div style="font-size:12px;color:var(--t2);margin-bottom:12px">Obtenha em <b>console.anthropic.com</b></div><div style="display:flex;gap:8px"><input id="sb-api-key" type="password" placeholder="sk-ant-api03-..." style="flex:1;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><button class="btn btn-primary" onclick="salvarChaveApiBoleto()">Salvar</button></div></div>
+      <div id="sb-upload" style="border:2px dashed var(--border);border-radius:12px;padding:28px;text-align:center;cursor:pointer;margin-bottom:16px" onclick="if(!CLAUDE_KEY){g('sb-setup').style.display='block';return;}document.getElementById('sb-input').click()" ondragover="event.preventDefault()" ondrop="boletoScannerDrop(event)">
         <span class="mi" style="font-size:44px;color:var(--t3);display:block;margin-bottom:10px">document_scanner</span>
-        <div style="font-size:14px;font-weight:600;color:var(--t1);margin-bottom:4px">Foto do boleto ou documento de parcelamento</div>
-        <div style="font-size:12px;color:var(--t3)">A IA vai identificar nome, valor, parcelas e vencimento</div>
+        <div style="font-size:14px;font-weight:600;color:var(--t1);margin-bottom:4px">Foto do boleto ou parcelamento</div>
+        <div style="font-size:12px;color:var(--t3)">A IA identifica nome, valor, parcelas e vencimento</div>
         <input type="file" id="sb-input" accept="image/*" capture="environment" style="display:none" onchange="processarBoleto(this.files[0])">
       </div>
-      <div id="sb-preview" style="display:none;margin-bottom:16px">
-        <img id="sb-img" style="width:100%;border-radius:10px;max-height:220px;object-fit:contain;background:var(--s2)">
-      </div>
-      <div id="sb-loading" style="display:none;text-align:center;padding:20px">
-        <div style="font-size:13px;color:var(--teal);margin-bottom:8px">&#129302; Lendo documento com IA...</div>
-        <div style="height:4px;background:var(--s2);border-radius:2px;overflow:hidden"><div style="height:4px;background:var(--teal);border-radius:2px;animation:loadpulse 1.2s ease-in-out infinite;width:60%"></div></div>
-      </div>
+      <div id="sb-preview" style="display:none;margin-bottom:16px"><img id="sb-img" style="width:100%;border-radius:10px;max-height:220px;object-fit:contain;background:var(--s2)"></div>
+      <div id="sb-loading" style="display:none;text-align:center;padding:20px"><div style="font-size:13px;color:var(--teal);margin-bottom:8px">&#129302; Lendo documento...</div><div style="height:4px;background:var(--s2);border-radius:2px;overflow:hidden"><div style="height:4px;background:var(--teal);border-radius:2px;animation:loadpulse 1.2s ease-in-out infinite;width:60%"></div></div></div>
       <div id="sb-result" style="display:none">
-        <div style="font-size:12px;font-weight:700;color:var(--teal);margin-bottom:14px">&#10003; Dados identificados — confirme e salve</div>
-        <div class="field"><label>Nome da conta / loja *</label>
-          <input id="sb-nome" placeholder="Ex: Magazine Luiza" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none">
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="field"><label>Valor total (R$) *</label>
-            <input id="sb-valor" type="number" step="0.01" placeholder="0,00" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none">
-          </div>
-          <div class="field"><label>Valor por parcela (R$)</label>
-            <input id="sb-vparc" type="number" step="0.01" placeholder="Automático" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none">
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="field"><label>N&#250;mero de parcelas *</label>
-            <input id="sb-parc" type="number" min="1" value="1" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none">
-          </div>
-          <div class="field"><label>1&#186; vencimento *</label>
-            <input id="sb-venc" type="date" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none">
-          </div>
-        </div>
-        <div class="field"><label>Categoria</label>
-          <select id="sb-cat" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></select>
-        </div>
-        <div id="sb-obs" style="display:none;font-size:11px;color:var(--t3);padding:10px 14px;background:var(--s2);border-radius:8px;line-height:1.6;margin-top:-8px;margin-bottom:4px"></div>
+        <div style="font-size:12px;font-weight:700;color:var(--teal);margin-bottom:14px">&#10003; Dados identificados</div>
+        <div class="field"><label>Nome da conta *</label><input id="sb-nome" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="field"><label>Valor total *</label><input id="sb-valor" type="number" step="0.01" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div><div class="field"><label>Valor/parcela</label><input id="sb-vparc" type="number" step="0.01" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="field"><label>N&#250;m. parcelas *</label><input id="sb-parc" type="number" min="1" value="1" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div><div class="field"><label>1&#186; vencimento *</label><input id="sb-venc" type="date" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div></div>
+        <div class="field"><label>Categoria</label><select id="sb-cat" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></select></div>
+        <div id="sb-obs" style="display:none;font-size:11px;color:var(--t3);padding:10px 14px;background:var(--s2);border-radius:8px;line-height:1.6;margin-bottom:4px"></div>
       </div>
       <div id="sb-error" style="display:none;background:rgba(255,94,94,.1);border:1px solid rgba(255,94,94,.2);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--red)"></div>
     </div>
-    <div class="modal-foot" id="sb-foot">
-      <button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('sb-input').click()">&#128247; Nova foto</button>
-    </div>
+    <div class="modal-foot" id="sb-foot"><button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button></div>
   </div>
 </div>
 
