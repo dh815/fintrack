@@ -1132,6 +1132,9 @@ function doLogin(){
     if(acc.p===bto(p)) fdb.ref('accounts/'+u+'/p').set(hashed).catch(function(){});
     S.user=u; S.accName=acc.n; S.isAdmin=(acc.role==='admin');
     localStorage.setItem('ftS',u);
+    // Salva uid para vincular conta ao Firebase Auth
+    var authUser=fauth.currentUser;
+    if(authUser) fdb.ref('accounts/'+u+'/uid').set(authUser.uid).catch(function(){});
     if(acc.firstAccess){ g('loginScreen').style.display='none'; g('changePassScreen').style.display='flex'; return; }
     loadUD(function(data){ if(data) showApp(acc.n); });
   }).catch(function(e){ btn.textContent='Entrar'; btn.disabled=false; showErr('loginError','Erro: '+e.message); });
@@ -2130,9 +2133,21 @@ function doChangePass(){
   if(!np||np.length<4){showErr('changePassError','Mínimo 4 caracteres.');return;}
   if(np!==cp){showErr('changePassError','Senhas não coincidem.');return;}
   var btn=document.querySelector('#changePassScreen .auth-btn'); btn.textContent='Salvando...'; btn.disabled=true;
-  hashPass(np).then(function(h){ return fdb.ref('accounts/'+S.user).update({p:h,firstAccess:false}); })
-  .then(function(){ btn.textContent='Salvar senha e entrar'; btn.disabled=false; g('changePassScreen').style.display='none'; g('cpNewPass').value=''; g('cpConfPass').value=''; loadUD(function(data){ if(data) showApp(S.accName||S.user); }); })
-  .catch(function(e){ btn.textContent='Salvar senha e entrar'; btn.disabled=false; showErr('changePassError','Erro: '+e.message); });
+  var hNova;
+  ensureAuth().then(function(user){
+    // Salva uid primeiro para desbloquear escrita
+    if(user) return fdb.ref('accounts/'+S.user+'/uid').set(user.uid);
+  }).then(function(){
+    return hashPass(np);
+  }).then(function(h){
+    hNova=h;
+    return fdb.ref('accounts/'+S.user).update({p:h,firstAccess:false});
+  }).then(function(){
+    btn.textContent='Salvar senha e entrar'; btn.disabled=false;
+    g('changePassScreen').style.display='none';
+    g('cpNewPass').value=''; g('cpConfPass').value='';
+    loadUD(function(data){ if(data) showApp(S.accName||S.user); });
+  }).catch(function(e){ btn.textContent='Salvar senha e entrar'; btn.disabled=false; showErr('changePassError','Erro: '+e.message); });
 }
 function openCreateAccess(){
   var title=g('mTitle'),body=g('mBody'),foot=g('mFoot'),wrap=g('mainModal');
