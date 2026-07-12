@@ -2510,6 +2510,111 @@ function salvarDoBoleto(){
 }
 
 
+
+// EXPORTAR PDF
+function exportPDF(){
+  var d=ud(); if(!d){toast('Sem dados.','err');return;}
+  var ent=d.ent.filter(function(e){return inM(e.date);});
+  var sai=d.sai.filter(function(s){return inM(s.date);});
+  var tE=ent.reduce(function(a,e){return a+parseFloat(e.val||0);},0);
+  var tS=sai.reduce(function(a,s){return a+parseFloat(s.val||0);},0);
+  var sal=tE-tS; var mes=MONTHS[S.month]+' '+S.year;
+  var catT={}; sai.forEach(function(s){catT[s.cat]=(catT[s.cat]||0)+parseFloat(s.val||0);});
+  var PC=['#00C896','#4D9CFF','#FF5E5E','#FFB547','#A78BFA','#F06292'];
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Fintrack - '+mes+'</title>'+
+    '<style>body{font-family:Arial,sans-serif;color:#1a1a2e;padding:32px}h1{color:#00C896;font-size:22px}.sub{color:#888;font-size:13px;margin-bottom:28px}'+
+    '.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}.card{border:1.5px solid #f0f0f0;border-radius:10px;padding:16px}'+
+    '.cl{font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px}.cv{font-size:20px;font-weight:800}.g{color:#00C896}.r{color:#FF5E5E}'+
+    'h2{font-size:14px;font-weight:700;margin:20px 0 10px;border-bottom:1px solid #f0f0f0;padding-bottom:6px}'+
+    'table{width:100%;border-collapse:collapse;font-size:12px}th{text-align:left;padding:8px 10px;background:#f8f8f8;font-size:10px;text-transform:uppercase;color:#888}'+
+    'td{padding:8px 10px;border-bottom:1px solid #f5f5f5}.cr{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px}'+
+    '.dot{width:10px;height:10px;border-radius:50%}.bar{flex:1;height:6px;background:#f0f0f0;border-radius:3px}.bf{height:6px;border-radius:3px}'+
+    '.ft{margin-top:40px;font-size:10px;color:#aaa;text-align:center;border-top:1px solid #f0f0f0;padding-top:12px}</style></head><body>'+
+    '<h1>Fintrack</h1><div class="sub">'+mes+' | '+new Date().toLocaleDateString('pt-BR')+'</div>'+
+    '<div class="cards"><div class="card"><div class="cl">Entradas</div><div class="cv g">'+fmt(tE)+'</div></div>'+
+    '<div class="card"><div class="cl">Saidas</div><div class="cv r">'+fmt(tS)+'</div></div>'+
+    '<div class="card"><div class="cl">Saldo</div><div class="cv '+(sal>=0?'g':'r')+'">'+fmt(sal)+'</div></div></div>';
+  if(ent.length) html+='<h2>Entradas</h2><table><tr><th>Data</th><th>Descricao</th><th>Categoria</th><th>Valor</th></tr>'+ent.map(function(e){return '<tr><td>'+fd(e.date)+'</td><td>'+esc(e.desc)+'</td><td>'+esc(e.cat)+'</td><td style="color:#00C896;font-weight:700">'+fmt(e.val)+'</td></tr>';}).join('')+'</table>';
+  if(sai.length) html+='<h2>Saidas</h2><table><tr><th>Data</th><th>Descricao</th><th>Categoria</th><th>Valor</th></tr>'+sai.map(function(s){return '<tr><td>'+fd(s.date)+'</td><td>'+esc(s.desc)+'</td><td>'+esc(s.cat)+'</td><td style="color:#FF5E5E;font-weight:700">'+fmt(s.val)+'</td></tr>';}).join('')+'</table>';
+  var ci=Object.entries(catT).sort(function(a,b){return b[1]-a[1];});
+  if(ci.length){ html+='<h2>Gastos por Categoria</h2>'; ci.forEach(function(item,i){ var pct=tS>0?(item[1]/tS*100).toFixed(1):0; html+='<div class="cr"><div class="dot" style="background:'+PC[i%PC.length]+'"></div><span style="width:120px">'+esc(item[0])+'</span><div class="bar"><div class="bf" style="width:'+pct+'%;background:'+PC[i%PC.length]+'"></div></div><span style="width:40px;text-align:right">'+pct+'%</span><span style="width:90px;text-align:right;font-weight:700">'+fmt(item[1])+'</span></div>'; }); }
+  html+='<div class="ft">Fintrack - dh815.github.io/fintrack</div></body></html>';
+  var w=window.open('','_blank'); w.document.write(html); w.document.close();
+  setTimeout(function(){w.print();},500);
+}
+
+// CRIAR ACESSO
+function openCreateAccess(){
+  var title=g('mTitle'),body=g('mBody'),foot=g('mFoot'),wrap=g('mainModal');
+  if(!title||!body||!foot||!wrap){alert('Erro: recarregue a pagina.');return;}
+  title.textContent='Criar acesso para cliente';
+  body.innerHTML='<div style="background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);border-radius:10px;padding:12px;font-size:12px;color:#00C896;margin-bottom:16px">O cliente recebera usuario e senha temporaria. No primeiro acesso devera criar sua senha pessoal.</div>'+
+    '<div class="field"><label>Nome completo *</label><input id="ca-name" placeholder="Ex: Joao Silva" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>'+
+    '<div class="field"><label>Usuario *</label><input id="ca-user" placeholder="Ex: joaosilva" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>'+
+    '<div class="field"><label>Senha temporaria *</label><input id="ca-pass" type="text" value="1234" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>';
+  foot.innerHTML='<button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveCreateAccess()">Criar acesso</button>';
+  wrap.classList.add('open');
+  setTimeout(function(){ var el=g('ca-name'); if(el) el.focus(); },150);
+}
+
+function saveCreateAccess(){
+  var name=(g('ca-name')?g('ca-name').value.trim():'');
+  var user=(g('ca-user')?g('ca-user').value.trim().replace(/[^a-zA-Z0-9_]/g,''):'');
+  var pass=(g('ca-pass')?g('ca-pass').value:'');
+  var savedPass=pass;
+  if(!name||!user||!pass){toast('Preencha todos os campos.','err');return;}
+  var btn=g('mFoot')?g('mFoot').querySelector('.btn-primary'):null;
+  if(btn){btn.textContent='Criando...';btn.disabled=true;}
+  fdb.ref('accounts/'+user).once('value').then(function(snap){
+    if(snap.val()){
+      if(btn){btn.textContent='Criar acesso';btn.disabled=false;}
+      toast('Usuario "'+user+'" ja existe!','err');
+      throw new Error('CANCEL');
+    }
+    return hashPass(pass);
+  }).then(function(h){
+    return fdb.ref('accounts/'+user).set({n:name,p:h,firstAccess:true,role:'user',createdBy:S.user});
+  }).then(function(){
+    if(btn){btn.textContent='Criar acesso';btn.disabled=false;}
+    closeModal();
+    toast('Acesso criado! Usuario: '+user+' Senha: '+savedPass,'ok',8000);
+  }).catch(function(e){
+    if(btn){btn.textContent='Criar acesso';btn.disabled=false;}
+    if(e.message!=='CANCEL') toast('Erro: '+e.message,'err');
+  });
+}
+
+// PERFIL
+function rPerfil(){
+  fdb.ref('accounts/'+S.user).once('value').then(function(snap){
+    var acc=snap.val()||{};
+    if(g('perfil-nome')) g('perfil-nome').textContent=acc.n||S.user;
+    if(g('perfil-user')) g('perfil-user').textContent=S.user;
+    if(g('perfil-avatar')) g('perfil-avatar').textContent=(acc.n||S.user).charAt(0).toUpperCase();
+  });
+}
+
+function salvarSenha(){
+  var atual=g('p-atual').value,nova=g('p-nova').value,conf=g('p-conf').value;
+  if(!atual||!nova||!conf){showErr('p-err','Preencha todos os campos.');return;}
+  if(nova.length<4){showErr('p-err','Senha muito curta.');return;}
+  if(nova!==conf){showErr('p-err','Senhas nao coincidem.');return;}
+  var btn=document.querySelector('#page-perfil .btn-primary');
+  btn.textContent='Salvando...'; btn.disabled=true;
+  hashPass(atual).then(function(hAtual){
+    return fdb.ref('accounts/'+S.user+'/p').once('value').then(function(snap){
+      if(snap.val()!==hAtual&&snap.val()!==bto(atual)) throw new Error('Senha atual incorreta.');
+      return hashPass(nova);
+    });
+  }).then(function(hNova){
+    return fdb.ref('accounts/'+S.user+'/p').set(hNova);
+  }).then(function(){
+    btn.textContent='Salvar nova senha'; btn.disabled=false;
+    g('p-atual').value=''; g('p-nova').value=''; g('p-conf').value='';
+    hideEl('p-err'); toast('Senha alterada!','ok');
+  }).catch(function(e){ btn.textContent='Salvar nova senha'; btn.disabled=false; showErr('p-err',e.message); });
+}
+
 // SIDEBAR
 function toggleSb(){ g('sidebar').classList.toggle('open'); g('sbOverlay').classList.toggle('open'); }
 function closeSb(){ g('sidebar').classList.remove('open'); g('sbOverlay').classList.remove('open'); }
