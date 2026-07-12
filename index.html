@@ -862,6 +862,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
         <button class="sb-item" data-p="planejamento" onclick="nav('planejamento')"><span class="sb-icon"><span class="mi">target</span></span>Planejamento</button>
         <button class="sb-item" data-p="investimentos" onclick="nav('investimentos')"><span class="sb-icon"><span class="mi">candlestick_chart</span></span>Investimentos</button>
         <div class="sb-section">Config</div>
+        <button class="sb-item" data-p="perfil" onclick="nav('perfil')"><span class="sb-icon"><span class="mi">manage_accounts</span></span>Minha conta</button>
         <button class="sb-item" data-p="categorias" onclick="nav('categorias')"><span class="sb-icon"><span class="mi">sell</span></span>Categorias</button>
       </nav>
       <div class="sb-foot">
@@ -1080,6 +1081,30 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
               <button class="btn btn-primary" onclick="openModal('investimento',null)">+ Novo investimento</button>
             </div>
             <div style="padding:12px 20px" id="i-list"></div>
+          </div>
+        </div>
+
+        <!-- PERFIL -->
+        <div class="page" id="page-perfil">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:700px">
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">Dados da conta</span></div>
+              <div style="padding:20px">
+                <div id="perfil-avatar" style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#07090F;margin-bottom:16px">?</div>
+                <div id="perfil-nome" style="font-size:18px;font-weight:700;margin-bottom:4px">-</div>
+                <div style="font-size:13px;color:var(--t2)">Usu&#225;rio: <b id="perfil-user">-</b></div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">Trocar senha</span></div>
+              <div style="padding:20px">
+                <div class="field"><label>Senha atual</label><input type="password" id="p-atual" placeholder="••••••••"></div>
+                <div class="field"><label>Nova senha</label><input type="password" id="p-nova" placeholder="M&#237;nimo 4 caracteres"></div>
+                <div class="field"><label>Confirmar nova senha</label><input type="password" id="p-conf" placeholder="Repita a senha"></div>
+                <div class="auth-error" id="p-err" style="margin-bottom:12px"></div>
+                <button class="btn btn-primary" style="width:100%" onclick="salvarSenha()">Salvar nova senha</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1371,7 +1396,7 @@ function saveAndRender(data){
 }
 
 // NAV
-var PTITLES={dashboard:'Dashboard',entradas:'Entradas',saidas:'Saídas',saldo:'Saldo do mês',parcelas:'Parcelas',planejamento:'Planejamento',investimentos:'Investimentos',categorias:'Categorias'};
+var PTITLES={dashboard:'Dashboard',entradas:'Entradas',saidas:'Saídas',saldo:'Saldo do mês',parcelas:'Parcelas',planejamento:'Planejamento',investimentos:'Investimentos',categorias:'Categorias',perfil:'Minha Conta'};
 function nav(p){
   S.page=p;
   document.querySelectorAll('.sb-item').forEach(function(el){ el.classList.toggle('active',el.getAttribute('data-p')===p); });
@@ -1392,6 +1417,7 @@ function render(p){
   else if(p==='planejamento') rPlan();
   else if(p==='investimentos') rInv();
   else if(p==='categorias') rCats();
+  else if(p==='perfil') rPerfil();
 }
 
 // MONTH
