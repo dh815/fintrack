@@ -1829,9 +1829,6 @@ function rEnt(){
       '<button class="btn btn-del btn-sm" onclick="delIt(\'ent\',\''+escq(e.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
   }).join(''):emptr(5,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">trending_up</span>Nenhuma entrada neste mês');
-}
-
-// SAIDAS
   // Mobile cards
   var mc=g('mc-ent');
   if(mc){
@@ -1851,7 +1848,7 @@ function rEnt(){
       '</div>';
     }).join(''):('<div style="text-align:center;padding:48px 20px;color:var(--t3)">Nenhum registro</div>');
   }
-
+}
 
 function rSai(){
   var d=ud(); if(!d||!d.sai) return;
@@ -1890,9 +1887,6 @@ function rSai(){
       '<button class="btn btn-del btn-sm" onclick="delIt(\'sai\',\''+escq(s.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
   }).join(''):emptr(6,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">trending_down</span>Nenhuma saída neste mês');
-}
-
-// SALDO
   // Mobile cards
   var mcs=g('mc-sai');
   if(mcs){
@@ -2555,6 +2549,7 @@ document.addEventListener('keydown',function(e){
   }
   if(e.key==='Escape'){ closeModal(); closeCf(); }
 });
+}
 </script>
 
 <!-- SCANNER MODAL -->
