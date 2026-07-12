@@ -686,6 +686,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 <div id="toast"></div>
@@ -1038,6 +1039,7 @@ var firebaseConfig = {
   };
 firebase.initializeApp(firebaseConfig);
 var fdb = firebase.database();
+var fauth = firebase.auth();
 console.log('Firebase inicializado:', firebase.apps.length > 0);
 
 var S = { user:null, page:'dashboard', month:new Date().getMonth(), year:new Date().getFullYear(), eid:null, etype:null };
@@ -1057,7 +1059,7 @@ function ud(){ return _cache; }
 function loadUD(cb){
   if(!S.user){ cb(null); return; }
   showLoading(true);
-  getUserRef().once('value').then(function(snap){
+  ensureAuth().then(function(){ return getUserRef().once('value'); }).then(function(snap){
     var data = snap.val();
     if(data){
       _cache = data;
@@ -1121,7 +1123,7 @@ function doLogin(){
   var btn=document.querySelector('#loginScreen .auth-btn');
   btn.textContent='Entrando...'; btn.disabled=true;
   var hashed;
-  hashPass(p).then(function(h){ hashed=h; return fdb.ref('accounts/'+u).once('value'); })
+  ensureAuth().then(function(){ return hashPass(p); }).then(function(h){ hashed=h; return fdb.ref('accounts/'+u).once('value'); })
   .then(function(snap){
     btn.textContent='Entrar'; btn.disabled=false;
     var acc=snap.val();
@@ -1177,6 +1179,13 @@ function showApp(n){
   updMonth(); nav('dashboard');
 }
 function bto(s){ try{ return btoa(unescape(encodeURIComponent(s))); }catch(e){ return btoa(s); } }
+
+function ensureAuth(){
+  return new Promise(function(resolve){
+    if(fauth.currentUser){ resolve(fauth.currentUser); return; }
+    fauth.signInAnonymously().then(function(r){ resolve(r.user); }).catch(function(){ resolve(null); });
+  });
+}
 async function hashPass(s){
   var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
   return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
@@ -2239,7 +2248,7 @@ window.addEventListener('load',function(){
   var s=localStorage.getItem('ftS');
   if(s){
     S.user=s;
-    fdb.ref('accounts/'+s).once('value').then(function(snap){
+    ensureAuth().then(function(){ return fdb.ref('accounts/'+s).once('value'); }).then(function(snap){
       var acc=snap.val();
       if(acc){
         S.accName=acc.n; S.isAdmin=(acc.role==='admin');
