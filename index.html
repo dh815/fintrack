@@ -1061,9 +1061,24 @@ function ud(){ return _cache; }
 function loadUD(cb){
   if(!S.user){ cb(null); return; }
   showLoading(true);
-  ensureAuth().then(function(){ return getUserRef().once('value'); }).then(function(snap){
+  ensureAuth().then(function(authUser){
+    // Sempre garante que uid está vinculado antes de ler
+    if(authUser){
+      return fdb.ref('accounts/'+S.user+'/uid').set(authUser.uid).then(function(){
+        return getUserRef().once('value');
+      });
+    }
+    return getUserRef().once('value');
+  }).then(function(snap){
     var data = snap.val();
     if(data){
+      // Garante que todos os arrays existem
+      if(!data.ent) data.ent=[];
+      if(!data.sai) data.sai=[];
+      if(!data.parc) data.parc=[];
+      if(!data.plans) data.plans=[];
+      if(!data.inv) data.inv=[];
+      if(!data.cats) data.cats={entrada:['Salário','Freelance','Outros'],saida:['Alimentação','Transporte','Moradia','Saúde','Lazer','Educação','Vestuário','Assinaturas','Outros'],investimento:['Renda Fixa','Renda Variável','Outros']};
       _cache = data;
     } else {
       _cache = {ent:[],sai:[],parc:[],plans:[],inv:[],cats:{
