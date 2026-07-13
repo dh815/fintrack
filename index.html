@@ -791,7 +791,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
           <button class="sb-logout" style="color:var(--blue);margin-bottom:4px" onclick="exportarDados()"><span class="mi" style="font-size:16px">download</span>Exportar backup</button>
           <button class="sb-logout" style="color:var(--yellow);margin-bottom:4px" onclick="importarDados()"><span class="mi" style="font-size:16px">upload</span>Importar backup</button>
           <button class="sb-logout" id="btnCriarAcesso" style="color:var(--teal);margin-bottom:4px" onclick="openCreateAccess()"><span class="mi" style="font-size:16px">person_add</span>Criar acesso</button>
-          <button class="sb-logout" style="color:var(--t3);margin-bottom:4px;font-size:12px" onclick="localStorage.removeItem('ft_api_key');toast('Chave removida.','ok')"><span class="mi" style="font-size:14px">key</span>Reset chave scanner</button>
+          <button class="sb-logout" style="color:var(--teal);margin-bottom:4px;font-size:12px" onclick="abrirConfigChave()"><span class="mi" style="font-size:14px">key</span>Configurar chave API</button>
         </div>
         <button class="sb-logout" onclick="doLogout()"><span class="mi" style="font-size:16px">logout</span>Sair da conta</button>
       </div>
@@ -2236,12 +2236,50 @@ function exportPDF(){
 // END_OF_EXPORTPDF
 var CLAUDE_KEY=localStorage.getItem('ft_api_key')||'';
 function abrirScanner(){
-  CLAUDE_KEY=localStorage.getItem('ft_api_key')||'';
   g('scannerModal').style.display='flex'; g('scanner-upload-area').style.display='block'; g('scanner-preview').style.display='none'; g('scanner-loading').style.display='none'; g('scanner-result').style.display='none'; g('scanner-error').style.display='none'; g('sc-obs').style.display='none';
-  g('scanner-setup').style.display=CLAUDE_KEY?'none':'block';
-  g('scanner-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScanner()">Cancelar</button>'+(CLAUDE_KEY?'<button class="btn btn-ghost" onclick="document.getElementById(\'scanner-input\').click()">&#128247; Nova foto</button>':'');
   var d=ud(); if(!d) return; var sel=g('sc-cat'); if(sel) sel.innerHTML=d.cats.saida.map(function(cat){return '<option value="'+esc(cat)+'">'+esc(cat)+'</option>';}).join('');
+  fdb.ref('config/claude_key').once('value').then(function(snap){
+    CLAUDE_KEY=snap.val()||localStorage.getItem('ft_api_key')||'';
+    g('scanner-setup').style.display=CLAUDE_KEY?'none':'block';
+    g('scanner-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScanner()">Cancelar</button>'+(CLAUDE_KEY?'<button class="btn btn-ghost" onclick="document.getElementById(\'scanner-input\').click()">&#128247; Nova foto</button>':'');
+  }).catch(function(){
+    CLAUDE_KEY=localStorage.getItem('ft_api_key')||'';
+    g('scanner-setup').style.display=CLAUDE_KEY?'none':'block';
+    g('scanner-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScanner()">Cancelar</button>'+(CLAUDE_KEY?'<button class="btn btn-ghost" onclick="document.getElementById(\'scanner-input\').click()">&#128247; Nova foto</button>':'');
+  });
 }
+
+function abrirConfigChave(){
+  fdb.ref('config/claude_key').once('value').then(function(snap){
+    var cur=snap.val()||'';
+    var masked=cur?'sk-ant-...'+cur.slice(-6):'(não configurada)';
+    g('mTitle').textContent='Configurar chave API do Scanner';
+    g('mBody').innerHTML=
+      '<div style="background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);border-radius:10px;padding:12px;font-size:12px;color:#00C896;margin-bottom:16px;line-height:1.6">'+
+      'A chave fica salva no Firebase. Todos os usuários usam automaticamente.</div>'+
+      '<div class="field"><label>Chave atual</label>'+
+      '<div style="font-size:13px;color:var(--t2);padding:10px 14px;background:var(--s2);border-radius:8px;border:1px solid var(--border)">'+masked+'</div></div>'+
+      '<div class="field"><label>Nova chave API</label>'+
+      '<input id="nova-api-key" type="password" placeholder="sk-ant-api03-..." style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>'+
+      '<p style="font-size:11px;color:var(--t3)">Obtenha em console.anthropic.com → API Keys</p>';
+    g('mFoot').innerHTML='<button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="salvarChaveFirebase()">Salvar chave</button>';
+    g('mainModal').classList.add('open');
+    setTimeout(function(){ var el=g('nova-api-key'); if(el) el.focus(); },100);
+  });
+}
+
+function salvarChaveFirebase(){
+  var key=g('nova-api-key')?g('nova-api-key').value.trim():'';
+  if(!key||!key.startsWith('sk-ant-')){toast('Chave inválida. Deve começar com sk-ant-','err');return;}
+  var btn=g('mFoot').querySelector('.btn-primary');
+  btn.textContent='Salvando...'; btn.disabled=true;
+  fdb.ref('config/claude_key').set(key).then(function(){
+    btn.textContent='Salvar chave'; btn.disabled=false;
+    closeModal();
+    toast('Chave salva! Todos os usuários podem usar o scanner.','ok');
+  }).catch(function(e){ btn.textContent='Salvar chave'; btn.disabled=false; toast('Erro: '+e.message,'err'); });
+}
+
 function salvarChaveApi(){ var key=g('api-key-input').value.trim(); if(!key||!key.startsWith('sk-ant-')){toast('Chave inválida.','err');return;} localStorage.setItem('ft_api_key',key); CLAUDE_KEY=key; g('scanner-setup').style.display='none'; toast('Chave salva!','ok'); }
 function fecharScanner(){ g('scannerModal').style.display='none'; var inp=g('scanner-input'); if(inp) inp.value=''; }
 function scannerDrop(e){ e.preventDefault(); var file=e.dataTransfer.files[0]; if(file&&file.type.startsWith('image/')) processarImagem(file); }
@@ -2258,9 +2296,17 @@ function analisarComClaude(base64,mediaType){
 }
 function salvarDoScanner(){ var desc=g('sc-desc').value.trim(),valor=parseFloat(g('sc-valor').value),data=g('sc-data').value,cat=g('sc-cat').value; if(!desc||isNaN(valor)||!data){toast('Preencha todos.','err');return;} var d=ud(); if(!d) return; d.sai.push({id:uid(),desc:desc,val:valor,date:data,cat:cat,ori:'Scanner'}); sud(d,function(){fecharScanner();toast('Saída salva!','ok');if(S.page==='saidas')rSai();if(S.page==='dashboard')rDash();}); }
 function abrirScannerBoleto(){
-  CLAUDE_KEY=localStorage.getItem('ft_api_key')||''; g('scannerBoletoModal').style.display='flex'; g('sb-upload').style.display='block'; g('sb-preview').style.display='none'; g('sb-loading').style.display='none'; g('sb-result').style.display='none'; g('sb-error').style.display='none'; g('sb-obs').style.display='none';
-  g('sb-setup').style.display=CLAUDE_KEY?'none':'block'; g('sb-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button>'+(CLAUDE_KEY?'<button class="btn btn-ghost" onclick="document.getElementById(\'sb-input\').click()">&#128247; Nova foto</button>':'');
+  g('scannerBoletoModal').style.display='flex'; g('sb-upload').style.display='block'; g('sb-preview').style.display='none'; g('sb-loading').style.display='none'; g('sb-result').style.display='none'; g('sb-error').style.display='none'; g('sb-obs').style.display='none';
   var d=ud(); if(!d) return; var sel=g('sb-cat'); if(sel) sel.innerHTML=d.cats.saida.map(function(cat){return '<option value="'+esc(cat)+'">'+esc(cat)+'</option>';}).join('');
+  fdb.ref('config/claude_key').once('value').then(function(snap){
+    CLAUDE_KEY=snap.val()||localStorage.getItem('ft_api_key')||'';
+    g('sb-setup').style.display=CLAUDE_KEY?'none':'block';
+    g('sb-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button>'+(CLAUDE_KEY?'<button class="btn btn-ghost" onclick="document.getElementById(\'sb-input\').click()">&#128247; Nova foto</button>':'');
+  }).catch(function(){
+    CLAUDE_KEY=localStorage.getItem('ft_api_key')||'';
+    g('sb-setup').style.display=CLAUDE_KEY?'none':'block';
+    g('sb-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button>'+(CLAUDE_KEY?'<button class="btn btn-ghost" onclick="document.getElementById(\'sb-input\').click()">&#128247; Nova foto</button>':'');
+  });
 }
 function salvarChaveApiBoleto(){ var key=g('sb-api-key').value.trim(); if(!key||!key.startsWith('sk-ant-')){toast('Inválida.','err');return;} localStorage.setItem('ft_api_key',key); CLAUDE_KEY=key; g('sb-setup').style.display='none'; toast('Chave salva!','ok'); }
 function fecharScannerBoleto(){ g('scannerBoletoModal').style.display='none'; var inp=g('sb-input'); if(inp) inp.value=''; }
