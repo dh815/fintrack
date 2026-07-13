@@ -787,10 +787,12 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
         <button class="sb-item" data-p="categorias" onclick="nav('categorias')"><span class="sb-icon"><span class="mi">sell</span></span>Categorias</button>
       </nav>
       <div class="sb-foot">
-        <button class="sb-logout" style="color:var(--blue);margin-bottom:4px" onclick="exportarDados()"><span class="mi" style="font-size:16px">download</span>Exportar backup</button>
-        <button class="sb-logout" style="color:var(--yellow);margin-bottom:4px" onclick="importarDados()"><span class="mi" style="font-size:16px">upload</span>Importar backup</button>
-        <button class="sb-logout" id="btnCriarAcesso" style="color:var(--teal);margin-bottom:4px;display:none" onclick="openCreateAccess()"><span class="mi" style="font-size:16px">person_add</span>Criar acesso</button>
-        <button class="sb-logout" style="color:var(--t3);margin-bottom:4px;font-size:12px" onclick="localStorage.removeItem('ft_api_key');toast('Chave removida.','ok')"><span class="mi" style="font-size:14px">key</span>Reset chave scanner</button>
+        <div id="adminButtons" style="display:none">
+          <button class="sb-logout" style="color:var(--blue);margin-bottom:4px" onclick="exportarDados()"><span class="mi" style="font-size:16px">download</span>Exportar backup</button>
+          <button class="sb-logout" style="color:var(--yellow);margin-bottom:4px" onclick="importarDados()"><span class="mi" style="font-size:16px">upload</span>Importar backup</button>
+          <button class="sb-logout" id="btnCriarAcesso" style="color:var(--teal);margin-bottom:4px" onclick="openCreateAccess()"><span class="mi" style="font-size:16px">person_add</span>Criar acesso</button>
+          <button class="sb-logout" style="color:var(--t3);margin-bottom:4px;font-size:12px" onclick="localStorage.removeItem('ft_api_key');toast('Chave removida.','ok')"><span class="mi" style="font-size:14px">key</span>Reset chave scanner</button>
+        </div>
         <button class="sb-logout" onclick="doLogout()"><span class="mi" style="font-size:16px">logout</span>Sair da conta</button>
       </div>
     </aside>
@@ -1178,7 +1180,11 @@ function showApp(n){
   g('changePassScreen').style.display='none';
   g('appScreen').style.display='block';
   g('sbName').textContent=n; g('sbAvatar').textContent=n.charAt(0).toUpperCase();
-  fdb.ref('accounts/'+S.user+'/role').once('value').then(function(snap){ var btn=g('btnCriarAcesso'); if(btn) btn.style.display=(snap.val()==='admin'?'flex':'none'); });
+  fdb.ref('accounts/'+S.user+'/role').once('value').then(function(snap){
+    var isAdmin=(snap.val()==='admin');
+    var adminDiv=g('adminButtons');
+    if(adminDiv) adminDiv.style.display=isAdmin?'block':'none';
+  });
   updMonth(); nav('dashboard');
 }
 function bto(s){ try{ return btoa(unescape(encodeURIComponent(s))); }catch(e){ return btoa(s); } }
