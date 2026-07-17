@@ -1211,6 +1211,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 
 
 
+
 // ===== FIREBASE INIT =====
 var firebaseConfig = {
     apiKey: "AIzaSyBiHiCoBBG2ofR6FQO2aLRh_iIadF9FECQ",
@@ -2022,7 +2023,10 @@ function rParc(){
   var totalAberto=lista.filter(function(p){return p.st==='ativo';}).reduce(function(a,p){
     return a+p.pars.filter(function(x){return !x.pg;}).reduce(function(s,x){return s+parseFloat(x.val||0);},0);
   },0);
-  if(g('parc-info')) g('parc-info').textContent=lista.length+' conta(s) — Total em aberto: '+fmt(totalAberto);
+  var totalMes=lista.reduce(function(a,p){
+    return a+p.pars.filter(function(x){return !x.pg&&inM(x.date);}).reduce(function(s,x){return s+parseFloat(x.val||0);},0);
+  },0);
+  if(g('parc-info')) g('parc-info').textContent=lista.length+' conta(s) — Vence este mês: '+fmt(totalMes);
   // Mobile cards
   var mc=g('mc-parc');
   if(mc) mc.innerHTML=lista.length?lista.map(function(p){
@@ -2785,6 +2789,7 @@ function abrirScannerCredito(){
   if(!d.cartoes||d.cartoes.length===0){toast('Crie um cartao primeiro!','err');openModalNovoCartao();return;}
   S.etype='scanner_credito'; abrirScanner();
 }
+
 
 
 
