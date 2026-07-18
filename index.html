@@ -2652,8 +2652,39 @@ function showUpgrade(motivo){
 }
 function assinarPro(){
   closeModal();
-  var msg=encodeURIComponent('Olá! Quero assinar o Fintrack Pro (R$ 29/mês). Meu usuário: '+S.user);
-  window.open('https://wa.me/5519995572793?text='+msg,'_blank');
+  var btn = document.querySelector('#mainModal .btn-primary');
+  
+  // Chama o servidor para criar link de pagamento no Mercado Pago
+  var SERVER = 'https://fintrack-server-production-9d87.up.railway.app';
+  
+  // Mostra loading
+  g('mTitle').textContent = 'Aguarde...';
+  g('mBody').innerHTML = '<div style="text-align:center;padding:30px"><div style="font-size:40px;margin-bottom:16px">⏳</div><p style="color:var(--t2)">Criando seu link de pagamento...</p></div>';
+  g('mFoot').innerHTML = '';
+  g('mainModal').classList.add('open');
+
+  fetch(SERVER + '/pagamento/criar', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({username: S.user})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(data.init_point){
+      // Redireciona para pagamento do Mercado Pago
+      closeModal();
+      window.open(data.init_point, '_blank');
+    } else {
+      throw new Error(data.error || 'Erro ao criar pagamento');
+    }
+  })
+  .catch(function(err){
+    // Fallback para WhatsApp se servidor falhar
+    closeModal();
+    var msg=encodeURIComponent('Olá! Quero assinar o Fintrack Pro (R$ 29/mês). Meu usuário: '+S.user);
+    window.open('https://wa.me/5519995572793?text='+msg,'_blank');
+    console.error('Erro pagamento:', err.message);
+  });
 }
 
 // ===== CRÉDITO À VISTA =====
