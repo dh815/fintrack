@@ -1000,7 +1000,22 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
         </div>
 
         <!-- PERFIL -->
-        <div class="page" id="page-perfil"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:700px"><div class="panel"><div class="panel-head"><span class="panel-title">Dados da conta</span></div><div style="padding:20px"><div id="perfil-avatar" style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#07090F;margin-bottom:16px">?</div><div id="perfil-nome" style="font-size:18px;font-weight:700;margin-bottom:4px">-</div><div style="font-size:13px;color:var(--t2)">Usu&#225;rio: <b id="perfil-user">-</b></div></div></div><div class="panel"><div class="panel-head"><span class="panel-title">Trocar senha</span></div><div style="padding:20px"><div class="field"><label>Senha atual</label><input type="password" id="p-atual" placeholder="••••••••"></div><div class="field"><label>Nova senha</label><input type="password" id="p-nova" placeholder="M&#237;nimo 4 caracteres"></div><div class="field"><label>Confirmar</label><input type="password" id="p-conf" placeholder="Repita a senha"></div><div class="auth-error" id="p-err" style="margin-bottom:12px"></div><button class="btn btn-primary" style="width:100%" onclick="salvarSenha()">Salvar nova senha</button></div></div>
+        <div class="page" id="page-perfil"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:700px"><div class="panel"><div class="panel-head"><span class="panel-title">Dados da conta</span></div><div style="padding:20px"><div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+              <div style="position:relative;flex-shrink:0">
+                <div id="perfil-avatar" style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#07090F;overflow:hidden"></div>
+                <button onclick="document.getElementById('foto-input').click()" style="position:absolute;bottom:0;right:0;width:22px;height:22px;background:var(--teal);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">
+                  <span class="mi" style="font-size:13px;color:#07090F">photo_camera</span>
+                </button>
+                <input type="file" id="foto-input" accept="image/*" style="display:none" onchange="uploadFoto(this)">
+              </div>
+              <div>
+                <div id="perfil-nome" style="font-size:18px;font-weight:700;margin-bottom:4px">-</div>
+                <div style="font-size:13px;color:var(--t2)">Usu&#225;rio: <b id="perfil-user">-</b></div>
+              </div>
+            </div>
+            <div class="field"><label>Nome</label><input type="text" id="p-nome" placeholder="Seu nome completo" style="width:100%;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>
+            <button class="btn btn-primary" style="width:100%" onclick="salvarNome()">Salvar nome</button>
+            </div></div><div class="panel"><div class="panel-head"><span class="panel-title">Trocar senha</span></div><div style="padding:20px"><div class="field"><label>Senha atual</label><input type="password" id="p-atual" placeholder="••••••••"></div><div class="field"><label>Nova senha</label><input type="password" id="p-nova" placeholder="M&#237;nimo 4 caracteres"></div><div class="field"><label>Confirmar</label><input type="password" id="p-conf" placeholder="Repita a senha"></div><div class="auth-error" id="p-err" style="margin-bottom:12px"></div><button class="btn btn-primary" style="width:100%" onclick="salvarSenha()">Salvar nova senha</button></div></div>
             <div class="panel"><div class="panel-head"><span class="panel-title"><span class="mi" style="font-size:16px;vertical-align:middle;margin-right:6px;color:#25D366">chat</span>WhatsApp</span></div><div style="padding:20px"><div class="field"><label>Número com DDD</label><input type="tel" id="p-whats" placeholder="Ex: 19999999999" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div><p style="font-size:12px;color:var(--t3);margin-bottom:16px">Vincule seu WhatsApp para registrar gastos enviando mensagem para o bot</p><div id="p-whats-atual" style="font-size:13px;color:var(--teal);margin-bottom:12px"></div><button class="btn btn-primary" style="width:100%;background:#25D366" onclick="salvarWhatsApp()"><span class="mi" style="font-size:15px;vertical-align:middle">chat</span> Salvar WhatsApp</button></div></div></div></div>
 
         <!-- CREDITO A VISTA -->
@@ -2437,7 +2452,19 @@ function rPerfil(){
     var acc=snap.val()||{};
     if(g('perfil-nome')) g('perfil-nome').textContent=acc.n||S.user;
     if(g('perfil-user')) g('perfil-user').textContent=S.user;
-    if(g('perfil-avatar')) g('perfil-avatar').textContent=(acc.n||S.user).charAt(0).toUpperCase();
+    if(g('p-nome')) g('p-nome').value=acc.n||'';
+    // Avatar — foto ou inicial
+    var av=g('perfil-avatar');
+    if(av){
+      if(acc.foto) av.innerHTML='<img src="'+acc.foto+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+      else av.textContent=(acc.n||S.user).charAt(0).toUpperCase();
+    }
+    // Sidebar avatar
+    var sbAv=document.querySelector('.user-avatar');
+    if(sbAv){
+      if(acc.foto) sbAv.innerHTML='<img src="'+acc.foto+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+      else sbAv.textContent=(acc.n||S.user).charAt(0).toUpperCase();
+    }
   });
 }
 function salvarSenha(){
@@ -2962,6 +2989,57 @@ function salvarWhatsApp(){
   fdb.ref('accounts/'+S.user+'/whatsapp').set(num).then(function(){
     if(g('p-whats-atual')) g('p-whats-atual').textContent='✅ Vinculado: ('+num.slice(0,2)+') '+num.slice(2,7)+'-'+num.slice(7);
     toast('WhatsApp vinculado! Bot ativado.','ok');
+  }).catch(function(e){ toast('Erro: '+e.message,'err'); });
+}
+
+var CLOUDINARY_CLOUD = 'dj4v0sa2n';
+var CLOUDINARY_PRESET = 'ml_default';
+
+function uploadFoto(input){
+  var file = input.files[0];
+  if(!file) return;
+  if(file.size > 5 * 1024 * 1024){ toast('Foto muito grande. Máximo 5MB.','err'); return; }
+  
+  toast('Enviando foto...','ok');
+  var formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_PRESET);
+  formData.append('folder', 'fintrack');
+
+  fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/image/upload', {
+    method: 'POST',
+    body: formData
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if(data.secure_url){
+      // Salva URL no Firebase
+      return fdb.ref('accounts/'+S.user+'/foto').set(data.secure_url).then(function(){
+        // Atualiza avatar na tela
+        var av = g('perfil-avatar');
+        if(av) av.innerHTML = '<img src="'+data.secure_url+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+        // Atualiza avatar no sidebar
+        var sbAv = document.querySelector('.user-avatar');
+        if(sbAv) sbAv.innerHTML = '<img src="'+data.secure_url+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+        toast('Foto atualizada!','ok');
+      });
+    } else {
+      throw new Error('Erro no upload');
+    }
+  })
+  .catch(function(e){ toast('Erro ao enviar foto: '+e.message,'err'); });
+}
+
+function salvarNome(){
+  var nome = g('p-nome') ? g('p-nome').value.trim() : '';
+  if(!nome){ toast('Digite um nome.','err'); return; }
+  fdb.ref('accounts/'+S.user+'/n').set(nome).then(function(){
+    S.accName = nome;
+    if(g('perfil-nome')) g('perfil-nome').textContent = nome;
+    // Atualiza nome no sidebar
+    var sbNome = document.querySelector('.user-name');
+    if(sbNome) sbNome.textContent = nome;
+    toast('Nome atualizado!','ok');
   }).catch(function(e){ toast('Erro: '+e.message,'err'); });
 }
 </script>
