@@ -724,7 +724,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
     </div>
     <button class="auth-btn" onclick="doLogin()">Entrar</button>
     <div class="auth-error" id="loginError">Usu&#225;rio ou senha incorretos.</div>
-    
+    <div class="auth-switch">Sem conta? <button onclick="showRegister()">Criar conta grátis</button></div>
   </div>
 </div>
 
@@ -772,6 +772,11 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 
 <!-- APP -->
 <div id="appScreen" style="display:none">
+  <!-- PRO BAR -->
+  <div id="pro-bar" style="display:none;align-items:center;justify-content:space-between;padding:8px 20px;background:linear-gradient(90deg,rgba(0,200,150,.12),rgba(77,156,255,.08));border-bottom:1px solid rgba(0,200,150,.2);font-size:13px;gap:12px">
+    <span style="color:var(--t1)">⚡ Você está no plano <b>Free</b> — Scanner, Cartão de crédito e mais recursos no <b style="color:var(--teal)">Pro</b></span>
+    <button onclick="showUpgrade()" class="btn btn-primary" style="padding:6px 14px;font-size:12px;white-space:nowrap">Assinar Pro R$29/mês</button>
+  </div>
   <div class="sb-overlay" id="sbOverlay" onclick="closeSb()"></div>
   <div class="app">
     <!-- SIDEBAR -->
@@ -1199,12 +1204,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="fecharModalCartao()">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarCartao()"><span class="mi" style="font-size:15px;vertical-align:middle">add_card</span> Salvar cart&#227;o</button>
-    </div>
-  </div>
-</div>
-
-<script>
+      <button class="btn btn-primary" onclick="salvarCartao()"><span class="mi" style="font-size:15px;v
 
 
 
@@ -1332,7 +1332,7 @@ function doLogin(){
     var ok=acc&&(acc.p===hashed||acc.p===bto(p));
     if(!acc||!ok){showErr('loginError','Usuário ou senha incorretos.');return;}
     if(acc.p===bto(p)) fdb.ref('accounts/'+u+'/p').set(hashed).catch(function(){});
-    S.user=u; S.accName=acc.n; S.isAdmin=(acc.role==='admin');
+    S.user=u; S.accName=acc.n; S.role=acc.role||'free'; S.isAdmin=(acc.role==='admin'); S.role=acc.role||'free';
     localStorage.setItem('ftS',u);
     // Salva uid para vincular conta ao Firebase Auth
     var authUser=fauth.currentUser;
@@ -1354,7 +1354,9 @@ function doRegister(){
       btn.textContent='Criar conta'; btn.disabled=false;
       showErr('registerError','Usuário já existe.');return;
     }
-    return fdb.ref('accounts/'+u).set({n:n,p:bto(p)});
+    return hashPass(p).then(function(h){
+      return fdb.ref('accounts/'+u).set({n:n,p:h,role:'free',createdAt:Date.now()});
+    });
   }).then(function(){
     btn.textContent='Criar conta'; btn.disabled=false;
     toast('Conta criada! Faça login.','ok');
@@ -1384,10 +1386,45 @@ function showApp(n){
     var isAdmin=(snap.val()==='admin');
     var adminDiv=g('adminButtons');
     if(adminDiv) adminDiv.style.display=isAdmin?'block':'none';
+    var proBar=g('pro-bar');
+    if(proBar) proBar.style.display=(snap.val()==='free')?'block':'none';
   });
   updMonth(); nav('dashboard');
 }
 function bto(s){ try{ return btoa(unescape(encodeURIComponent(s))); }catch(e){ return btoa(s); } }
+
+// ===== PLANOS =====
+var FREE_LIMITS = { ent: 20, sai: 20, parc: 5 };
+function isPro(){ return S.role==='pro'||S.role==='admin'; }
+function showUpgrade(feat){
+  var msg = feat ? 'O recurso <b>'+feat+'</b> é exclusivo do plano <b style="color:var(--teal)">Pro</b>.' : 'Este recurso é exclusivo do plano <b style="color:var(--teal)">Pro</b>.';
+  g('mTitle').textContent = 'Upgrade para Pro 🚀';
+  g('mBody').innerHTML =
+    '<div style="text-align:center;padding:10px 0 20px">'+
+    '<div style="font-size:48px;margin-bottom:12px">⚡</div>'+
+    msg+
+    '<div style="margin:20px 0;background:var(--s2);border-radius:12px;padding:16px;text-align:left;font-size:13px;color:var(--t2)">'+
+    '<div style="margin-bottom:6px;color:var(--t1);font-weight:700">PRO inclui:</div>'+
+    '✅ Scanner de cupons e boletos com IA<br>'+
+    '✅ Cartão de crédito com fatura<br>'+
+    '✅ Planejamento e metas<br>'+
+    '✅ Investimentos<br>'+
+    '✅ Exportar PDF<br>'+
+    '✅ WhatsApp bot<br>'+
+    '✅ Lançamentos ilimitados'+
+    '</div>'+
+    '<div style="font-size:28px;font-weight:800;color:var(--teal);margin:12px 0">R$ 29<span style="font-size:16px;color:var(--t2)">/mês</span></div>'+
+    '</div>';
+  g('mFoot').innerHTML = '<button class="btn btn-ghost" onclick="closeModal()">Agora não</button>'+
+    '<button class="btn btn-primary" onclick="assinarPro()">Assinar Pro →</button>';
+  g('mainModal').classList.add('open');
+}
+function assinarPro(){
+  closeModal();
+  // Abre WhatsApp para pagamento (temporário até integração MP)
+  var msg = encodeURIComponent('Olá! Quero assinar o Fintrack Pro (R$ 29/mês). Meu usuário: '+S.user);
+  window.open('https://wa.me/5500000000000?text='+msg, '_blank');
+}
 
 function ensureAuth(){
   return new Promise(function(resolve){
@@ -1422,11 +1459,11 @@ function render(p){
   else if(p==='saidas') rSai();
   else if(p==='saldo') rSal();
   else if(p==='parcelas') rParc();
-  else if(p==='planejamento') rPlan();
-  else if(p==='investimentos') rInv();
+  else if(p==='planejamento'){ if(!isPro()){showUpgrade('Planejamento e Metas');return;} rPlan(); }
+  else if(p==='investimentos'){ if(!isPro()){showUpgrade('Investimentos');return;} rInv(); }
   else if(p==='categorias') rCats();
   else if(p==='perfil') rPerfil();
-  else if(p==='credito') rCredito();
+  else if(p==='credito'){ if(!isPro()){showUpgrade('Cartão de Crédito');return;} rCredito(); }
 }
 
 // MONTH
@@ -2102,6 +2139,11 @@ function canParc(id){
 
 // PLANEJAMENTO
 function rPlan(){
+  if(isFree()){
+    var el=document.getElementById('page-planejamento');
+    if(el){ el.innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:16px">🎯</div><div style="font-size:18px;font-weight:700;color:var(--t1);margin-bottom:8px">Planejamento e Metas</div><p style="color:var(--t2);margin-bottom:24px">Defina objetivos e acompanhe seu progresso.<br>Disponível no plano Pro.</p><button class="btn btn-primary" onclick="showUpgrade(this.dataset.msg)" data-msg="Planejamento é exclusivo do Pro"><span class="mi" style="font-size:15px;vertical-align:middle">star</span> Ver plano Pro</button></div>'; }
+    return;
+  }
   var d=ud(); if(!d) return;
   g('p-list').innerHTML=d.plans.length?d.plans.map(function(p){
     var pct=Math.min(100,((p.cur||0)/p.tgt*100));
@@ -2136,6 +2178,11 @@ function updPlan(id){
 
 // INVESTIMENTOS
 function rInv(){
+  if(isFree()){
+    var el=document.getElementById('page-investimentos');
+    if(el){ el.innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:16px">📈</div><div style="font-size:18px;font-weight:700;color:var(--t1);margin-bottom:8px">Investimentos</div><p style="color:var(--t2);margin-bottom:24px">Acompanhe sua carteira de investimentos.<br>Disponível no plano Pro.</p><button class="btn btn-primary" onclick="showUpgrade(this.dataset.msg)" data-msg="Investimentos é exclusivo do Pro"><span class="mi" style="font-size:15px;vertical-align:middle">star</span> Ver plano Pro</button></div>'; }
+    return;
+  }
   var d=ud(); if(!d) return;
   var total=sum(d.inv);
   var rend=d.inv.reduce(function(a,i){return a+parseFloat(i.yld||0);},0);
@@ -2376,7 +2423,10 @@ function saveCreateAccess(){
   fdb.ref('accounts/'+user).once('value').then(function(snap){
     if(snap.val()){if(btn){btn.textContent='Criar acesso';btn.disabled=false;}toast('Usuário já existe!','err');throw new Error('CANCEL');}
     return hashPass(pass);
-  }).then(function(h){ return fdb.ref('accounts/'+user).set({n:name,p:h,firstAccess:true,role:'user',createdBy:S.user}); })
+  }).then(function(h){ var whats=g('ca-whats')?g('ca-whats').value.trim().replace(/\D/g,''):'';
+    var acc={n:name,p:h,firstAccess:true,role:'user',createdBy:S.user};
+    if(whats) acc.whatsapp=whats;
+    return fdb.ref('accounts/'+user).set(acc); })
   .then(function(){ if(btn){btn.textContent='Criar acesso';btn.disabled=false;} closeModal(); toast('Acesso criado! Usuário: '+user+' Senha: '+savedPass,'ok',8000); })
   .catch(function(e){ if(btn){btn.textContent='Criar acesso';btn.disabled=false;} if(e.message!=='CANCEL') toast('Erro: '+e.message,'err'); });
 }
@@ -2400,6 +2450,8 @@ function salvarSenha(){
   .catch(function(e){ btn.textContent='Salvar nova senha'; btn.disabled=false; showErr('p-err',e.message); });
 }
 function exportPDF(){
+  if(isFree()){showUpgrade('Exportar PDF é exclusivo do Pro');return;}
+  if(!isPro()){showUpgrade('Exportar PDF');return;}
   var d=ud(); if(!d){toast('Sem dados.','err');return;}
   var ent=d.ent.filter(function(e){return inM(e.date);});
   var sai=d.sai.filter(function(s){return inM(s.date);});
@@ -2425,6 +2477,7 @@ function exportPDF(){
 // END_OF_EXPORTPDF
 var CLAUDE_KEY=localStorage.getItem('ft_api_key')||'';
 function abrirScanner(){
+  if(!isPro()){showUpgrade('Scanner de cupons');return;}
   g('scannerModal').style.display='flex'; g('scanner-upload-area').style.display='block'; g('scanner-preview').style.display='none'; g('scanner-loading').style.display='none'; g('scanner-result').style.display='none'; g('scanner-error').style.display='none'; g('sc-obs').style.display='none';
   var d=ud(); if(!d) return; var sel=g('sc-cat'); if(sel) sel.innerHTML=d.cats.saida.map(function(cat){return '<option value="'+esc(cat)+'">'+esc(cat)+'</option>';}).join('');
   fdb.ref('config/claude_key').once('value').then(function(snap){
@@ -2499,6 +2552,7 @@ function salvarDoScanner(){
   }
 }
 function abrirScannerBoleto(){
+  if(!isPro()){showUpgrade('Scanner de boletos');return;}
   g('scannerBoletoModal').style.display='flex'; g('sb-upload').style.display='block'; g('sb-preview').style.display='none'; g('sb-loading').style.display='none'; g('sb-result').style.display='none'; g('sb-error').style.display='none'; g('sb-obs').style.display='none';
   var d=ud(); if(!d) return; var sel=g('sb-cat'); if(sel) sel.innerHTML=d.cats.saida.map(function(cat){return '<option value="'+esc(cat)+'">'+esc(cat)+'</option>';}).join('');
   fdb.ref('config/claude_key').once('value').then(function(snap){
@@ -2536,7 +2590,7 @@ window.addEventListener('load',function(){
     ensureAuth().then(function(){ return fdb.ref('accounts/'+s).once('value'); }).then(function(snap){
       var acc=snap.val();
       if(acc){
-        S.accName=acc.n; S.isAdmin=(acc.role==='admin');
+        S.accName=acc.n; S.isAdmin=(acc.role==='admin'); S.role=acc.role||'free';
         if(acc.firstAccess){ g('changePassScreen').style.display='flex'; updMonth(); return; }
         loadUD(function(data){
           if(data) showApp(acc.n);
@@ -2556,8 +2610,58 @@ window.addEventListener('load',function(){
 });
 var S_CARTAO = null;
 
+// ===== FREE / PRO =====
+var FREE_LIMITS = { ent: 20, sai: 20, parc: 5 };
+function isPro(){ return S.role==='pro'||S.role==='admin'; }
+function isFree(){ return !isPro(); }
+function contaLancamentos(d, tipo){
+  var hoje = new Date();
+  var mes = hoje.getMonth(); var ano = hoje.getFullYear();
+  return (d[tipo]||[]).filter(function(x){
+    var dd=new Date(x.date+'T12:00:00');
+    return dd.getMonth()===mes&&dd.getFullYear()===ano;
+  }).length;
+}
+function showUpgrade(motivo){
+  var g2=function(id){return document.getElementById(id);};
+  g2('mTitle').textContent='🚀 Upgrade para Pro';
+  g2('mBody').innerHTML=
+    '<div style="text-align:center;padding:8px 0 16px">'+
+    '<div style="font-size:48px;margin-bottom:12px">⚡</div>'+
+    '<p style="font-size:15px;color:var(--t1);font-weight:600;margin-bottom:8px">'+motivo+'</p>'+
+    '<p style="font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.6">Assine o Fintrack Pro e tenha acesso a tudo sem limites.</p>'+
+    '<div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;text-align:left">'+
+    '<div style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Fintrack Pro inclui:</div>'+
+    '<div style="font-size:13px;color:var(--t1);line-height:2">'+
+    '✅ Lançamentos ilimitados<br>'+
+    '✅ Scanner com IA (cupom e boleto)<br>'+
+    '✅ Cartão de crédito com fatura<br>'+
+    '✅ Planejamento e metas<br>'+
+    '✅ Investimentos<br>'+
+    '✅ Exportar PDF<br>'+
+    '✅ WhatsApp bot'+
+    '</div></div>'+
+    '<div style="font-size:32px;font-weight:800;color:var(--teal);margin-bottom:4px">R$ 29<span style="font-size:16px;font-weight:400;color:var(--t2)">/mês</span></div>'+
+    '<div style="font-size:12px;color:var(--t3)">Sem fidelidade • Cancele quando quiser</div>'+
+    '</div>';
+  g2('mFoot').innerHTML=
+    '<button class="btn btn-ghost" onclick="closeModal()">Agora não</button>'+
+    '<button class="btn btn-primary" onclick="assinarPro()"><span class="mi" style="font-size:15px;vertical-align:middle">star</span> Assinar Pro</button>';
+  g2('mainModal').classList.add('open');
+}
+function assinarPro(){
+  closeModal();
+  var msg=encodeURIComponent('Olá! Quero assinar o Fintrack Pro (R$ 29/mês). Meu usuário: '+S.user);
+  window.open('https://wa.me/5511999999999?text='+msg,'_blank');
+}
+
 // ===== CRÉDITO À VISTA =====
 function rCredito(){
+  if(isFree()){
+    var el=document.getElementById('page-credito');
+    if(el){ el.innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:16px">💳</div><div style="font-size:18px;font-weight:700;color:var(--t1);margin-bottom:8px">Cartão de Crédito</div><p style="color:var(--t2);margin-bottom:24px">Controle a fatura de cada cartão.<br>Disponível no plano Pro.</p><button class="btn btn-primary" onclick="showUpgrade(this.dataset.msg)" data-msg="Cartão de Crédito é exclusivo do Pro"><span class="mi" style="font-size:15px;vertical-align:middle">star</span> Ver plano Pro</button></div>'; }
+    return;
+  }
   var d=ud(); if(!d) return;
   d.cartoes=d.cartoes||[]; d.gastos_credito=d.gastos_credito||[];
 
@@ -2789,6 +2893,30 @@ function abrirScannerCredito(){
   if(!d.cartoes||d.cartoes.length===0){toast('Crie um cartao primeiro!','err');openModalNovoCartao();return;}
   S.etype='scanner_credito'; abrirScanner();
 }
+
+
+
+
+
+
+
+function editGastoCredito(id){
+  var d=ud(); var it=(d.gastos_credito||[]).find(function(x){return x.id===id;});
+}
+function delGastoCredito(id){
+  cf('Excluir gasto?','Nao pode ser desfeito.',function(){
+    var d=ud();
+    d.gastos_credito=(d.gastos_credito||[]).filter(function(x){return x.id!==id;});
+    sud(d,function(){toast('Excluido.','ok');rCredito();});
+  });
+}
+function abrirScannerCredito(){
+  var d=ud(); if(!d) return;
+  if(!d.cartoes||d.cartoes.length===0){toast('Crie um cartao primeiro!','err');openModalNovoCartao();return;}
+  S.etype='scanner_credito'; abrirScanner();
+}
+
+
 
 
 
