@@ -1212,6 +1212,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 
 
 
+<script>
 // ===== FIREBASE INIT =====
 var firebaseConfig = {
     apiKey: "AIzaSyBiHiCoBBG2ofR6FQO2aLRh_iIadF9FECQ",
@@ -2915,6 +2916,7 @@ function abrirScannerCredito(){
   if(!d.cartoes||d.cartoes.length===0){toast('Crie um cartao primeiro!','err');openModalNovoCartao();return;}
   S.etype='scanner_credito'; abrirScanner();
 }
+
 
 
 
