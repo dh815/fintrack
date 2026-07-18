@@ -1399,12 +1399,15 @@ function showApp(n){
   g('changePassScreen').style.display='none';
   g('appScreen').style.display='block';
   g('sbName').textContent=n; g('sbAvatar').textContent=n.charAt(0).toUpperCase();
-  fdb.ref('accounts/'+S.user+'/role').once('value').then(function(snap){
-    var isAdmin=(snap.val()==='admin');
+  fdb.ref('accounts/'+S.user).once('value').then(function(snap){
+    var acc=snap.val()||{};
+    var isAdmin=(acc.role==='admin');
     var adminDiv=g('adminButtons');
     if(adminDiv) adminDiv.style.display=isAdmin?'block':'none';
     var proBar=g('pro-bar');
-    if(proBar) proBar.style.display=(snap.val()==='free')?'block':'none';
+    if(proBar) proBar.style.display=(acc.role==='free')?'block':'none';
+    var sbAv=g('sbAvatar');
+    if(sbAv && acc.foto) sbAv.innerHTML='<img src="'+acc.foto+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
   });
   updMonth(); nav('dashboard');
 }
@@ -2460,7 +2463,7 @@ function rPerfil(){
       else av.textContent=(acc.n||S.user).charAt(0).toUpperCase();
     }
     // Sidebar avatar
-    var sbAv=document.querySelector('.user-avatar');
+    var sbAv=g('sbAvatar');
     if(sbAv){
       if(acc.foto) sbAv.innerHTML='<img src="'+acc.foto+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
       else sbAv.textContent=(acc.n||S.user).charAt(0).toUpperCase();
@@ -2993,7 +2996,7 @@ function salvarWhatsApp(){
 }
 
 var CLOUDINARY_CLOUD = 'dj4v0sa2n';
-var CLOUDINARY_PRESET = 'ml_default';
+var CLOUDINARY_PRESET = 'estetica_gabriela';
 
 function uploadFoto(input){
   var file = input.files[0];
@@ -3019,7 +3022,7 @@ function uploadFoto(input){
         var av = g('perfil-avatar');
         if(av) av.innerHTML = '<img src="'+data.secure_url+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
         // Atualiza avatar no sidebar
-        var sbAv = document.querySelector('.user-avatar');
+        var sbAv = g('sbAvatar');
         if(sbAv) sbAv.innerHTML = '<img src="'+data.secure_url+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
         toast('Foto atualizada!','ok');
       });
@@ -3037,7 +3040,7 @@ function salvarNome(){
     S.accName = nome;
     if(g('perfil-nome')) g('perfil-nome').textContent = nome;
     // Atualiza nome no sidebar
-    var sbNome = document.querySelector('.user-name');
+    var sbNome = g('sbName');
     if(sbNome) sbNome.textContent = nome;
     toast('Nome atualizado!','ok');
   }).catch(function(e){ toast('Erro: '+e.message,'err'); });
