@@ -2717,7 +2717,7 @@ function showUpgrade(motivo){
     '</div></div>'+
     '<div style="font-size:32px;font-weight:800;color:var(--teal);margin-bottom:4px">R$ 29<span style="font-size:16px;font-weight:400;color:var(--t2)">/mês</span></div>'+
     '<div style="font-size:12px;color:var(--t3);margin-bottom:16px">Renovação automática • Cancele quando quiser</div>'+
-    '<div class="field" style="text-align:left"><label>Seu e-mail (necessário para a cobrança recorrente)</label><input type="email" id="up-email" placeholder="seuemail@exemplo.com" value="'+esc(S.email||'')+'"></div>'+
+    '<div class="field" style="text-align:left"><label>Seu e-mail (necessário para a cobrança recorrente)</label><input type="email" id="up-email" placeholder="seuemail@exemplo.com" autocomplete="off"></div>'+
     '</div>';
   g2('mFoot').innerHTML=
     '<button class="btn btn-ghost" onclick="closeModal()">Agora não</button>'+
@@ -2739,9 +2739,6 @@ function assinarPro(){
   g('mFoot').innerHTML = '';
   g('mainModal').classList.add('open');
 
-  fdb.ref('accounts/'+S.user+'/email').set(email).catch(function(){});
-  S.email = email;
-
   fetch(SERVER + '/assinatura/criar', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -2750,6 +2747,9 @@ function assinarPro(){
   .then(function(r){ return r.json(); })
   .then(function(data){
     if(data.init_point){
+      // Só grava o e-mail depois de confirmar que o MP aceitou a criação da assinatura
+      fdb.ref('accounts/'+S.user+'/email').set(email).catch(function(){});
+      S.email = email;
       // Redireciona para autorizar a assinatura recorrente no Mercado Pago
       closeModal();
       window.open(data.init_point, '_blank');
