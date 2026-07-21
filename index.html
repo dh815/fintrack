@@ -318,6 +318,17 @@ body {
 .hero-saldo-val { position: relative; font-size: 38px; font-weight: 700; letter-spacing: -0.5px; }
 .hero-saldo-sub { position: relative; font-size: 12px; color: var(--t3); margin-top: 6px; }
 @media (max-width: 680px) { .hero-saldo-val { font-size: 28px; } .hero-saldo { padding: 18px 20px; } }
+.credit-card-visual {
+  background: linear-gradient(135deg, var(--s2), var(--s3));
+  border: 1px solid var(--border2); border-radius: var(--r);
+  padding: 20px 22px; margin-bottom: 16px;
+}
+.ccv-top { display: flex; justify-content: space-between; align-items: center; color: var(--t3); font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 26px; }
+.ccv-top span:last-child { color: var(--purple); }
+.ccv-number { font-family: 'IBM Plex Mono', monospace; font-size: 18px; letter-spacing: 3px; color: var(--t1); margin-bottom: 18px; }
+.ccv-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+.ccv-label { font-size: 10px; color: var(--t3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+.ccv-val { font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 600; color: var(--t1); }
 .sb-collapse-btn {
   width: 26px; height: 26px; border-radius: 8px; border: none; background: var(--s3);
   color: var(--t2); display: flex; align-items: center; justify-content: center;
@@ -1068,6 +1079,8 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
               <span class="mi" style="font-size:18px">add_card</span>
             </button>
           </div>
+          <!-- Cartão visual -->
+          <div class="credit-card-visual" id="cred-card-visual"></div>
           <!-- Métricas -->
           <div class="metrics" id="cred-metrics"></div>
           <!-- Painel de gastos -->
@@ -2799,6 +2812,19 @@ function rCredito(){
   var maiorCat=getMaiorCategoria(gastosMes);
   var fatPaga=getFaturaPaga(d,S_CARTAO);
   var fatStatus=getFaturaStatus(d,S_CARTAO);
+
+  // Cartão visual
+  var ccv=g('cred-card-visual');
+  if(ccv){
+    var last4=cart&&cart.id?String(cart.id).replace(/\D/g,'').slice(-4).padStart(4,'0'):'••••';
+    ccv.innerHTML=
+      '<div class="ccv-top"><span>FINTRACK</span><span>'+(cart?esc(cart.nome).toUpperCase():'TODOS OS CARTÕES')+'</span></div>'+
+      '<div class="ccv-number">•••• •••• •••• '+last4+'</div>'+
+      '<div class="ccv-bottom">'+
+      '<div><div class="ccv-label">Fatura atual</div><div class="ccv-val">'+fmt(fatAtual)+'</div></div>'+
+      '<div style="text-align:right"><div class="ccv-label">Vencimento</div><div class="ccv-val">'+(vencDia?vencDia+'/'+String(S.month+1).padStart(2,'0'):'--')+'</div></div>'+
+      '</div>';
+  }
 
   if(g('cred-metrics')) g('cred-metrics').innerHTML=
     mc('<span class="mi">credit_card</span>','Fatura '+MONTHS[S.month].slice(0,3),fmt(fatAtual),'purple',gastosMes.length+' gastos'+(cart?' · '+esc(cart.nome):''))+
