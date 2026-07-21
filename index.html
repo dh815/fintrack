@@ -811,7 +811,6 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
           <button class="sb-logout" style="color:var(--blue);margin-bottom:4px" onclick="exportarDados()"><span class="mi" style="font-size:16px">download</span>Exportar backup</button>
           <button class="sb-logout" style="color:var(--yellow);margin-bottom:4px" onclick="importarDados()"><span class="mi" style="font-size:16px">upload</span>Importar backup</button>
           <button class="sb-logout" id="btnCriarAcesso" style="color:var(--teal);margin-bottom:4px" onclick="openCreateAccess()"><span class="mi" style="font-size:16px">person_add</span>Criar acesso</button>
-          <button class="sb-logout" style="color:var(--teal);margin-bottom:4px;font-size:12px" onclick="abrirConfigChave()"><span class="mi" style="font-size:14px">key</span>Configurar chave API</button>
         </div>
         <button class="sb-logout" onclick="doLogout()"><span class="mi" style="font-size:16px">logout</span>Sair da conta</button>
       </div>
@@ -1116,8 +1115,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
   <div class="modal" style="max-width:560px">
     <div class="modal-head"><span class="modal-title">&#128247; Escanear cupom</span><button class="modal-x" onclick="fecharScanner()"><span class="mi" style="font-size:16px">close</span></button></div>
     <div class="modal-body">
-      <div id="scanner-setup" style="display:none;background:rgba(77,156,255,.08);border:1px solid rgba(77,156,255,.2);border-radius:12px;padding:20px;margin-bottom:16px"><div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:8px">&#128272; Configure sua chave API</div><div style="font-size:12px;color:var(--t2);margin-bottom:12px">Obtenha em <b>console.anthropic.com</b></div><div style="display:flex;gap:8px"><input id="api-key-input" type="password" placeholder="sk-ant-api03-..." style="flex:1;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><button class="btn btn-primary" onclick="salvarChaveApi()">Salvar</button></div></div>
-      <div id="scanner-upload-area" style="border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;margin-bottom:16px" onclick="if(!CLAUDE_KEY){g('scanner-setup').style.display='block';return;}document.getElementById('scanner-input').click()" ondragover="event.preventDefault()" ondrop="scannerDrop(event)">
+      <div id="scanner-upload-area" style="border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;margin-bottom:16px" onclick="document.getElementById('scanner-input').click()" ondragover="event.preventDefault()" ondrop="scannerDrop(event)">
         <span class="mi" style="font-size:48px;color:var(--t3);display:block;margin-bottom:12px">photo_camera</span>
         <div style="font-size:14px;font-weight:600;color:var(--t1);margin-bottom:6px">Toque para tirar foto</div>
         <div style="font-size:12px;color:var(--t3)">Cupom fiscal, nota, recibo</div>
@@ -1143,8 +1141,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
   <div class="modal" style="max-width:560px">
     <div class="modal-head"><span class="modal-title">&#128196; Escanear boleto / parcelamento</span><button class="modal-x" onclick="fecharScannerBoleto()"><span class="mi" style="font-size:16px">close</span></button></div>
     <div class="modal-body">
-      <div id="sb-setup" style="display:none;background:rgba(77,156,255,.08);border:1px solid rgba(77,156,255,.2);border-radius:12px;padding:20px;margin-bottom:16px"><div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:8px">&#128272; Configure sua chave API</div><div style="font-size:12px;color:var(--t2);margin-bottom:12px">Obtenha em <b>console.anthropic.com</b></div><div style="display:flex;gap:8px"><input id="sb-api-key" type="password" placeholder="sk-ant-api03-..." style="flex:1;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><button class="btn btn-primary" onclick="salvarChaveApiBoleto()">Salvar</button></div></div>
-      <div id="sb-upload" style="border:2px dashed var(--border);border-radius:12px;padding:28px;text-align:center;cursor:pointer;margin-bottom:16px" onclick="if(!CLAUDE_KEY){g('sb-setup').style.display='block';return;}document.getElementById('sb-input').click()" ondragover="event.preventDefault()" ondrop="boletoScannerDrop(event)">
+      <div id="sb-upload" style="border:2px dashed var(--border);border-radius:12px;padding:28px;text-align:center;cursor:pointer;margin-bottom:16px" onclick="document.getElementById('sb-input').click()" ondragover="event.preventDefault()" ondrop="boletoScannerDrop(event)">
         <span class="mi" style="font-size:44px;color:var(--t3);display:block;margin-bottom:10px">document_scanner</span>
         <div style="font-size:14px;font-weight:600;color:var(--t1);margin-bottom:4px">Foto do boleto ou parcelamento</div>
         <div style="font-size:12px;color:var(--t3)">A IA identifica nome, valor, parcelas e vencimento</div>
@@ -2549,54 +2546,13 @@ function exportPDF(){
 }
 
 // END_OF_EXPORTPDF
-var CLAUDE_KEY=localStorage.getItem('ft_api_key')||'';
 function abrirScanner(){
   if(!isPro()){showUpgrade('Scanner de cupons');return;}
   g('scannerModal').style.display='flex'; g('scanner-upload-area').style.display='block'; g('scanner-preview').style.display='none'; g('scanner-loading').style.display='none'; g('scanner-result').style.display='none'; g('scanner-error').style.display='none'; g('sc-obs').style.display='none';
   var d=ud(); if(!d) return; var sel=g('sc-cat'); if(sel) sel.innerHTML=d.cats.saida.map(function(cat){return '<option value="'+esc(cat)+'">'+esc(cat)+'</option>';}).join('');
-  fdb.ref('config/claude_key').once('value').then(function(snap){
-    CLAUDE_KEY=snap.val()||localStorage.getItem('ft_api_key')||'';
-    g('scanner-setup').style.display=CLAUDE_KEY?'none':'block';
-    g('scanner-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScanner()">Cancelar</button>'+(CLAUDE_KEY?'<button class="btn btn-ghost" onclick="document.getElementById(\'scanner-input\').click()">&#128247; Nova foto</button>':'');
-  }).catch(function(){
-    CLAUDE_KEY=localStorage.getItem('ft_api_key')||'';
-    g('scanner-setup').style.display=CLAUDE_KEY?'none':'block';
-    g('scanner-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScanner()">Cancelar</button>'+(CLAUDE_KEY?'<button class="btn btn-ghost" onclick="document.getElementById(\'scanner-input\').click()">&#128247; Nova foto</button>':'');
-  });
+  g('scanner-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScanner()">Cancelar</button>';
 }
 
-function abrirConfigChave(){
-  fdb.ref('config/claude_key').once('value').then(function(snap){
-    var cur=snap.val()||'';
-    var masked=cur?'sk-ant-...'+cur.slice(-6):'(não configurada)';
-    g('mTitle').textContent='Configurar chave API do Scanner';
-    g('mBody').innerHTML=
-      '<div style="background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);border-radius:10px;padding:12px;font-size:12px;color:#00C896;margin-bottom:16px;line-height:1.6">'+
-      'A chave fica salva no Firebase. Todos os usuários usam automaticamente.</div>'+
-      '<div class="field"><label>Chave atual</label>'+
-      '<div style="font-size:13px;color:var(--t2);padding:10px 14px;background:var(--s2);border-radius:8px;border:1px solid var(--border)">'+masked+'</div></div>'+
-      '<div class="field"><label>Nova chave API</label>'+
-      '<input id="nova-api-key" type="password" placeholder="sk-ant-api03-..." style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>'+
-      '<p style="font-size:11px;color:var(--t3)">Obtenha em console.anthropic.com → API Keys</p>';
-    g('mFoot').innerHTML='<button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="salvarChaveFirebase()">Salvar chave</button>';
-    g('mainModal').classList.add('open');
-    setTimeout(function(){ var el=g('nova-api-key'); if(el) el.focus(); },100);
-  });
-}
-
-function salvarChaveFirebase(){
-  var key=g('nova-api-key')?g('nova-api-key').value.trim():'';
-  if(!key||!key.startsWith('sk-ant-')){toast('Chave inválida. Deve começar com sk-ant-','err');return;}
-  var btn=g('mFoot').querySelector('.btn-primary');
-  btn.textContent='Salvando...'; btn.disabled=true;
-  fdb.ref('config/claude_key').set(key).then(function(){
-    btn.textContent='Salvar chave'; btn.disabled=false;
-    closeModal();
-    toast('Chave salva! Todos os usuários podem usar o scanner.','ok');
-  }).catch(function(e){ btn.textContent='Salvar chave'; btn.disabled=false; toast('Erro: '+e.message,'err'); });
-}
-
-function salvarChaveApi(){ var key=g('api-key-input').value.trim(); if(!key||!key.startsWith('sk-ant-')){toast('Chave inválida.','err');return;} localStorage.setItem('ft_api_key',key); CLAUDE_KEY=key; g('scanner-setup').style.display='none'; toast('Chave salva!','ok'); }
 function fecharScanner(){ g('scannerModal').style.display='none'; var inp=g('scanner-input'); if(inp) inp.value=''; }
 function scannerDrop(e){ e.preventDefault(); var file=e.dataTransfer.files[0]; if(file&&file.type.startsWith('image/')) processarImagem(file); }
 function processarImagem(file){
@@ -2606,8 +2562,9 @@ function processarImagem(file){
 }
 function analisarComClaude(base64,mediaType){
   var hoje=new Date().toISOString().slice(0,10);
-  fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':CLAUDE_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:300,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mediaType,data:base64}},{type:'text',text:'Analise este cupom. JSON apenas: {"descricao":"loja","valor":0.00,"data":"YYYY-MM-DD","categoria":"Alimentacao","itens":"resumo"}. data: '+hoje+' se nao encontrar.'}]}]})})
-  .then(function(r){return r.json();}).then(function(data){ g('scanner-loading').style.display='none'; if(data.error){g('scanner-error').textContent='Erro: '+data.error.message;g('scanner-error').style.display='block';return;} var res=JSON.parse(data.content[0].text.trim().replace(/```json|```/g,'').trim()); g('sc-desc').value=res.descricao||''; g('sc-valor').value=res.valor||''; g('sc-data').value=res.data||hoje; if(res.itens){g('sc-obs').textContent='Itens: '+res.itens;g('sc-obs').style.display='block';} var sel=g('sc-cat'); var cm={'Alimentacao':'Alimentação','Transporte':'Transporte','Moradia':'Moradia','Saude':'Saúde','Lazer':'Lazer','Educacao':'Educação','Vestuario':'Vestuário','Outros':'Outros'}[res.categoria]||'Outros'; for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===cm){sel.selectedIndex=i;break;}} g('scanner-result').style.display='block'; g('scanner-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScanner()">Cancelar</button><button class="btn btn-ghost" onclick="document.getElementById(\'scanner-input\').click()">&#128247; Nova foto</button><button class="btn btn-primary" onclick="salvarDoScanner()">Salvar saída</button>'; })
+  var SERVER='https://fintrack-server-production-9d87.up.railway.app';
+  fetch(SERVER+'/scanner/analisar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:S.user,base64:base64,mediaType:mediaType,tipo:'cupom'})})
+  .then(function(r){return r.json();}).then(function(data){ g('scanner-loading').style.display='none'; if(data.error){g('scanner-error').textContent='Erro: '+data.error;g('scanner-error').style.display='block';return;} var res=data.resultado; g('sc-desc').value=res.descricao||''; g('sc-valor').value=res.valor||''; g('sc-data').value=res.data||hoje; if(res.itens){g('sc-obs').textContent='Itens: '+res.itens;g('sc-obs').style.display='block';} var sel=g('sc-cat'); var cm={'Alimentacao':'Alimentação','Transporte':'Transporte','Moradia':'Moradia','Saude':'Saúde','Lazer':'Lazer','Educacao':'Educação','Vestuario':'Vestuário','Outros':'Outros'}[res.categoria]||'Outros'; for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===cm){sel.selectedIndex=i;break;}} g('scanner-result').style.display='block'; g('scanner-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScanner()">Cancelar</button><button class="btn btn-ghost" onclick="document.getElementById(\'scanner-input\').click()">&#128247; Nova foto</button><button class="btn btn-primary" onclick="salvarDoScanner()">Salvar saída</button>'; })
   .catch(function(e){g('scanner-loading').style.display='none';g('scanner-error').textContent='Erro: '+e.message;g('scanner-error').style.display='block';});
 }
 function salvarDoScanner(){
@@ -2629,17 +2586,8 @@ function abrirScannerBoleto(){
   if(!isPro()){showUpgrade('Scanner de boletos');return;}
   g('scannerBoletoModal').style.display='flex'; g('sb-upload').style.display='block'; g('sb-preview').style.display='none'; g('sb-loading').style.display='none'; g('sb-result').style.display='none'; g('sb-error').style.display='none'; g('sb-obs').style.display='none';
   var d=ud(); if(!d) return; var sel=g('sb-cat'); if(sel) sel.innerHTML=d.cats.saida.map(function(cat){return '<option value="'+esc(cat)+'">'+esc(cat)+'</option>';}).join('');
-  fdb.ref('config/claude_key').once('value').then(function(snap){
-    CLAUDE_KEY=snap.val()||localStorage.getItem('ft_api_key')||'';
-    g('sb-setup').style.display=CLAUDE_KEY?'none':'block';
-    g('sb-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button>'+(CLAUDE_KEY?'<button class="btn btn-ghost" onclick="document.getElementById(\'sb-input\').click()">&#128247; Nova foto</button>':'');
-  }).catch(function(){
-    CLAUDE_KEY=localStorage.getItem('ft_api_key')||'';
-    g('sb-setup').style.display=CLAUDE_KEY?'none':'block';
-    g('sb-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button>'+(CLAUDE_KEY?'<button class="btn btn-ghost" onclick="document.getElementById(\'sb-input\').click()">&#128247; Nova foto</button>':'');
-  });
+  g('sb-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button>';
 }
-function salvarChaveApiBoleto(){ var key=g('sb-api-key').value.trim(); if(!key||!key.startsWith('sk-ant-')){toast('Inválida.','err');return;} localStorage.setItem('ft_api_key',key); CLAUDE_KEY=key; g('sb-setup').style.display='none'; toast('Chave salva!','ok'); }
 function fecharScannerBoleto(){ g('scannerBoletoModal').style.display='none'; var inp=g('sb-input'); if(inp) inp.value=''; }
 function boletoScannerDrop(e){ e.preventDefault(); var file=e.dataTransfer.files[0]; if(file&&file.type.startsWith('image/')) processarBoleto(file); }
 function processarBoleto(file){
@@ -2649,8 +2597,9 @@ function processarBoleto(file){
 }
 function analisarBoletoComClaude(base64,mediaType){
   var hoje=new Date().toISOString().slice(0,10);
-  fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':CLAUDE_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:400,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mediaType,data:base64}},{type:'text',text:'Analise este documento. JSON apenas: {"nome":"empresa","valor_total":0.00,"num_parcelas":1,"valor_parcela":0.00,"primeiro_vencimento":"YYYY-MM-DD","categoria":"Outros","obs":"detalhes"}. vencimento: '+hoje+' se nao encontrar.'}]}]})})
-  .then(function(r){return r.json();}).then(function(data){ g('sb-loading').style.display='none'; if(data.error){g('sb-error').textContent='Erro: '+data.error.message;g('sb-error').style.display='block';return;} var res=JSON.parse(data.content[0].text.trim().replace(/```json|```/g,'').trim()); g('sb-nome').value=res.nome||''; g('sb-valor').value=res.valor_total||res.valor_parcela||''; g('sb-venc').value=res.primeiro_vencimento||hoje; g('sb-parc').value=res.num_parcelas||1; g('sb-vparc').value=res.valor_parcela||''; if(res.obs){g('sb-obs').textContent=res.obs;g('sb-obs').style.display='block';} g('sb-result').style.display='block'; g('sb-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button><button class="btn btn-ghost" onclick="document.getElementById(\'sb-input\').click()">&#128247; Nova foto</button><button class="btn btn-primary" onclick="salvarDoBoleto()">Salvar parcela</button>'; })
+  var SERVER='https://fintrack-server-production-9d87.up.railway.app';
+  fetch(SERVER+'/scanner/analisar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:S.user,base64:base64,mediaType:mediaType,tipo:'boleto'})})
+  .then(function(r){return r.json();}).then(function(data){ g('sb-loading').style.display='none'; if(data.error){g('sb-error').textContent='Erro: '+data.error;g('sb-error').style.display='block';return;} var res=data.resultado; g('sb-nome').value=res.nome||''; g('sb-valor').value=res.valor_total||res.valor_parcela||''; g('sb-venc').value=res.primeiro_vencimento||hoje; g('sb-parc').value=res.num_parcelas||1; g('sb-vparc').value=res.valor_parcela||''; if(res.obs){g('sb-obs').textContent=res.obs;g('sb-obs').style.display='block';} g('sb-result').style.display='block'; g('sb-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharScannerBoleto()">Cancelar</button><button class="btn btn-ghost" onclick="document.getElementById(\'sb-input\').click()">&#128247; Nova foto</button><button class="btn btn-primary" onclick="salvarDoBoleto()">Salvar parcela</button>'; })
   .catch(function(e){g('sb-loading').style.display='none';g('sb-error').textContent='Erro: '+e.message;g('sb-error').style.display='block';});
 }
 function salvarDoBoleto(){ var nome=g('sb-nome').value.trim(),valor=parseFloat(g('sb-valor').value),venc=g('sb-venc').value,nparc=parseInt(g('sb-parc').value)||1,vparc=parseFloat(g('sb-vparc').value)||0,cat=g('sb-cat').value; if(!nome||isNaN(valor)||!venc){toast('Preencha os campos.','err');return;} var d=ud(); if(!d) return; var vp=vparc>0?vparc:parseFloat((valor/nparc).toFixed(2)); var pars=[]; for(var i=0;i<nparc;i++){var dd=new Date(venc+'T12:00:00');dd.setMonth(dd.getMonth()+i);pars.push({seq:i+1,date:dd.toISOString().slice(0,10),val:vp,pg:false});} d.parc.push({id:uid(),name:nome,cat:cat,tot:valor,pars:pars,st:'ativo'}); sud(d,function(){fecharScannerBoleto();toast('Parcela cadastrada!','ok');if(S.page==='parcelas')rParc();if(S.page==='dashboard')rDash();}); }
