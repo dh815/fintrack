@@ -1022,7 +1022,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
               <span class="panel-title">Contas &amp; Parcelas</span>
               <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="abrirScannerBoleto()" style="display:flex;align-items:center;gap:6px"><span class="mi" style="font-size:15px">document_scanner</span>Escanear boleto</button><button class="btn btn-primary" onclick="openModal('parcela',null)">+ Nova conta</button></div>
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--border)"><input id="parc-busca" oninput="rParc()" placeholder="&#128269; Buscar..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><select id="parc-cat" onchange="rParc()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todas categorias</option></select><select id="parc-venc" onchange="rParc()" style="flex:1;min-width:140px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todos vencimentos</option><option value="mes">Vence este m&#234;s</option><option value="prox">Pr&#243;ximos 30 dias</option><option value="atrasado">Atrasados</option></select><select id="parc-status" onchange="rParc()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todos status</option><option value="ativo">Ativos</option><option value="quitado">Quitados</option><option value="cancelado">Cancelados</option></select></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--border)"><input id="parc-busca" oninput="rParc()" placeholder="&#128269; Buscar..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><select id="parc-cat" onchange="rParc()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todas categorias</option></select><select id="parc-venc" onchange="rParc()" style="flex:1;min-width:140px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todos vencimentos</option><option value="mes">Vence este m&#234;s</option><option value="prox">Pr&#243;ximos 30 dias</option><option value="atrasado">Atrasados</option></select><select id="parc-status" onchange="rParc()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todos status</option><option value="ativo">Ativos</option><option value="quitado">Quitados</option><option value="cancelado">Cancelados</option></select><select id="parc-dia" onchange="rParc()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todos os dias</option></select></div>
             <div style="padding:4px 16px 6px;font-size:11px;color:var(--t3)" id="parc-info"></div>
             <div class="mobile-cards" id="mc-parc"></div>
             <div class="table-wrap">
@@ -2137,12 +2137,31 @@ function rParc(){
   var filtCat=g('parc-cat')?g('parc-cat').value:'';
   var filtVenc=g('parc-venc')?g('parc-venc').value:'';
   var filtStatus=g('parc-status')?g('parc-status').value:'';
+  var filtDia=g('parc-dia')?g('parc-dia').value:'';
+  // Atualiza dias disponíveis no select (só os dias que realmente existem, com base no próximo vencimento em aberto)
+  var diaSel=g('parc-dia');
+  if(diaSel){
+    var diasSet={};
+    d.parc.forEach(function(p){
+      var prox=p.pars&&p.pars.find(function(x){return !x.pg;});
+      if(prox){ var dd=new Date(prox.date+'T12:00:00').getDate(); diasSet[dd]=true; }
+    });
+    var dias=Object.keys(diasSet).map(Number).sort(function(a,b){return a-b;});
+    var curDia=diaSel.value;
+    diaSel.innerHTML='<option value="">Todos os dias</option>'+dias.map(function(dd){ return '<option value="'+dd+'"'+(curDia==String(dd)?' selected':'')+'>Dia '+String(dd).padStart(2,'0')+'</option>'; }).join('');
+    diaSel.value=curDia;
+  }
   var hoje=new Date(); hoje.setHours(0,0,0,0);
   var em30=new Date(hoje); em30.setDate(em30.getDate()+30);
   var lista=d.parc.filter(function(p){
     if(busca && p.name.toLowerCase().indexOf(busca)<0) return false;
     if(filtCat && p.cat!==filtCat) return false;
     if(filtStatus && p.st!==filtStatus) return false;
+    if(filtDia){
+      var proxD=p.pars.find(function(x){return !x.pg;});
+      if(!proxD) return false;
+      if(new Date(proxD.date+'T12:00:00').getDate()!==parseInt(filtDia,10)) return false;
+    }
     if(filtVenc){
       var prox=p.pars.find(function(x){return !x.pg;});
       if(!prox) return filtVenc==='quitado';
