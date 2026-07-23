@@ -840,7 +840,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
         <div><div class="sb-brand">Fin<span>track</span></div></div>
         <button class="sb-collapse-btn" onclick="toggleSbCollapse()" title="Recolher menu"><span class="mi" style="font-size:16px">menu_open</span></button>
       </div>
-      <div class="sb-user">
+      <div class="sb-user" style="display:none">
         <div class="sb-avatar" id="sbAvatar">?</div>
         <div><div class="sb-uname" id="sbName">-</div><div class="sb-utag">conta pessoal</div></div>
       </div>
@@ -901,9 +901,9 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
           <div class="hero-saldo" id="d-hero"></div>
           <div class="metrics" id="d-metrics"></div>
 
-          <!-- CHART ROW 1: Donut -->
+          <!-- CHART ROW 1: Donut categorias + Barras entradas/saídas -->
           <div class="chart-grid">
-            <div class="panel" style="grid-column:1 / -1">
+            <div class="panel">
               <div class="panel-head">
                 <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--purple)">donut_large</span>Gastos por Categoria</span>
               </div>
@@ -914,10 +914,6 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
                 <div class="chart-legend" style="padding:0 0 0 12px;flex:1" id="d-donut-legend"></div>
               </div>
             </div>
-          </div>
-
-          <!-- CHART ROW 2: Barras saldo + Investimentos -->
-          <div class="chart-grid">
             <div class="panel">
               <div class="panel-head">
                 <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--blue)">bar_chart</span>Entradas x Sa&#237;das (mensal)</span>
@@ -926,7 +922,11 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
                 <canvas id="ch-bar" height="180"></canvas>
               </div>
             </div>
-            <div class="panel">
+          </div>
+
+          <!-- CHART ROW 2: Investimentos -->
+          <div class="chart-grid">
+            <div class="panel" style="grid-column:1 / -1">
               <div class="panel-head">
                 <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--blue)">candlestick_chart</span>Carteira de Investimentos</span>
               </div>
