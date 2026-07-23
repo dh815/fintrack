@@ -876,9 +876,12 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
       <div class="topbar">
         <div class="topbar-left">
           <button class="menu-btn" onclick="toggleSb()"><span class="mi" style="font-size:22px">menu</span></button>
-          <div class="page-title" id="pageTitle">Dashboard</div>
+          <div>
+            <div class="page-title" id="pageTitle">Dashboard</div>
+            <div id="pageSubtitle" style="display:none;font-size:12px;color:var(--t3);margin-top:2px"></div>
+          </div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px">
+        <div style="display:flex;align-items:center;gap:12px">
           <div class="month-nav">
             <button onclick="chMonth(-1)"><span class="mi" style="font-size:18px">chevron_left</span></button>
             <span id="monthLbl">-</span>
@@ -888,6 +891,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
             <span class="mi" style="font-size:15px">picture_as_pdf</span>
             <span class="hide-desktop" style="display:none">Exportar</span>
           </button>
+          <div class="sb-avatar" id="topAvatar" style="width:34px;height:34px;font-size:13px"></div>
         </div>
       </div>
       <div class="content">
@@ -1452,6 +1456,7 @@ function showApp(n){
   g('changePassScreen').style.display='none';
   g('appScreen').style.display='block';
   g('sbName').textContent=n; g('sbAvatar').textContent=n.charAt(0).toUpperCase();
+  if(g('topAvatar')) g('topAvatar').textContent=n.charAt(0).toUpperCase();
   try{
     if(localStorage.getItem('ft_sb_collapsed')==='1'){
       g('sidebar').classList.add('collapsed');
@@ -1467,6 +1472,8 @@ function showApp(n){
     if(proBar) proBar.style.display=(acc.role==='free')?'block':'none';
     var sbAv=g('sbAvatar');
     if(sbAv && acc.foto) sbAv.innerHTML='<img src="'+acc.foto+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+    var topAv=g('topAvatar');
+    if(topAv) topAv.innerHTML = acc.foto ? '<img src="'+acc.foto+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">' : n.charAt(0).toUpperCase();
   });
   updMonth(); nav('dashboard');
 }
@@ -1528,9 +1535,19 @@ function nav(p){
   document.querySelectorAll('.sb-item').forEach(function(el){ el.classList.toggle('active',el.getAttribute('data-p')===p); });
   document.querySelectorAll('.page').forEach(function(el){ el.classList.remove('active'); });
   var pg=g('page-'+p); if(pg) pg.classList.add('active');
-  g('pageTitle').textContent=PTITLES[p]||p;
+  atualizarTituloTopo(p);
   document.querySelectorAll('.bn-item').forEach(function(el){ el.classList.toggle('active',el.getAttribute('data-p')===p); });
   closeSb(); render(p);
+}
+function atualizarTituloTopo(p){
+  var sub=g('pageSubtitle');
+  if(p==='dashboard'){
+    g('pageTitle').textContent='Olá, '+(S.accName||S.user||'');
+    if(sub){ sub.textContent=MONTHS[S.month]+' '+S.year+' · resumo do mês'; sub.style.display='block'; }
+  } else {
+    g('pageTitle').textContent=PTITLES[p]||p;
+    if(sub) sub.style.display='none';
+  }
 }
 function render(p){
   if(p==='dashboard') rDash();
@@ -1554,13 +1571,19 @@ function updMonth(){
 function chMonth(d){
   S.month+=d;
   if(S.month>11){S.month=0;S.year++;} if(S.month<0){S.month=11;S.year--;}
-  updMonth(); render(S.page);
+  updMonth(); atualizarTituloTopo(S.page); render(S.page);
 }
 function inM(ds){ var d=new Date(ds+'T12:00:00'); return d.getMonth()===S.month&&d.getFullYear()===S.year; }
 
 // FORMAT
 function fmt(n){ return '<span class="mono-val">R$ '+parseFloat(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'</span>'; }
 function fmtTxt(n){ return 'R$ '+parseFloat(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtHero(n){
+  var v=parseFloat(n||0); var neg=v<0; var abs=Math.abs(v);
+  var s=abs.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  var parts=s.split(',');
+  return '<span class="mono-val">'+(neg?'-':'')+'R$ '+parts[0]+'<small style="font-size:.5em;font-weight:500;color:var(--t3)">,'+parts[1]+'</small></span>';
+}
 function fd(s){ if(!s) return '—'; var p=s.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2); }
 function g(id){ return document.getElementById(id); }
@@ -1591,11 +1614,23 @@ function rDash(){
     return a+p.pars.filter(function(x){return !x.pg && inM(x.date);}).length;
   },0);
 
+  // Saldo do mês anterior (para comparação)
+  var pm=S.month-1, py=S.year; if(pm<0){pm=11;py--;}
+  var entPrev=d.ent.filter(function(e){var dd=new Date(e.date+'T12:00:00');return dd.getMonth()===pm&&dd.getFullYear()===py;});
+  var saiPrev=d.sai.filter(function(s){var dd=new Date(s.date+'T12:00:00');return dd.getMonth()===pm&&dd.getFullYear()===py;});
+  var salPrev=sum(entPrev)-sum(saiPrev);
+  var deltaHtml='';
+  if(salPrev!==0){
+    var pct=(sal-salPrev)/Math.abs(salPrev)*100;
+    var up=pct>=0;
+    deltaHtml='<div class="hero-saldo-sub" style="color:'+(up?'var(--teal)':'var(--red)')+'">'+(up?'↑':'↓')+' '+Math.abs(pct).toFixed(1).replace('.',',')+'% vs. mês passado</div>';
+  }
+
   // HERO SALDO
   g('d-hero').innerHTML=
-    '<div class="hero-saldo-label">Saldo de '+MONTHS[S.month]+'</div>'+
-    '<div class="hero-saldo-val" style="color:'+(sal>=0?'var(--teal)':'var(--red)')+'">'+fmt(sal)+'</div>'+
-    '<div class="hero-saldo-sub">'+fmtTxt(tE)+' em entradas · '+fmtTxt(tS)+' em saídas</div>';
+    '<div class="hero-saldo-label">Saldo do mês</div>'+
+    '<div class="hero-saldo-val" style="color:'+(sal>=0?'var(--teal)':'var(--red)')+'">'+fmtHero(sal)+'</div>'+
+    deltaHtml;
 
   // METRICS
   g('d-metrics').innerHTML=
@@ -1994,7 +2029,7 @@ function rSal(){
   var tE=sum(ent),tS=sum(sai),sal=tE-tS;
   if(g('sal-hero')) g('sal-hero').innerHTML=
     '<div class="hero-saldo-label">Saldo de '+MONTHS[S.month]+'</div>'+
-    '<div class="hero-saldo-val" style="color:'+(sal>=0?'var(--teal)':'var(--red)')+'">'+fmt(sal)+'</div>'+
+    '<div class="hero-saldo-val" style="color:'+(sal>=0?'var(--teal)':'var(--red)')+'">'+fmtHero(sal)+'</div>'+
     '<div class="hero-saldo-sub">'+fmtTxt(tE)+' em entradas · '+fmtTxt(tS)+' em saídas</div>';
   g('s-metrics').innerHTML=
     mc('<span class="mi">trending_up</span>','Entradas',fmt(tE),'teal',ent.length+' registros')+
@@ -2458,6 +2493,11 @@ function rPerfil(){
     if(sbAv){
       if(acc.foto) sbAv.innerHTML='<img src="'+acc.foto+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
       else sbAv.textContent=(acc.n||S.user).charAt(0).toUpperCase();
+    }
+    var topAv=g('topAvatar');
+    if(topAv){
+      if(acc.foto) topAv.innerHTML='<img src="'+acc.foto+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+      else topAv.textContent=(acc.n||S.user).charAt(0).toUpperCase();
     }
     // E-mail e status da assinatura recorrente
     S.email=acc.email||'';
@@ -3024,6 +3064,8 @@ function uploadFoto(input){
         // Atualiza avatar no sidebar
         var sbAv = g('sbAvatar');
         if(sbAv) sbAv.innerHTML = '<img src="'+data.secure_url+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+        var topAv = g('topAvatar');
+        if(topAv) topAv.innerHTML = '<img src="'+data.secure_url+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
         toast('Foto atualizada!','ok');
       });
     } else {
