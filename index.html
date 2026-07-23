@@ -328,6 +328,13 @@ body {
 .hero-saldo-val { position: relative; font-size: 38px; font-weight: 700; letter-spacing: -0.5px; }
 .hero-saldo-sub { position: relative; font-size: 12px; color: var(--t3); margin-top: 6px; }
 @media (max-width: 680px) { .hero-saldo-val { font-size: 28px; } .hero-saldo { padding: 18px 20px; } }
+.perfil-row { display:flex; align-items:center; gap:12px; padding:14px 20px; cursor:pointer; border-bottom:1px solid var(--border); transition:background .15s; }
+.perfil-row:hover { background: var(--s2); }
+.perfil-row-icon { width:32px;height:32px;border-radius:8px;background:var(--s3);display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.perfil-row-icon .mi { font-size:16px; }
+.perfil-row-label { font-weight:600; font-size:13px; min-width:80px; flex-shrink:0; }
+.perfil-row-val { flex:1; color:var(--t2); font-size:13px; font-family:'IBM Plex Mono',monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.perfil-row-edit { color:var(--t3); font-size:16px; flex-shrink:0; }
 .credit-card-visual {
   background: linear-gradient(135deg, var(--s2), var(--s3));
   border: 1px solid var(--border2); border-radius: var(--r);
@@ -1052,28 +1059,76 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
         </div>
 
         <!-- PERFIL -->
-        <div class="page" id="page-perfil"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:700px"><div class="panel"><div class="panel-head"><span class="panel-title">Dados da conta</span></div><div style="padding:20px"><div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+        <div class="page" id="page-perfil" style="max-width:640px">
+          <!-- Card de identidade -->
+          <div class="panel" style="margin-bottom:16px">
+            <div style="display:flex;align-items:center;gap:16px;padding:20px">
               <div style="position:relative;flex-shrink:0">
-                <div id="perfil-avatar" style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#07090F;overflow:hidden"></div>
-                <button onclick="document.getElementById('foto-input').click()" style="position:absolute;bottom:0;right:0;width:22px;height:22px;background:var(--teal);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">
-                  <span class="mi" style="font-size:13px;color:#07090F">photo_camera</span>
+                <div id="perfil-avatar" style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#07090F;overflow:hidden"></div>
+                <button onclick="document.getElementById('foto-input').click()" style="position:absolute;bottom:-2px;right:-2px;width:20px;height:20px;background:var(--teal);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">
+                  <span class="mi" style="font-size:12px;color:#07090F">photo_camera</span>
                 </button>
                 <input type="file" id="foto-input" accept="image/*" style="display:none" onchange="uploadFoto(this)">
               </div>
-              <div>
-                <div id="perfil-nome" style="font-size:18px;font-weight:700;margin-bottom:4px">-</div>
-                <div style="font-size:13px;color:var(--t2)">Usu&#225;rio: <b id="perfil-user">-</b></div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div id="perfil-nome" style="font-size:17px;font-weight:700">-</div>
+                  <button onclick="toggleEditRow('nome')" style="background:none;border:none;cursor:pointer;color:var(--t3);padding:2px;display:flex"><span class="mi" style="font-size:15px">edit</span></button>
+                </div>
+                <div id="perfil-status-line" style="font-size:13px;margin-top:2px"></div>
               </div>
             </div>
-            <div class="field"><label>Nome</label><input type="text" id="p-nome" placeholder="Seu nome completo" style="width:100%;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>
-            <button class="btn btn-primary" style="width:100%" onclick="salvarNome()">Salvar nome</button>
-            </div></div><div class="panel"><div class="panel-head"><span class="panel-title"><span class="mi" style="font-size:16px;vertical-align:middle;margin-right:6px">star</span>Assinatura</span></div><div style="padding:20px" id="p-assinatura-wrap">
+            <div id="edit-nome-wrap" style="display:none;padding:16px 20px 20px;border-top:1px solid var(--border)">
+              <div class="field"><label>Nome</label><input type="text" id="p-nome" placeholder="Seu nome completo" style="width:100%;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>
+              <button class="btn btn-primary" style="width:100%" onclick="salvarNome()">Salvar nome</button>
+              <p style="font-size:12px;color:var(--t3);margin-top:10px">Usu&#225;rio: <b id="perfil-user">-</b></p>
+            </div>
+          </div>
+
+          <!-- Card de informações -->
+          <div class="panel">
+            <div class="perfil-row" onclick="toggleEditRow('email')">
+              <div class="perfil-row-icon"><span class="mi">mail</span></div>
+              <div class="perfil-row-label">E-mail</div>
+              <div class="perfil-row-val" id="perfil-email-val">-</div>
+              <span class="mi perfil-row-edit">edit</span>
+            </div>
+            <div id="edit-email-wrap" style="display:none;padding:0 20px 18px">
               <div class="field"><label>E-mail</label><input type="email" id="p-email" placeholder="seuemail@exemplo.com" style="width:100%;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>
-              <p style="font-size:12px;color:var(--t3);margin-bottom:16px">Usado para a cobrança recorrente do plano Pro</p>
-              <button class="btn btn-primary" style="width:100%;margin-bottom:14px" onclick="salvarEmail()">Salvar e-mail</button>
+              <p style="font-size:12px;color:var(--t3);margin-bottom:12px">Usado para a cobrança recorrente do plano Pro</p>
+              <button class="btn btn-primary" style="width:100%" onclick="salvarEmail()">Salvar e-mail</button>
+            </div>
+
+            <div class="perfil-row" onclick="toggleEditRow('whats')">
+              <div class="perfil-row-icon"><span class="mi" style="color:#25D366">chat</span></div>
+              <div class="perfil-row-label">WhatsApp</div>
+              <div class="perfil-row-val" id="perfil-whats-val">-</div>
+              <span class="mi perfil-row-edit">edit</span>
+            </div>
+            <div id="edit-whats-wrap" style="display:none;padding:0 20px 18px">
+              <div class="field"><label>N&#250;mero com DDD</label><input type="tel" id="p-whats" placeholder="Ex: 19999999999" style="width:100%;padding:10px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div>
+              <p style="font-size:12px;color:var(--t3);margin-bottom:12px">Vincule seu WhatsApp para registrar gastos enviando mensagem para o bot</p>
+              <div id="p-whats-atual" style="font-size:12px;color:var(--teal);margin-bottom:10px"></div>
+              <button class="btn btn-primary" style="width:100%;background:#25D366" onclick="salvarWhatsApp()"><span class="mi" style="font-size:15px;vertical-align:middle">chat</span> Salvar WhatsApp</button>
+            </div>
+
+            <div class="perfil-row" onclick="toggleEditRow('assinatura')" style="border-bottom:none">
+              <div class="perfil-row-icon"><span class="mi">workspace_premium</span></div>
+              <div class="perfil-row-label">Assinatura</div>
+              <div class="perfil-row-val" id="perfil-assinatura-val">-</div>
+              <span class="badge" id="perfil-assinatura-badge"></span>
+            </div>
+            <div id="edit-assinatura-wrap" style="display:none;padding:0 20px 18px">
               <div id="p-assinatura-status" style="font-size:13px;color:var(--t2)"></div>
-            </div></div><div class="panel"><div class="panel-head"><span class="panel-title">Trocar senha</span></div><div style="padding:20px"><div class="field"><label>Senha atual</label><input type="password" id="p-atual" placeholder="••••••••"></div><div class="field"><label>Nova senha</label><input type="password" id="p-nova" placeholder="M&#237;nimo 4 caracteres"></div><div class="field"><label>Confirmar</label><input type="password" id="p-conf" placeholder="Repita a senha"></div><div class="auth-error" id="p-err" style="margin-bottom:12px"></div><button class="btn btn-primary" style="width:100%" onclick="salvarSenha()">Salvar nova senha</button></div></div>
-            <div class="panel"><div class="panel-head"><span class="panel-title"><span class="mi" style="font-size:16px;vertical-align:middle;margin-right:6px;color:#25D366">chat</span>WhatsApp</span></div><div style="padding:20px"><div class="field"><label>Número com DDD</label><input type="tel" id="p-whats" placeholder="Ex: 19999999999" style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit;outline:none"></div><p style="font-size:12px;color:var(--t3);margin-bottom:16px">Vincule seu WhatsApp para registrar gastos enviando mensagem para o bot</p><div id="p-whats-atual" style="font-size:13px;color:var(--teal);margin-bottom:12px"></div><button class="btn btn-primary" style="width:100%;background:#25D366" onclick="salvarWhatsApp()"><span class="mi" style="font-size:15px;vertical-align:middle">chat</span> Salvar WhatsApp</button></div></div></div></div>
+            </div>
+          </div>
+
+          <!-- Trocar senha -->
+          <div class="panel" style="margin-top:16px">
+            <div class="panel-head"><span class="panel-title">Trocar senha</span></div>
+            <div style="padding:20px"><div class="field"><label>Senha atual</label><input type="password" id="p-atual" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;"></div><div class="field"><label>Nova senha</label><input type="password" id="p-nova" placeholder="M&#237;nimo 4 caracteres"></div><div class="field"><label>Confirmar</label><input type="password" id="p-conf" placeholder="Repita a senha"></div><div class="auth-error" id="p-err" style="margin-bottom:12px"></div><button class="btn btn-primary" style="width:100%" onclick="salvarSenha()">Salvar nova senha</button></div>
+          </div>
+        </div>
 
         <!-- CREDITO A VISTA -->
         <div class="page" id="page-credito" style="max-width:100%;overflow-x:hidden;">
@@ -1544,10 +1599,19 @@ function atualizarTituloTopo(p){
   if(p==='dashboard'){
     g('pageTitle').textContent='Olá, '+(S.accName||S.user||'');
     if(sub){ sub.textContent=MONTHS[S.month]+' '+S.year+' · resumo do mês'; sub.style.display='block'; }
+  } else if(p==='perfil'){
+    g('pageTitle').textContent='Perfil';
+    if(sub){ sub.textContent='Dados da conta'; sub.style.display='block'; }
   } else {
     g('pageTitle').textContent=PTITLES[p]||p;
     if(sub) sub.style.display='none';
   }
+}
+function toggleEditRow(which){
+  ['nome','email','whats','assinatura'].forEach(function(k){
+    var el=g('edit-'+k+'-wrap');
+    if(el) el.style.display=(k===which && el.style.display==='none')?'block':'none';
+  });
 }
 function render(p){
   if(p==='dashboard') rDash();
@@ -2502,6 +2566,29 @@ function rPerfil(){
     // E-mail e status da assinatura recorrente
     S.email=acc.email||'';
     if(g('p-email')) g('p-email').value=acc.email||'';
+    if(g('perfil-email-val')) g('perfil-email-val').textContent=acc.email||'—';
+    if(g('p-whats')) g('p-whats').value=acc.whatsapp||'';
+    if(g('perfil-whats-val')) g('perfil-whats-val').textContent=acc.whatsapp?'('+acc.whatsapp.slice(0,2)+') '+acc.whatsapp.slice(2,7)+'-'+acc.whatsapp.slice(7):'—';
+    var statusLine=g('perfil-status-line');
+    var valBadge=g('perfil-assinatura-val');
+    var badge=g('perfil-assinatura-badge');
+    if(acc.role==='pro'&&acc.subscriptionStatus==='authorized'){
+      if(statusLine) statusLine.innerHTML='<span style="color:var(--teal)">✓ Pro · renovação automática</span>';
+      if(valBadge) valBadge.textContent='R$ 29,00/mês';
+      if(badge){ badge.textContent='ATIVA'; badge.className='badge bg-teal'; badge.style.display='inline-block'; }
+    } else if(acc.subscriptionStatus==='pending'){
+      if(statusLine) statusLine.innerHTML='<span style="color:var(--yellow)">⏳ Assinatura pendente</span>';
+      if(valBadge) valBadge.textContent='Aguardando autorização';
+      if(badge){ badge.textContent='PENDENTE'; badge.className='badge bg-yellow'; badge.style.display='inline-block'; }
+    } else if(acc.role==='admin'){
+      if(statusLine) statusLine.innerHTML='<span style="color:var(--purple)">👑 Conta administradora</span>';
+      if(valBadge) valBadge.textContent='—';
+      if(badge) badge.style.display='none';
+    } else {
+      if(statusLine) statusLine.innerHTML='<span style="color:var(--t3)">Plano Free</span>';
+      if(valBadge) valBadge.textContent='—';
+      if(badge){ badge.textContent='FREE'; badge.className='badge bg-muted'; badge.style.display='inline-block'; }
+    }
     var st=g('p-assinatura-status');
     if(st){
       if(acc.role==='pro'&&acc.subscriptionStatus==='authorized'){
@@ -2513,7 +2600,7 @@ function rPerfil(){
       } else if(acc.role==='admin'){
         st.innerHTML='👑 Conta administradora.';
       } else {
-        st.innerHTML='Você está no plano Free. Assine o Pro para liberar a renovação automática.';
+        st.innerHTML='Você está no plano Free. <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="showUpgrade(\'Perfil\')">Assinar Pro</button>';
       }
     }
   });
