@@ -909,13 +909,13 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
           <div class="metrics" id="d-metrics"></div>
 
           <!-- CHART ROW 1: Carteira + Entradas x Saídas + Gastos por Categoria -->
-          <div class="chart-grid" style="grid-template-columns:1fr 1fr 1fr;align-items:start">
+          <div class="chart-grid" style="grid-template-columns:1fr 1fr 1fr">
             <div class="panel">
               <div class="panel-head">
                 <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--blue)">candlestick_chart</span>Carteira de Investimentos</span>
               </div>
-              <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px">
-                <div class="chart-wrap" style="width:130px">
+              <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;height:340px;box-sizing:border-box">
+                <div class="chart-wrap" style="width:130px;flex-shrink:0">
                   <canvas id="ch-inv" width="130" height="130"></canvas>
                 </div>
                 <div class="chart-legend" style="padding:0;width:100%" id="d-inv-legend"></div>
@@ -925,16 +925,18 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
               <div class="panel-head">
                 <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--blue)">bar_chart</span>Entradas x Sa&#237;das</span>
               </div>
-              <div class="chart-wrap" style="padding:16px 16px 8px">
-                <canvas id="ch-bar" height="180"></canvas>
+              <div style="display:flex;flex-direction:column;justify-content:center;padding:16px;height:340px;box-sizing:border-box">
+                <div class="chart-wrap">
+                  <canvas id="ch-bar" height="180"></canvas>
+                </div>
               </div>
             </div>
             <div class="panel">
               <div class="panel-head">
                 <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--purple)">donut_large</span>Gastos por Categoria</span>
               </div>
-              <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px">
-                <div class="chart-wrap" style="width:130px">
+              <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;height:340px;box-sizing:border-box">
+                <div class="chart-wrap" style="width:130px;flex-shrink:0">
                   <canvas id="ch-donut" width="130" height="130"></canvas>
                 </div>
                 <div class="chart-legend" style="padding:0;width:100%" id="d-donut-legend"></div>
