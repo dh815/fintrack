@@ -786,7 +786,33 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
     </div>
     <button class="auth-btn" onclick="doLogin()">Entrar</button>
     <div class="auth-error" id="loginError">Usu&#225;rio ou senha incorretos.</div>
+    <div class="auth-switch"><button onclick="showForgot()" style="color:var(--teal)">Esqueci minha senha</button></div>
     <div class="auth-switch">Sem conta? <button onclick="showRegister()">Criar conta grátis</button></div>
+  </div>
+</div>
+
+<!-- ESQUECI MINHA SENHA -->
+<div class="auth-screen" id="forgotScreen" style="display:none">
+  <div class="auth-card">
+    <div class="auth-logo"><div class="auth-logo-icon"><span class="mi">mail</span></div><h1>Recuperar <span>senha</span></h1><p>Vamos enviar um link para o seu e-mail</p></div>
+    <div class="auth-field"><label>Usu&#225;rio</label><input type="text" id="forgotUser" placeholder="Seu nome de usu&#225;rio" autocomplete="username"></div>
+    <button class="auth-btn" id="forgotBtn" onclick="solicitarReset()">Enviar link de recupera&#231;&#227;o</button>
+    <div class="auth-error" id="forgotError"></div>
+    <div id="forgotOk" style="display:none;background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);border-radius:10px;padding:12px;font-size:13px;color:#00C896;margin-top:14px;line-height:1.5">
+      Se esse usu&#225;rio existir e tiver um e-mail cadastrado, um link de recupera&#231;&#227;o foi enviado. Confira sua caixa de entrada (e o spam).
+    </div>
+    <div class="auth-switch"><button onclick="voltarLoginDeForgot()">Voltar para o login</button></div>
+  </div>
+</div>
+
+<!-- REDEFINIR SENHA (via link do e-mail) -->
+<div class="auth-screen" id="resetScreen" style="display:none">
+  <div class="auth-card">
+    <div class="auth-logo"><div class="auth-logo-icon"><span class="mi">lock_reset</span></div><h1>Nova <span>senha</span></h1><p>Escolha uma nova senha para sua conta</p></div>
+    <div class="auth-field"><label>Nova senha</label><input type="password" id="resetNewPass" placeholder="M&#237;nimo 4 caracteres"></div>
+    <div class="auth-field"><label>Confirmar</label><input type="password" id="resetConfPass" placeholder="Repita a senha"></div>
+    <button class="auth-btn" id="resetBtn" onclick="confirmarReset()">Salvar nova senha</button>
+    <div class="auth-error" id="resetError"></div>
   </div>
 </div>
 
@@ -1480,6 +1506,63 @@ function doLogout(){
 }
 function showRegister(){ g('loginScreen').style.display='none'; g('registerScreen').style.display='flex'; }
 function showLogin(){ g('registerScreen').style.display='none'; g('loginScreen').style.display='flex'; }
+function showForgot(){ g('loginScreen').style.display='none'; g('forgotScreen').style.display='flex'; g('forgotOk').style.display='none'; g('forgotError').textContent=''; }
+function voltarLoginDeForgot(){ g('forgotScreen').style.display='none'; g('loginScreen').style.display='flex'; }
+
+function solicitarReset(){
+  var username=g('forgotUser').value.trim();
+  var err=g('forgotError'); err.textContent='';
+  if(!username){ err.textContent='Digite seu usuário.'; return; }
+  var btn=g('forgotBtn'); btn.textContent='Enviando...'; btn.disabled=true;
+  var SERVER='https://fintrack-server-production-9d87.up.railway.app';
+  fetch(SERVER+'/senha/solicitar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:username})})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    btn.textContent='Enviar link de recuperação'; btn.disabled=false;
+    g('forgotOk').style.display='block';
+  })
+  .catch(function(e){
+    btn.textContent='Enviar link de recuperação'; btn.disabled=false;
+    err.textContent='Erro ao enviar. Tente novamente em instantes.';
+  });
+}
+
+function confirmarReset(){
+  var novaSenha=g('resetNewPass').value;
+  var confSenha=g('resetConfPass').value;
+  var err=g('resetError'); err.textContent='';
+  if(!novaSenha||novaSenha.length<4){ err.textContent='A senha deve ter pelo menos 4 caracteres.'; return; }
+  if(novaSenha!==confSenha){ err.textContent='As senhas não coincidem.'; return; }
+  var params=new URLSearchParams(window.location.search);
+  var token=params.get('reset'); var username=params.get('u');
+  if(!token||!username){ err.textContent='Link inválido ou expirado.'; return; }
+  var btn=g('resetBtn'); btn.textContent='Salvando...'; btn.disabled=true;
+  var SERVER='https://fintrack-server-production-9d87.up.railway.app';
+  fetch(SERVER+'/senha/redefinir',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:username,token:token,novaSenha:novaSenha})})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    btn.textContent='Salvar nova senha'; btn.disabled=false;
+    if(data.success){
+      toast('Senha atualizada! Faça login com a nova senha.','ok');
+      history.replaceState(null,'',window.location.pathname);
+      g('resetScreen').style.display='none'; g('loginScreen').style.display='flex';
+    } else {
+      err.textContent=data.error||'Erro ao redefinir senha.';
+    }
+  })
+  .catch(function(e){ btn.textContent='Salvar nova senha'; btn.disabled=false; err.textContent='Erro: '+e.message; });
+}
+
+// Detecta link de redefinição de senha na URL, ao carregar a página
+(function(){
+  var params=new URLSearchParams(window.location.search);
+  if(params.get('reset')&&params.get('u')){
+    document.addEventListener('DOMContentLoaded',function(){
+      g('loginScreen').style.display='none';
+      g('resetScreen').style.display='flex';
+    });
+  }
+})();
 function showApp(n){
   g('loginScreen').style.display='none'; g('registerScreen').style.display='none';
   g('changePassScreen').style.display='none';
