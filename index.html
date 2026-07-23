@@ -908,64 +908,36 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
           <div class="hero-saldo" id="d-hero"></div>
           <div class="metrics" id="d-metrics"></div>
 
-          <!-- CHART ROW 1: Donut categorias + Barras entradas/saídas -->
-          <div class="chart-grid">
+          <!-- CHART ROW 1: Carteira + Entradas x Saídas + Gastos por Categoria -->
+          <div class="chart-grid" style="grid-template-columns:1fr 1fr 1fr">
             <div class="panel">
               <div class="panel-head">
-                <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--purple)">donut_large</span>Gastos por Categoria</span>
+                <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--blue)">candlestick_chart</span>Carteira de Investimentos</span>
               </div>
-              <div style="display:flex;align-items:center;gap:0;padding:16px">
-                <div class="chart-wrap" style="width:160px;flex-shrink:0">
-                  <canvas id="ch-donut" width="160" height="160"></canvas>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px">
+                <div class="chart-wrap" style="width:130px">
+                  <canvas id="ch-inv" width="130" height="130"></canvas>
                 </div>
-                <div class="chart-legend" style="padding:0 0 0 12px;flex:1" id="d-donut-legend"></div>
+                <div class="chart-legend" style="padding:0;width:100%" id="d-inv-legend"></div>
               </div>
             </div>
             <div class="panel">
               <div class="panel-head">
-                <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--blue)">bar_chart</span>Entradas x Sa&#237;das (mensal)</span>
+                <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--blue)">bar_chart</span>Entradas x Sa&#237;das</span>
               </div>
               <div class="chart-wrap" style="padding:16px 16px 8px">
                 <canvas id="ch-bar" height="180"></canvas>
               </div>
             </div>
-          </div>
-
-          <!-- CHART ROW 2: Investimentos -->
-          <div class="chart-grid">
-            <div class="panel" style="grid-column:1 / -1">
+            <div class="panel">
               <div class="panel-head">
-                <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--blue)">candlestick_chart</span>Carteira de Investimentos</span>
+                <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--purple)">donut_large</span>Gastos por Categoria</span>
               </div>
-              <div style="display:flex;align-items:center;gap:0;padding:16px">
-                <div class="chart-wrap" style="width:160px;flex-shrink:0">
-                  <canvas id="ch-inv" width="160" height="160"></canvas>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px">
+                <div class="chart-wrap" style="width:130px">
+                  <canvas id="ch-donut" width="130" height="130"></canvas>
                 </div>
-                <div class="chart-legend" style="padding:0 0 0 12px;flex:1" id="d-inv-legend"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- CHART ROW 3: Metas + Recentes + Resumo -->
-          <div class="dash-grid">
-            <div class="dash-col">
-              <div class="panel">
-                <div class="panel-head"><span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--yellow)">target</span>Metas</span></div>
-                <div style="padding:14px 20px" id="d-plans"></div>
-              </div>
-              <div class="panel">
-                <div class="panel-head"><span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--teal)">receipt_long</span>Parcelas Ativas</span></div>
-                <div style="padding:4px 20px 14px" id="d-parc-chart"></div>
-              </div>
-            </div>
-            <div class="dash-col">
-              <div class="panel">
-                <div class="panel-head"><span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--t2)">receipt</span>&#218;ltimas Transa&#231;&#245;es</span></div>
-                <div id="d-recent"></div>
-              </div>
-              <div class="panel">
-                <div class="panel-head"><span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--teal)">summarize</span>Resumo do M&#234;s</span></div>
-                <div style="padding:4px 20px 16px" id="d-summary"></div>
+                <div class="chart-legend" style="padding:0;width:100%" id="d-donut-legend"></div>
               </div>
             </div>
           </div>
@@ -1704,63 +1676,6 @@ function rDash(){
     mc('<span class="mi">receipt_long</span>','Parcelas',String(pAb),'yellow','contas ativas')+
     mc('<span class="mi">payments</span>','A Pagar',fmt(parcTotal),'purple','total em aberto')+
     mc('<span class="mi">calendar_month</span>','Parcelas '+MONTHS[S.month].slice(0,3),fmt(parcMes),'yellow',parcMesQtd+' venc. no m\u00eas');
-
-  // SUMMARY
-  g('d-summary').innerHTML=
-    sr('Total de entradas',fmt(tE),'var(--teal)')+
-    sr('Total de saídas',fmt(tS),'var(--red)')+
-    sr('Saldo',fmt(sal),sal>=0?'var(--teal)':'var(--red)')+
-    sr('Taxa de economia',(tE>0?Math.max(0,sal/tE*100).toFixed(1):0)+'%','var(--t1)');
-
-  // RECENT
-  var all=[].concat(
-    ent.map(function(e){return Object.assign({},e,{_t:'E'});}),
-    sai.map(function(s){return Object.assign({},s,{_t:'S'})})
-  ).sort(function(a,b){return new Date(b.date)-new Date(a.date);}).slice(0,8);
-  g('d-recent').innerHTML=all.length?
-    '<table style="width:100%"><thead><tr><th>Data</th><th>Descrição</th><th>Valor</th></tr></thead><tbody>'+
-    all.map(function(t){
-      return '<tr><td style="font-size:12px;color:var(--t2)">'+fd(t.date)+'</td>'+
-        '<td style="font-size:13px">'+esc(t.desc)+'</td>'+
-        '<td style="font-weight:700;font-size:13px;color:'+(t._t==='E'?'var(--teal)':'var(--red)')+'">'+
-        (t._t==='E'?'+':'-')+fmt(t.val)+'</td></tr>';
-    }).join('')+'</tbody></table>':
-    empt('Sem transações neste mês');
-
-  // PLANS
-  g('d-plans').innerHTML=d.plans.length?d.plans.map(function(p){
-    var pct=Math.min(100,((p.cur||0)/p.tgt*100));
-    var falta=Math.max(0,p.tgt-(p.cur||0));
-    var cor=pct>=100?'var(--teal)':pct>=50?'var(--blue)':'var(--purple)';
-    return '<div style="background:var(--s2);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px;margin-bottom:10px">'+
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'+
-      '<div style="flex:1;min-width:0">'+
-      '<div style="font-weight:600;font-size:13px;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(p.name)+'</div>'+
-      (p.dead?'<div style="font-size:10px;color:var(--t3);margin-top:2px">Prazo: '+fd(p.dead)+'</div>':'')+'</div>'+
-      '<div style="text-align:right;flex-shrink:0;margin-left:10px">'+
-      '<div style="font-size:15px;font-weight:800;color:'+cor+'">'+pct.toFixed(0)+'%</div>'+
-      '</div></div>'+
-      '<div class="prog-wrap" style="margin-bottom:8px"><div class="prog-fill" style="width:'+pct.toFixed(0)+'%;background:'+cor+'"></div></div>'+
-      '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3)">'+
-      '<span>'+fmt(p.cur||0)+' acumulado</span>'+
-      '<span>Falta: <b style="color:var(--t1)">'+fmt(falta)+'</b></span>'+
-      '</div></div>';
-  }).join(''):'<div style="text-align:center;padding:24px;color:var(--t3);font-size:12px">Nenhuma meta criada.<br>'+
-    '<button onclick="nav(&quot;planejamento&quot;)" style="margin-top:8px;background:var(--s3);border:none;border-radius:8px;padding:6px 14px;color:var(--teal);font-size:12px;cursor:pointer;font-family:inherit">+ Criar planejamento</button></div>';
-
-  // PARCELAS ATIVAS
-  var parc = d.parc.filter(function(p){return p.st==='ativo';}).slice(0,5);
-  g('d-parc-chart').innerHTML=parc.length?parc.map(function(p){
-    var pg=p.pars.filter(function(x){return x.pg;}).length;
-    var tot=p.pars.length;
-    var pct=(pg/tot*100).toFixed(0);
-    return '<div style="margin-bottom:12px">'+
-      '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">'+
-      '<span style="font-weight:500;color:var(--t1)">'+esc(p.name)+'</span>'+
-      '<span style="color:var(--t2)">'+pg+'/'+tot+' parcelas</span></div>'+
-      '<div class="prog-wrap"><div class="prog-fill" style="width:'+pct+'%;background:var(--yellow)"></div></div>'+
-      '<div style="font-size:10px;color:var(--t3);margin-top:3px">'+fmt(p.tot)+' total</div></div>';
-  }).join(''):'<p style="font-size:12px;color:var(--t3)">Nenhuma parcela ativa.</p>';
 
   // draw charts after DOM update
   setTimeout(function(){
