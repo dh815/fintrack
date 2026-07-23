@@ -924,7 +924,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
           <div class="chart-grid">
             <div class="panel">
               <div class="panel-head">
-                <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--blue)">bar_chart</span>Saldo Mensal</span>
+                <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--blue)">bar_chart</span>Entradas x Sa&#237;das (mensal)</span>
               </div>
               <div class="chart-wrap" style="padding:16px 16px 8px">
                 <canvas id="ch-bar" height="180"></canvas>
@@ -1842,7 +1842,7 @@ function drawBarChart(d){
   var W=canvas.width, H=canvas.height=180; canvas.style.height='180px';
   ctx.clearRect(0,0,W,H);
 
-  // 6 months saldo
+  // 6 meses — entradas e saídas separadas (não o saldo líquido)
   var months=[];
   for(var i=5;i>=0;i--){
     var m=S.month-i; var y=S.year;
@@ -1857,66 +1857,60 @@ function drawBarChart(d){
     var dd=new Date(s.date+'T12:00:00');
     months.forEach(function(mo){if(dd.getMonth()===mo.m&&dd.getFullYear()===mo.y) mo.tS+=parseFloat(s.val||0);});
   });
-  var saldos=months.map(function(mo){return mo.tE-mo.tS;});
-  var maxAbs=Math.max.apply(null,saldos.map(function(v){return Math.abs(v);}));
-  if(maxAbs===0) maxAbs=1000;
+  var maxVal=Math.max.apply(null, months.map(function(mo){return Math.max(mo.tE,mo.tS);}));
+  if(maxVal===0) maxVal=1000;
 
-  var pad={t:16,r:16,b:32,l:60};
+  var pad={t:26,r:16,b:32,l:60};
   var cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
   var n=months.length;
-  var barW=cW/n*0.5;
-  var midY=pad.t+cH/2;
-
-  // Baseline
-  ctx.strokeStyle='rgba(255,255,255,.1)'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(pad.l,midY); ctx.lineTo(pad.l+cW,midY); ctx.stroke();
+  var groupW=cW/n;
+  var barW=groupW*0.32;
+  var gap=groupW*0.06;
+  var baseY=pad.t+cH;
 
   // Grid
+  ctx.strokeStyle='rgba(255,255,255,.1)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(pad.l,baseY); ctx.lineTo(pad.l+cW,baseY); ctx.stroke();
   ctx.strokeStyle='rgba(255,255,255,.04)';
   ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l+cW,pad.t); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(pad.l,pad.t+cH); ctx.lineTo(pad.l+cW,pad.t+cH); ctx.stroke();
 
   // Y labels
   ctx.fillStyle='rgba(255,255,255,.25)'; ctx.font='10px Inter'; ctx.textAlign='right';
-  ctx.fillText('+'+fmtK(maxAbs),pad.l-6,pad.t+4);
-  ctx.fillText('-'+fmtK(maxAbs),pad.l-6,pad.t+cH+4);
-  ctx.fillText('0',pad.l-6,midY+4);
+  ctx.fillText(fmtK(maxVal),pad.l-6,pad.t+4);
+  ctx.fillText('0',pad.l-6,baseY+4);
+
+  function roundBar(x,y,w,h,col){
+    if(h<=0) return;
+    var r2=Math.min(4,w/2,h);
+    ctx.beginPath();
+    ctx.moveTo(x+r2,y); ctx.lineTo(x+w-r2,y);
+    ctx.quadraticCurveTo(x+w,y,x+w,y+r2);
+    ctx.lineTo(x+w,y+h); ctx.lineTo(x,y+h);
+    ctx.lineTo(x,y+r2); ctx.quadraticCurveTo(x,y,x+r2,y);
+    ctx.closePath();
+    var grad2=ctx.createLinearGradient(0,y,0,y+h);
+    grad2.addColorStop(0,col[0]); grad2.addColorStop(1,col[1]);
+    ctx.fillStyle=grad2; ctx.fill();
+  }
 
   // Bars
   months.forEach(function(mo,i){
-    var sal=saldos[i];
-    var x=pad.l+i*cW/n+(cW/n-barW)/2;
-    var h=Math.abs(sal)/maxAbs*(cH/2-4);
-    var positive=sal>=0;
-    var y=positive?midY-h:midY;
-    // rounded rect
-    ctx.beginPath();
-    var r2=Math.min(4,barW/2,h);
-    if(h>0){
-      if(positive){
-        ctx.moveTo(x+r2,y); ctx.lineTo(x+barW-r2,y);
-        ctx.quadraticCurveTo(x+barW,y,x+barW,y+r2);
-        ctx.lineTo(x+barW,y+h); ctx.lineTo(x,y+h);
-        ctx.lineTo(x,y+r2); ctx.quadraticCurveTo(x,y,x+r2,y);
-      } else {
-        ctx.moveTo(x,y); ctx.lineTo(x+barW,y);
-        ctx.lineTo(x+barW,y+h-r2); ctx.quadraticCurveTo(x+barW,y+h,x+barW-r2,y+h);
-        ctx.lineTo(x+r2,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r2);
-        ctx.lineTo(x,y);
-      }
-      ctx.closePath();
-    }
-    var grad2=ctx.createLinearGradient(0,y,0,y+h);
-    if(positive){
-      grad2.addColorStop(0,'#00C896'); grad2.addColorStop(1,'#00A878');
-    } else {
-      grad2.addColorStop(0,'#FF7B7B'); grad2.addColorStop(1,'#FF5E5E');
-    }
-    ctx.fillStyle=grad2; ctx.fill();
+    var gx=pad.l+i*groupW+(groupW-(barW*2+gap))/2;
+    var hE=mo.tE/maxVal*cH, hS=mo.tS/maxVal*cH;
+    roundBar(gx, baseY-hE, barW, hE, ['#00C896','#00A878']);
+    roundBar(gx+barW+gap, baseY-hS, barW, hS, ['#FF7B7B','#FF5E5E']);
     // X label
     ctx.fillStyle='rgba(255,255,255,.3)'; ctx.font='10px Inter'; ctx.textAlign='center';
-    ctx.fillText(mo.label,x+barW/2,H-8);
+    ctx.fillText(mo.label,gx+barW+gap/2,H-8);
   });
+
+  // Legend (mesmo padrão do gráfico de linha)
+  ctx.fillStyle='#00C896'; ctx.fillRect(pad.l,8,18,3);
+  ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='10px Inter'; ctx.textAlign='left';
+  ctx.fillText('Entradas',pad.l+22,11);
+  ctx.fillStyle='#FF5E5E'; ctx.fillRect(pad.l+90,8,18,3);
+  ctx.fillStyle='rgba(255,255,255,.5)';
+  ctx.fillText('Saídas',pad.l+112,11);
 }
 
 function drawInvChart(d){
