@@ -897,17 +897,9 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
           <div class="hero-saldo" id="d-hero"></div>
           <div class="metrics" id="d-metrics"></div>
 
-          <!-- CHART ROW 1: Linha + Donut -->
+          <!-- CHART ROW 1: Donut -->
           <div class="chart-grid">
-            <div class="panel chart-full">
-              <div class="panel-head">
-                <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--teal)">show_chart</span>Entradas vs Sa&#237;das — &#218;ltimos 6 meses</span>
-              </div>
-              <div class="chart-wrap" style="padding:16px 16px 8px">
-                <canvas id="ch-line" height="200"></canvas>
-              </div>
-            </div>
-            <div class="panel">
+            <div class="panel" style="grid-column:1 / -1">
               <div class="panel-head">
                 <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--purple)">donut_large</span>Gastos por Categoria</span>
               </div>
@@ -1673,7 +1665,6 @@ function rDash(){
 
   // draw charts after DOM update
   setTimeout(function(){
-    drawLineChart(d);
     drawDonutChart(d);
     drawBarChart(d);
     drawInvChart(d);
@@ -1689,100 +1680,6 @@ function getCtx(id){
   return el.getContext('2d');
 }
 
-function drawLineChart(d){
-  var ctx=getCtx('ch-line'); if(!ctx) return;
-  var canvas=g('ch-line');
-  var W=canvas.width, H=canvas.height=200; canvas.style.height='200px';
-  ctx.clearRect(0,0,W,H);
-
-  // Build last 6 months data
-  var months=[];
-  for(var i=5;i>=0;i--){
-    var m=S.month-i; var y=S.year;
-    while(m<0){m+=12;y--;}
-    months.push({m:m,y:y,label:MONTHS[m].slice(0,3),tE:0,tS:0});
-  }
-  d.ent.forEach(function(e){
-    var dd=new Date(e.date+'T12:00:00');
-    months.forEach(function(mo){if(dd.getMonth()===mo.m&&dd.getFullYear()===mo.y) mo.tE+=parseFloat(e.val||0);});
-  });
-  d.sai.forEach(function(s){
-    var dd=new Date(s.date+'T12:00:00');
-    months.forEach(function(mo){if(dd.getMonth()===mo.m&&dd.getFullYear()===mo.y) mo.tS+=parseFloat(s.val||0);});
-  });
-
-  var maxVal=Math.max.apply(null, months.map(function(m){return Math.max(m.tE,m.tS);}));
-  if(maxVal===0) maxVal=1000;
-  var pad={t:20,r:20,b:36,l:64};
-  var cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
-  var n=months.length;
-
-  // Grid lines
-  ctx.strokeStyle='rgba(255,255,255,.05)';
-  ctx.lineWidth=1;
-  for(var gi=0;gi<=4;gi++){
-    var gy=pad.t+cH*(1-gi/4);
-    ctx.beginPath(); ctx.moveTo(pad.l,gy); ctx.lineTo(pad.l+cW,gy); ctx.stroke();
-    ctx.fillStyle='rgba(255,255,255,.25)';
-    ctx.font='10px Inter';
-    ctx.textAlign='right';
-    ctx.fillText(fmtK(maxVal*gi/4),pad.l-6,gy+3);
-  }
-
-  // X labels
-  ctx.fillStyle='rgba(255,255,255,.3)';
-  ctx.font='10px Inter'; ctx.textAlign='center';
-  months.forEach(function(mo,i){
-    var x=pad.l+i*cW/(n-1);
-    ctx.fillText(mo.label,x,H-8);
-  });
-
-  // Entradas line (teal)
-  drawLine(ctx,months,pad,cW,cH,maxVal,n,'tE','#00C896');
-  // Saidas line (red)
-  drawLine(ctx,months,pad,cW,cH,maxVal,n,'tS','#FF5E5E');
-
-  // Legend
-  ctx.fillStyle='#00C896'; ctx.fillRect(pad.l,8,18,3);
-  ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='10px Inter'; ctx.textAlign='left';
-  ctx.fillText('Entradas',pad.l+22,11);
-  ctx.fillStyle='#FF5E5E'; ctx.fillRect(pad.l+90,8,18,3);
-  ctx.fillStyle='rgba(255,255,255,.5)';
-  ctx.fillText('Saídas',pad.l+112,11);
-}
-
-function drawLine(ctx,months,pad,cW,cH,maxVal,n,key,color){
-  var pts=months.map(function(mo,i){
-    return {x:pad.l+i*cW/(n-1), y:pad.t+cH*(1-mo[key]/maxVal)};
-  });
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x,pts[0].y);
-  for(var i=1;i<pts.length;i++){
-    var cp1x=(pts[i-1].x+pts[i].x)/2, cp1y=pts[i-1].y;
-    var cp2x=(pts[i-1].x+pts[i].x)/2, cp2y=pts[i].y;
-    ctx.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,pts[i].x,pts[i].y);
-  }
-  ctx.lineTo(pts[pts.length-1].x,pad.t+cH);
-  ctx.lineTo(pts[0].x,pad.t+cH);
-  ctx.closePath();
-  // simple gradient fill
-  ctx.fillStyle=color+'22';
-  ctx.fill();
-  // Line
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x,pts[0].y);
-  for(var j=1;j<pts.length;j++){
-    var cx1=(pts[j-1].x+pts[j].x)/2;
-    ctx.bezierCurveTo(cx1,pts[j-1].y,cx1,pts[j].y,pts[j].x,pts[j].y);
-  }
-  ctx.strokeStyle=color; ctx.lineWidth=2.5; ctx.stroke();
-  // Dots
-  pts.forEach(function(p){
-    ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2);
-    ctx.fillStyle=color; ctx.fill();
-    ctx.strokeStyle='#0D1117'; ctx.lineWidth=2; ctx.stroke();
-  });
-}
 
 function drawDonutChart(d){
   var ctx=getCtx('ch-donut'); if(!ctx) return;
