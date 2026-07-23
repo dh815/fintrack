@@ -865,7 +865,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
         <div class="sb-section">Cart&#245;es</div>
         <button class="sb-item" data-p="credito" onclick="nav('credito')"><span class="sb-icon"><span class="mi">credit_card</span></span><span class="sb-label">Cr&#233;dito &#224; Vista</span></button>
         <div class="sb-section">Config</div>
-        <button class="sb-item" data-p="perfil" onclick="nav('perfil')"><span class="sb-icon"><span class="mi">manage_accounts</span></span><span class="sb-label">Minha conta</span></button>
+        <button class="sb-item" data-p="perfil" onclick="nav('perfil')"><span class="sb-icon"><span class="mi">manage_accounts</span></span><span class="sb-label">Perfil</span></button>
         <button class="sb-item" data-p="categorias" onclick="nav('categorias')"><span class="sb-icon"><span class="mi">sell</span></span><span class="sb-label">Categorias</span></button>
       </nav>
       <div class="sb-foot">
@@ -1584,7 +1584,7 @@ function saveAndRender(data){
 }
 
 // NAV
-var PTITLES={dashboard:'Dashboard',entradas:'Entradas',saidas:'Saídas',saldo:'Saldo do mês',parcelas:'Parcelas',planejamento:'Planejamento',investimentos:'Investimentos',categorias:'Categorias',perfil:'Minha Conta',credito:'Crédito à Vista'};
+var PTITLES={dashboard:'Dashboard',entradas:'Entradas',saidas:'Saídas',saldo:'Saldo do mês',parcelas:'Parcelas',planejamento:'Planejamento',investimentos:'Investimentos',categorias:'Categorias',perfil:'Perfil',credito:'Crédito à Vista'};
 function nav(p){
   S.page=p;
   document.querySelectorAll('.sb-item').forEach(function(el){ el.classList.toggle('active',el.getAttribute('data-p')===p); });
