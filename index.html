@@ -742,6 +742,8 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
   .bottom-nav { display: flex !important; background: var(--s1); border-top: 1px solid var(--border); padding: 8px 0 env(safe-area-inset-bottom, 20px); position: fixed; bottom: 0; left: 0; right: 0; z-index: 95; }
   .bn-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 4px; border: none; background: none; cursor: pointer; color: var(--t3); font-size: 11px; font-weight: 500; font-family: inherit; transition: color .15s; }
   .bn-item.active { color: var(--teal); } .bn-item .mi { font-size: 26px; }
+  .bn-fab { flex: 1; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; margin-top: -26px; }
+  .bn-fab .mi { width: 50px; height: 50px; border-radius: 50%; background: var(--teal); color: #07090F; font-size: 26px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(0,200,150,.4); }
 }
 @media(max-width:480px){ .month-nav span { min-width: 34px; font-size: 11px; } }
 
@@ -1189,12 +1191,25 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
   </div>
   <nav class="bottom-nav" id="bottomNav">
     <button class="bn-item" data-p="dashboard" onclick="nav('dashboard')"><span class="mi">dashboard</span><span>In&#237;cio</span></button>
-    <button class="bn-item" data-p="entradas" onclick="nav('entradas')"><span class="mi">trending_up</span><span>Entradas</span></button>
-    <button class="bn-item" data-p="saidas" onclick="nav('saidas')"><span class="mi">trending_down</span><span>Sa&#237;das</span></button>
     <button class="bn-item" data-p="parcelas" onclick="nav('parcelas')"><span class="mi">receipt_long</span><span>Parcelas</span></button>
-    <button class="bn-item" data-p="credito" onclick="nav('credito')"><span class="mi">credit_card</span><span>Cr&#233;dito</span></button>
+    <button class="bn-fab" onclick="toggleFabMenu()" id="fabBtn"><span class="mi">add</span></button>
+    <button class="bn-item" data-p="investimentos" onclick="nav('investimentos')"><span class="mi">candlestick_chart</span><span>Invest.</span></button>
     <button class="bn-item" data-p="menu" onclick="toggleSb()"><span class="mi">menu</span><span>Mais</span></button>
   </nav>
+  <div id="fabMenu" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:96">
+    <div id="fabOverlay" onclick="toggleFabMenu()" style="position:fixed;inset:0;background:rgba(0,0,0,.5)"></div>
+    <div style="position:relative;background:var(--s1);border-top:1px solid var(--border);border-radius:20px 20px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom, 10px));display:flex;flex-direction:column;gap:10px">
+      <div style="text-align:center;font-size:13px;font-weight:700;color:var(--t2);margin-bottom:4px">O que voc&#234; quer registrar?</div>
+      <button onclick="toggleFabMenu();openModal('entrada',null)" style="display:flex;align-items:center;gap:12px;background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--t1);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">
+        <span style="width:36px;height:36px;border-radius:10px;background:var(--teal-dim);display:flex;align-items:center;justify-content:center"><span class="mi" style="color:var(--teal);font-size:20px">trending_up</span></span>
+        Registrar Entrada
+      </button>
+      <button onclick="toggleFabMenu();openModal('saida',null)" style="display:flex;align-items:center;gap:12px;background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;color:var(--t1);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">
+        <span style="width:36px;height:36px;border-radius:10px;background:var(--red-dim);display:flex;align-items:center;justify-content:center"><span class="mi" style="color:var(--red);font-size:20px">trending_down</span></span>
+        Registrar Sa&#237;da
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL -->
@@ -2481,6 +2496,10 @@ function toast(msg,type){
 
 // SIDEBAR
 function toggleSb(){ g('sidebar').classList.toggle('open'); g('sbOverlay').classList.toggle('open'); }
+function toggleFabMenu(){
+  var m=g('fabMenu');
+  m.style.display = (m.style.display==='none') ? 'block' : 'none';
+}
 function closeSb(){ g('sidebar').classList.remove('open'); g('sbOverlay').classList.remove('open'); }
 function toggleSbCollapse(){
   var collapsed=g('sidebar').classList.toggle('collapsed');
