@@ -1439,15 +1439,7 @@ function ud(){ return _cache; }
 function loadUD(cb){
   if(!S.user){ cb(null); return; }
   showLoading(true);
-  ensureAuth().then(function(authUser){
-    // Sempre garante que uid está vinculado antes de ler
-    if(authUser){
-      return fdb.ref('accounts/'+S.user+'/uid').set(authUser.uid).then(function(){
-        return getUserRef().once('value');
-      });
-    }
-    return getUserRef().once('value');
-  }).then(function(snap){
+  getUserRef().once('value').then(function(snap){
     var data = snap.val();
     if(data){
       // Garante que todos os arrays existem
@@ -1519,21 +1511,21 @@ function doLogin(){
   showErr('loginError','');
   var btn=document.querySelector('#loginScreen .auth-btn');
   btn.textContent='Entrando...'; btn.disabled=true;
-  var hashed;
-  ensureAuth().then(function(){ return hashPass(p); }).then(function(h){ hashed=h; return fdb.ref('accounts/'+u).once('value'); })
-  .then(function(snap){
-    btn.textContent='Entrar'; btn.disabled=false;
-    var acc=snap.val();
-    var ok=acc&&(acc.p===hashed||acc.p===bto(p));
-    if(!acc||!ok){showErr('loginError','Usuário ou senha incorretos.');return;}
-    if(acc.p===bto(p)) fdb.ref('accounts/'+u+'/p').set(hashed).catch(function(){});
-    S.user=u; S.accName=acc.n; S.role=acc.role||'free'; S.isAdmin=(acc.role==='admin'); S.role=acc.role||'free';
-    localStorage.setItem('ftS',u);
-    // Salva uid para vincular conta ao Firebase Auth
-    var authUser=fauth.currentUser;
-    if(authUser) fdb.ref('accounts/'+u+'/uid').set(authUser.uid).catch(function(){});
-    if(acc.firstAccess){ g('loginScreen').style.display='none'; g('changePassScreen').style.display='flex'; return; }
-    loadUD(function(data){ if(data) showApp(acc.n); });
+  var SERVER='https://fintrack-server-production-9d87.up.railway.app';
+  fetch(SERVER+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,senha:p})})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(!data.success){
+      btn.textContent='Entrar'; btn.disabled=false;
+      showErr('loginError',data.error||'Usuário ou senha incorretos.');
+      return;
+    }
+    return fauth.signInWithCustomToken(data.token).then(function(){
+      btn.textContent='Entrar'; btn.disabled=false;
+      S.user=u; S.accName=data.nome; S.role=data.role||'free'; S.isAdmin=(data.role==='admin');
+      if(data.firstAccess){ g('loginScreen').style.display='none'; g('changePassScreen').style.display='flex'; return; }
+      loadUD(function(ud){ if(ud) showApp(data.nome); });
+    });
   }).catch(function(e){ btn.textContent='Entrar'; btn.disabled=false; showErr('loginError','Erro: '+e.message); });
 }
 
@@ -1545,18 +1537,21 @@ function doRegister(){
   if(!g('regAceite').checked){showErr('registerError','Você precisa aceitar os Termos de Uso e a Política de Privacidade.');return;}
   var btn = document.querySelector('#registerScreen .auth-btn');
   btn.textContent='Criando...'; btn.disabled=true;
-  fdb.ref('accounts/'+u).once('value').then(function(snap){
-    if(snap.val()){
+  var SERVER='https://fintrack-server-production-9d87.up.railway.app';
+  fetch(SERVER+'/auth/registrar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,senha:p,nome:n})})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(!data.success){
       btn.textContent='Criar conta'; btn.disabled=false;
-      showErr('registerError','Usuário já existe.');return;
+      showErr('registerError',data.error||'Erro ao criar conta.');
+      return;
     }
-    return hashPass(p).then(function(h){
-      return fdb.ref('accounts/'+u).set({n:n,p:h,role:'free',createdAt:Date.now(),termsAcceptedAt:Date.now()});
+    return fauth.signInWithCustomToken(data.token).then(function(){
+      btn.textContent='Criar conta'; btn.disabled=false;
+      S.user=u; S.accName=n; S.role='free'; S.isAdmin=false;
+      updMonth();
+      showApp(n);
     });
-  }).then(function(){
-    btn.textContent='Criar conta'; btn.disabled=false;
-    toast('Conta criada! Faça login.','ok');
-    showLogin();
   }).catch(function(e){
     btn.textContent='Criar conta'; btn.disabled=false;
     showErr('registerError','Erro: '+e.message);
@@ -1565,7 +1560,7 @@ function doRegister(){
 
 function doLogout(){
   S.user=null; S.accName=null; _cache=null;
-  localStorage.removeItem('ftS');
+  try{ fauth.signOut(); }catch(e){}
   g('appScreen').style.display='none';
   g('changePassScreen').style.display='none';
   g('loginScreen').style.display='flex';
@@ -1718,12 +1713,6 @@ function assinarPro(){
   window.open('https://wa.me/5519995572793?text='+msg, '_blank');
 }
 
-function ensureAuth(){
-  return new Promise(function(resolve){
-    if(fauth.currentUser){ resolve(fauth.currentUser); return; }
-    fauth.signInAnonymously().then(function(r){ resolve(r.user); }).catch(function(){ resolve(null); });
-  });
-}
 async function hashPass(s){
   var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
   return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
@@ -2607,12 +2596,7 @@ function doChangePass(){
   if(np!==cp){showErr('changePassError','Senhas não coincidem.');return;}
   var btn=document.querySelector('#changePassScreen .auth-btn'); btn.textContent='Salvando...'; btn.disabled=true;
   var hNova;
-  ensureAuth().then(function(user){
-    // Salva uid primeiro para desbloquear escrita
-    if(user) return fdb.ref('accounts/'+S.user+'/uid').set(user.uid);
-  }).then(function(){
-    return hashPass(np);
-  }).then(function(h){
+  hashPass(np).then(function(h){
     hNova=h;
     return fdb.ref('accounts/'+S.user).update({p:h,firstAccess:false});
   }).then(function(){
@@ -2636,15 +2620,16 @@ function saveCreateAccess(){
   var name=g('ca-name')?g('ca-name').value.trim():'', user=g('ca-user')?g('ca-user').value.trim().replace(/[^a-zA-Z0-9_]/g,''):'', pass=g('ca-pass')?g('ca-pass').value:'', savedPass=pass;
   if(!name||!user||!pass){toast('Preencha todos.','err');return;}
   var btn=g('mFoot')?g('mFoot').querySelector('.btn-primary'):null; if(btn){btn.textContent='Criando...';btn.disabled=true;}
-  fdb.ref('accounts/'+user).once('value').then(function(snap){
-    if(snap.val()){if(btn){btn.textContent='Criar acesso';btn.disabled=false;}toast('Usuário já existe!','err');throw new Error('CANCEL');}
-    return hashPass(pass);
-  }).then(function(h){ var whats=g('ca-whats')?g('ca-whats').value.trim().replace(/\D/g,''):'';
-    var acc={n:name,p:h,firstAccess:true,role:'user',createdBy:S.user};
-    if(whats) acc.whatsapp=whats;
-    return fdb.ref('accounts/'+user).set(acc); })
-  .then(function(){ if(btn){btn.textContent='Criar acesso';btn.disabled=false;} closeModal(); toast('Acesso criado! Usuário: '+user+' Senha: '+savedPass,'ok',8000); })
-  .catch(function(e){ if(btn){btn.textContent='Criar acesso';btn.disabled=false;} if(e.message!=='CANCEL') toast('Erro: '+e.message,'err'); });
+  var whats=g('ca-whats')?g('ca-whats').value.trim().replace(/\D/g,''):'';
+  var SERVER='https://fintrack-server-production-9d87.up.railway.app';
+  fetch(SERVER+'/admin/criar-acesso',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminUsername:S.user,nome:name,username:user,senha:pass,whatsapp:whats})})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(btn){btn.textContent='Criar acesso';btn.disabled=false;}
+    if(data.success){ closeModal(); toast('Acesso criado! Usuário: '+user+' Senha: '+savedPass,'ok',8000); }
+    else { toast(data.error||'Erro ao criar acesso.','err'); }
+  })
+  .catch(function(e){ if(btn){btn.textContent='Criar acesso';btn.disabled=false;} toast('Erro: '+e.message,'err'); });
 }
 function rPerfil(){
   fdb.ref('accounts/'+S.user).once('value').then(function(snap){
@@ -2748,7 +2733,7 @@ function confirmarExclusaoConta(){
     btn.textContent='Excluir permanentemente'; btn.disabled=false;
     if(data.success){
       fecharExclusaoConta();
-      try{ localStorage.removeItem('ftS'); localStorage.removeItem('ftBK_'+S.user); }catch(e){}
+      try{ fauth.signOut(); localStorage.removeItem('ftBK_'+S.user); }catch(e){}
       toast('Conta excluída. Sentiremos sua falta!','ok');
       g('appScreen').style.display='none';
       g('loginScreen').style.display='flex';
@@ -2865,29 +2850,34 @@ window.addEventListener('load',function(){
     g('resetScreen').style.display='flex';
     return;
   }
-  var s=localStorage.getItem('ftS');
-  if(s){
+  // A sessão agora é a do próprio Firebase Auth (token real, vinculado ao
+  // username via uid) — não depende mais de uma flag solta no localStorage.
+  fauth.onAuthStateChanged(function(user){
+    if(!user){
+      g('loginScreen').style.display='flex';
+      updMonth();
+      return;
+    }
+    var s=user.uid; // uid === username, graças ao token de login personalizado
     S.user=s;
-    ensureAuth().then(function(){ return fdb.ref('accounts/'+s).once('value'); }).then(function(snap){
+    fdb.ref('accounts/'+s).once('value').then(function(snap){
       var acc=snap.val();
       if(acc){
         S.accName=acc.n; S.isAdmin=(acc.role==='admin'); S.role=acc.role||'free';
+        g('loginScreen').style.display='none';
         if(acc.firstAccess){ g('changePassScreen').style.display='flex'; updMonth(); return; }
         loadUD(function(data){
           if(data) showApp(acc.n);
-          else { localStorage.removeItem('ftS'); g('loginScreen').style.display='flex'; updMonth(); }
+          else { fauth.signOut(); g('loginScreen').style.display='flex'; updMonth(); }
         });
       } else {
-        localStorage.removeItem('ftS');
+        fauth.signOut();
         g('loginScreen').style.display='flex'; updMonth();
       }
     }).catch(function(){
       g('loginScreen').style.display='flex'; updMonth();
     });
-  } else {
-    g('loginScreen').style.display='flex';
-    updMonth();
-  }
+  });
 });
 var S_CARTAO = null;
 
