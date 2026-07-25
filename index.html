@@ -790,6 +790,11 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
     <div class="auth-error" id="loginError">Usu&#225;rio ou senha incorretos.</div>
     <div class="auth-switch"><button onclick="showForgot()" style="color:var(--teal)">Esqueci minha senha</button></div>
     <div class="auth-switch">Sem conta? <button onclick="showRegister()">Criar conta grátis</button></div>
+    <div style="text-align:center;margin-top:18px;font-size:11px;color:var(--t3)">
+      <button type="button" onclick="abrirLegal('termos')" style="color:var(--t3);background:none;border:none;padding:0;font-size:11px;text-decoration:underline;cursor:pointer;font-family:inherit">Termos de Uso</button>
+      &nbsp;·&nbsp;
+      <button type="button" onclick="abrirLegal('privacidade')" style="color:var(--t3);background:none;border:none;padding:0;font-size:11px;text-decoration:underline;cursor:pointer;font-family:inherit">Política de Privacidade</button>
+    </div>
   </div>
 </div>
 
@@ -841,6 +846,12 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
     <div class="auth-field">
       <label>Confirmar senha</label>
       <input type="password" id="regPass2" placeholder="Repita a senha">
+    </div>
+    <div class="auth-field" style="display:flex;align-items:flex-start;gap:8px;margin-bottom:14px">
+      <input type="checkbox" id="regAceite" style="margin-top:3px;width:16px;height:16px;flex-shrink:0;accent-color:var(--teal);cursor:pointer">
+      <label for="regAceite" style="font-size:12.5px;color:var(--t2);font-weight:400;line-height:1.5;cursor:pointer">
+        Li e aceito os <button type="button" onclick="event.preventDefault();abrirLegal('termos')" style="color:var(--teal);background:none;border:none;padding:0;font-size:12.5px;text-decoration:underline;cursor:pointer;font-family:inherit">Termos de Uso</button> e a <button type="button" onclick="event.preventDefault();abrirLegal('privacidade')" style="color:var(--teal);background:none;border:none;padding:0;font-size:12.5px;text-decoration:underline;cursor:pointer;font-family:inherit">Política de Privacidade</button>
+      </label>
     </div>
     <button class="auth-btn" onclick="doRegister()">Criar conta</button>
     <div class="auth-error" id="registerError"></div>
@@ -1222,6 +1233,19 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 </div>
 
 <!-- CONFIRM -->
+<!-- TERMOS / PRIVACIDADE -->
+<div class="modal-wrap" id="legalModal">
+  <div class="modal" style="max-width:640px;max-height:80vh;display:flex;flex-direction:column">
+    <div class="modal-head"><span class="modal-title" id="legalTitle"></span>
+      <button class="modal-x" onclick="fecharLegal()"><span class="mi" style="font-size:16px">close</span></button>
+    </div>
+    <div class="modal-body" id="legalBody" style="overflow-y:auto;flex:1;font-size:13.5px;line-height:1.7;color:var(--t2)"></div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" onclick="fecharLegal()" style="width:100%">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-wrap" id="confirmWrap">
   <div class="modal" style="max-width:360px">
     <div class="modal-head"><span class="modal-title" id="cfTitle"></span>
@@ -1491,6 +1515,7 @@ function doRegister(){
   if(!n||!u||!p){showErr('registerError','Preencha todos os campos.');return;}
   if(p!==p2){showErr('registerError','Senhas não coincidem.');return;}
   if(p.length<4){showErr('registerError','Senha muito curta.');return;}
+  if(!g('regAceite').checked){showErr('registerError','Você precisa aceitar os Termos de Uso e a Política de Privacidade.');return;}
   var btn = document.querySelector('#registerScreen .auth-btn');
   btn.textContent='Criando...'; btn.disabled=true;
   fdb.ref('accounts/'+u).once('value').then(function(snap){
@@ -1499,7 +1524,7 @@ function doRegister(){
       showErr('registerError','Usuário já existe.');return;
     }
     return hashPass(p).then(function(h){
-      return fdb.ref('accounts/'+u).set({n:n,p:h,role:'free',createdAt:Date.now()});
+      return fdb.ref('accounts/'+u).set({n:n,p:h,role:'free',createdAt:Date.now(),termsAcceptedAt:Date.now()});
     });
   }).then(function(){
     btn.textContent='Criar conta'; btn.disabled=false;
@@ -1521,6 +1546,47 @@ function doLogout(){
 }
 function showRegister(){ g('loginScreen').style.display='none'; g('registerScreen').style.display='flex'; }
 function showLogin(){ g('registerScreen').style.display='none'; g('loginScreen').style.display='flex'; }
+
+var LEGAL_TERMOS = '<p><b>Última atualização: 25 de julho de 2026</b></p>'+
+'<p>Estes Termos de Uso regulam o uso do aplicativo <b>Fintrack</b>, disponibilizado por <b>Dhiefferton Raposo</b> (pessoa física), contato: monteirodhiefferton@gmail.com. Ao criar uma conta ou usar o Fintrack, você concorda com estes Termos.</p>'+
+'<p><b>O que é o Fintrack.</b> Ferramenta de controle financeiro pessoal (entradas, saídas, parcelas, investimentos, cartão de crédito), com leitura automática de cupons/boletos por IA e registro via WhatsApp. <b>O Fintrack não é uma instituição financeira e não presta consultoria financeira, contábil ou de investimentos.</b> Informações geradas automaticamente (scanner) podem conter erros. Decisões financeiras são de responsabilidade exclusiva do usuário.</p>'+
+'<p><b>Cadastro.</b> Você deve fornecer dados verdadeiros e é responsável por manter sua senha em sigilo e por tudo que ocorrer na sua conta. Podemos suspender contas que violem estes Termos ou pratiquem fraude.</p>'+
+'<p><b>Planos e cobrança.</b> Há um plano Free (com limites de uso) e um plano Pro (R$ 29,00/mês, sujeito a alteração mediante aviso). A cobrança do Pro é recorrente e automática via Mercado Pago; ao assinar, você autoriza a cobrança mensal até o cancelamento. Cancele quando quiser pela tela de Perfil — não há reembolso proporcional do período já pago, salvo obrigação legal em contrário.</p>'+
+'<p><b>Uso aceitável.</b> É proibido usar o Fintrack para fins ilícitos, tentar acessar dados de terceiros, sobrecarregar o serviço (ex.: automatizar chamadas em massa) ou abusar do scanner de IA para fins não relacionados a controle financeiro pessoal.</p>'+
+'<p><b>Serviços de terceiros.</b> O Fintrack integra Mercado Pago (pagamentos), Anthropic (leitura de imagens por IA), Brevo (e-mail) e Z-API (WhatsApp). O uso desses recursos também está sujeito aos termos desses provedores.</p>'+
+'<p><b>Isenção de responsabilidade.</b> O serviço é fornecido "como está", sem garantia de disponibilidade ininterrupta ou ausência de erros. Não nos responsabilizamos por perdas financeiras decorrentes do uso do serviço, na máxima extensão permitida por lei.</p>'+
+'<p><b>Alterações.</b> Podemos alterar estes Termos a qualquer momento, com aviso por e-mail ou no aplicativo em mudanças relevantes.</p>'+
+'<p><b>Encerramento.</b> Você pode encerrar sua conta quando quiser pela tela de Perfil.</p>'+
+'<p><b>Lei aplicável.</b> Estes Termos são regidos pelas leis do Brasil, com foro do domicílio do usuário conforme legislação consumerista.</p>'+
+'<p><b>Contato:</b> monteirodhiefferton@gmail.com</p>';
+
+var LEGAL_PRIVACIDADE = '<p><b>Última atualização: 25 de julho de 2026</b></p>'+
+'<p>Esta Política explica como o Fintrack trata seus dados pessoais, em conformidade com a LGPD (Lei nº 13.709/2018). <b>Controlador:</b> Dhiefferton Raposo. <b>Contato:</b> monteirodhiefferton@gmail.com</p>'+
+'<p><b>Dados que coletamos:</b> nome de usuário e senha (com hash criptográfico), nome, foto, e-mail, WhatsApp (opcionais), e os dados financeiros que você insere (entradas, saídas, parcelas, investimentos, cartão, categorias). Imagens enviadas ao scanner são processadas e não armazenadas permanentemente pelo provedor de IA. <b>Não coletamos dados de cartão de crédito ou bancários</b> — pagamentos são processados inteiramente pelo Mercado Pago.</p>'+
+'<p><b>Para que usamos:</b> fornecer o app, processar sua assinatura, enviar e-mails operacionais (recuperação de senha), enviar lembretes por WhatsApp (se vinculado), interpretar cupons/boletos no scanner, e prevenir fraude. <b>Não vendemos seus dados nem os usamos para publicidade.</b></p>'+
+'<p><b>Compartilhamento com terceiros:</b></p>'+
+'<ul style="margin:0 0 12px 18px;padding:0">'+
+'<li><b>Google Firebase</b> — armazenamento do banco de dados</li>'+
+'<li><b>Mercado Pago</b> — pagamento da assinatura</li>'+
+'<li><b>Anthropic (Claude)</b> — leitura de cupons/boletos</li>'+
+'<li><b>Brevo</b> — e-mail de recuperação de senha</li>'+
+'<li><b>Z-API</b> — bot de WhatsApp, se vinculado</li>'+
+'<li><b>Railway</b> — hospedagem do servidor</li>'+
+'</ul>'+
+'<p><b>Armazenamento internacional.</b> Seus dados podem ficar em servidores do Firebase fora do Brasil; ao usar o app, você concorda com essa transferência, necessária ao funcionamento do serviço.</p>'+
+'<p><b>Retenção.</b> Mantemos seus dados enquanto a conta estiver ativa. Ao solicitar exclusão, apagamos dados pessoais e financeiros em até 30 dias, exceto obrigações legais de retenção de terceiros (ex.: registros fiscais do Mercado Pago).</p>'+
+'<p><b>Seus direitos (Art. 18 LGPD):</b> acessar, corrigir, solicitar exclusão da conta, portar seus dados (via exportação de backup no app), revogar consentimentos opcionais (ex.: desvincular WhatsApp) e se opor a tratamentos indevidos. Exercite pelo e-mail acima.</p>'+
+'<p><b>Segurança.</b> Senha com hash criptográfico, regras de acesso no banco e chaves de API mantidas só no servidor. Nenhum sistema é 100% imune a falhas.</p>'+
+'<p><b>Menores de idade.</b> O Fintrack não se destina a menores de 18 anos.</p>'+
+'<p><b>Alterações.</b> Mudanças relevantes serão comunicadas por e-mail ou aviso no app.</p>'+
+'<p><b>Reclamações:</b> monteirodhiefferton@gmail.com ou Autoridade Nacional de Proteção de Dados (ANPD) — gov.br/anpd</p>';
+
+function abrirLegal(which){
+  if(which==='termos'){ g('legalTitle').textContent='Termos de Uso'; g('legalBody').innerHTML=LEGAL_TERMOS; }
+  else { g('legalTitle').textContent='Política de Privacidade'; g('legalBody').innerHTML=LEGAL_PRIVACIDADE; }
+  g('legalModal').classList.add('open');
+}
+function fecharLegal(){ g('legalModal').classList.remove('open'); }
 function showForgot(){ g('loginScreen').style.display='none'; g('forgotScreen').style.display='flex'; g('forgotOk').style.display='none'; g('forgotError').textContent=''; }
 function voltarLoginDeForgot(){ g('forgotScreen').style.display='none'; g('loginScreen').style.display='flex'; }
 
