@@ -2775,7 +2775,7 @@ function exportPDF(){
     '<div class="card"><div class="cl">Saldo</div><div class="cv '+(sal>=0?'g':'r')+'">'+fmt(sal)+'</div></div></div>';
   if(ent.length) html+='<h2>Entradas</h2><table><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th></tr>'+ent.map(function(e){return '<tr><td>'+fd(e.date)+'</td><td>'+esc(e.desc)+'</td><td>'+esc(e.cat)+'</td><td style="color:#16A34A;font-weight:700">'+fmt(e.val)+'</td></tr>';}).join('')+'</table>';
   if(sai.length) html+='<h2>Saídas</h2><table><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th></tr>'+sai.map(function(s){return '<tr><td>'+fd(s.date)+'</td><td>'+esc(s.desc)+'</td><td>'+esc(s.cat)+'</td><td style="color:#FF5E5E;font-weight:700">'+fmt(s.val)+'</td></tr>';}).join('')+'</table>';
-  html+='<div style="margin-top:40px;font-size:10px;color:#aaa;text-align:center">Bolso Inteligente - dh815.github.io/fintrack</div></body></html>';
+  html+='<div style="margin-top:40px;font-size:10px;color:#aaa;text-align:center">Bolso Inteligente - bolsointeligenteapp.com.br</div></body></html>';
   var w=window.open('','_blank'); w.document.write(html); w.document.close(); setTimeout(function(){w.print();},500);
 }
 
