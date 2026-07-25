@@ -1141,6 +1141,15 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
             <div class="panel-head"><span class="panel-title">Trocar senha</span></div>
             <div style="padding:20px"><div class="field"><label>Senha atual</label><input type="password" id="p-atual" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;"></div><div class="field"><label>Nova senha</label><input type="password" id="p-nova" placeholder="M&#237;nimo 4 caracteres"></div><div class="field"><label>Confirmar</label><input type="password" id="p-conf" placeholder="Repita a senha"></div><div class="auth-error" id="p-err" style="margin-bottom:12px"></div><button class="btn btn-primary" style="width:100%" onclick="salvarSenha()">Salvar nova senha</button></div>
           </div>
+
+          <!-- Zona de perigo -->
+          <div class="panel" style="margin-top:16px;border-color:rgba(255,94,94,.25)">
+            <div class="panel-head"><span class="panel-title" style="color:var(--red)"><span class="mi" style="font-size:16px;vertical-align:middle;margin-right:6px">warning</span>Zona de perigo</span></div>
+            <div style="padding:20px">
+              <p style="font-size:12.5px;color:var(--t3);margin-bottom:14px;line-height:1.6">Excluir sua conta apaga permanentemente todos os seus lançamentos, parcelas, investimentos e dados de perfil. Se você tiver uma assinatura Pro ativa, ela será cancelada automaticamente. <b style="color:var(--t2)">Essa ação não pode ser desfeita.</b></p>
+              <button class="btn btn-ghost" style="width:100%;color:var(--red);border-color:rgba(255,94,94,.3)" onclick="abrirExclusaoConta()">Excluir minha conta</button>
+            </div>
+          </div>
         </div>
 
         <!-- CREDITO A VISTA -->
@@ -1234,6 +1243,24 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 
 <!-- CONFIRM -->
 <!-- TERMOS / PRIVACIDADE -->
+<!-- EXCLUIR CONTA -->
+<div class="modal-wrap" id="excluirContaModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-head"><span class="modal-title" style="color:var(--red)">Excluir conta</span>
+      <button class="modal-x" onclick="fecharExclusaoConta()"><span class="mi" style="font-size:16px">close</span></button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--t2);margin-bottom:16px;line-height:1.6">Isso vai apagar <b>permanentemente</b> sua conta e todos os seus dados financeiros. Digite sua senha atual para confirmar.</p>
+      <div class="field"><label>Senha atual</label><input type="password" id="excluirSenha" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;"></div>
+      <div class="auth-error" id="excluirErro"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="fecharExclusaoConta()">Cancelar</button>
+      <button class="btn btn-primary" id="excluirBtn" style="background:var(--red)" onclick="confirmarExclusaoConta()">Excluir permanentemente</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-wrap" id="legalModal">
   <div class="modal" style="max-width:640px;max-height:80vh;display:flex;flex-direction:column">
     <div class="modal-head"><span class="modal-title" id="legalTitle"></span>
@@ -2703,6 +2730,33 @@ function cancelarMinhaAssinatura(){
     })
     .catch(function(e){ toast('Erro: '+e.message,'err'); });
   });
+}
+function abrirExclusaoConta(){
+  g('excluirSenha').value=''; g('excluirErro').textContent='';
+  g('excluirContaModal').classList.add('open');
+}
+function fecharExclusaoConta(){ g('excluirContaModal').classList.remove('open'); }
+function confirmarExclusaoConta(){
+  var senha=g('excluirSenha').value;
+  var err=g('excluirErro'); err.textContent='';
+  if(!senha){ err.textContent='Digite sua senha atual.'; return; }
+  var btn=g('excluirBtn'); btn.textContent='Excluindo...'; btn.disabled=true;
+  var SERVER='https://fintrack-server-production-9d87.up.railway.app';
+  fetch(SERVER+'/conta/excluir',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:S.user,senha:senha})})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    btn.textContent='Excluir permanentemente'; btn.disabled=false;
+    if(data.success){
+      fecharExclusaoConta();
+      try{ localStorage.removeItem('ftS'); localStorage.removeItem('ftBK_'+S.user); }catch(e){}
+      toast('Conta excluída. Sentiremos sua falta!','ok');
+      g('appScreen').style.display='none';
+      g('loginScreen').style.display='flex';
+    } else {
+      err.textContent=data.error||'Erro ao excluir conta.';
+    }
+  })
+  .catch(function(e){ btn.textContent='Excluir permanentemente'; btn.disabled=false; err.textContent='Erro: '+e.message; });
 }
 function salvarSenha(){
   var atual=g('p-atual').value,nova=g('p-nova').value,conf=g('p-conf').value;
