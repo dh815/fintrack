@@ -3,33 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fintrack — Controle Financeiro</title>
+<title>Bolso Inteligente — Controle Financeiro</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 <style>
 :root {
-  --bg:       #07090F;
-  --s1:       #0D1117;
-  --s2:       #131920;
-  --s3:       #1C2433;
+  --bg:       #0D1B2A;
+  --s1:       #13233A;
+  --s2:       #1A2C42;
+  --s3:       #24384F;
   --border:   rgba(255,255,255,.07);
   --border2:  rgba(255,255,255,.12);
-  --teal:     #00C896;
-  --teal-dim: rgba(0,200,150,.12);
-  --teal-glow:rgba(0,200,150,.25);
+  --teal:     #16A34A;
+  --teal-dim: rgba(22,163,74,.12);
+  --teal-glow:rgba(22,163,74,.25);
   --red:      #FF5E5E;
   --red-dim:  rgba(255,94,94,.12);
-  --yellow:   #FFB547;
-  --yel-dim:  rgba(255,181,71,.12);
+  --yellow:   #FBBF24;
+  --yel-dim:  rgba(251,191,36,.12);
   --blue:     #4D9CFF;
   --blue-dim: rgba(77,156,255,.12);
   --purple:   #A78BFA;
   --pur-dim:  rgba(167,139,250,.12);
   --t1: #F0F4F8;
-  --t2: #8892A4;
-  --t3: #4A5568;
+  --t2: #94A3B8;
+  --t3: #64748B;
   --r:  14px;
   --r2: 10px;
   --r3: 8px;
@@ -85,7 +85,7 @@ body {
   content: '';
   position: absolute;
   width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(0,200,150,.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(22,163,74,.08) 0%, transparent 70%);
   top: -200px; right: -200px;
   pointer-events: none;
 }
@@ -117,16 +117,16 @@ body {
   align-items: center;
   justify-content: center;
   width: 56px; height: 56px;
-  background: linear-gradient(135deg, var(--teal), #00A878);
+  background: linear-gradient(135deg, var(--teal), #0F7A37);
   border-radius: 16px;
   font-size: 24px;
   margin-bottom: 16px;
   box-shadow: 0 8px 32px var(--teal-glow);
 }
 .auth-logo h1 {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.4px;
   color: var(--t1);
 }
 .auth-logo h1 span { color: var(--teal); }
@@ -226,15 +226,15 @@ body {
 }
 .sb-logo {
   width: 34px; height: 34px;
-  background: linear-gradient(135deg, var(--teal), #00A878);
+  background: linear-gradient(135deg, var(--teal), #0F7A37);
   border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
   font-size: 16px;
   flex-shrink: 0;
   box-shadow: 0 4px 12px var(--teal-glow);
 }
-.sb-brand { font-size: 15px; font-weight: 800; letter-spacing: -0.3px; }
-.sb-brand span { color: var(--teal); }
+.sb-brand { font-size: 13px; font-weight: 800; letter-spacing: -0.2px; line-height: 1.25; }
+.sb-brand span { color: var(--teal); display: block; }
 .sb-user {
   padding: 14px 16px;
   border-bottom: 1px solid var(--border);
@@ -505,7 +505,7 @@ body {
 .btn-del { background: var(--red-dim); color: var(--red); }
 .btn-del:hover { background: rgba(255,94,94,.22); }
 .btn-pay { background: var(--teal-dim); color: var(--teal); }
-.btn-pay:hover { background: rgba(0,200,150,.22); }
+.btn-pay:hover { background: rgba(22,163,74,.22); }
 .btn-warn { background: var(--yel-dim); color: var(--yellow); }
 .btn-warn:hover { background: rgba(255,181,71,.22); }
 .btn-muted { background: var(--s3); color: var(--t3); }
@@ -691,7 +691,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
   pointer-events: none; white-space: nowrap;
 }
 #toast.show { transform: translateX(-50%) translateY(0); }
-#toast.ok { border-color: rgba(0,200,150,.3); color: var(--teal); }
+#toast.ok { border-color: rgba(22,163,74,.3); color: var(--teal); }
 #toast.err { border-color: rgba(255,94,94,.3); color: var(--red); }
 
 /* ===== PARCEL BADGE ===== */
@@ -744,7 +744,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
   .bn-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 4px; border: none; background: none; cursor: pointer; color: var(--t3); font-size: 11px; font-weight: 500; font-family: inherit; transition: color .15s; }
   .bn-item.active { color: var(--teal); } .bn-item .mi { font-size: 26px; }
   .bn-fab { flex: 1; display: flex; align-items: center; justify-content: center; border: none; background: none; padding: 0; cursor: pointer; margin-top: -26px; -webkit-tap-highlight-color: transparent; }
-  .bn-fab .mi { width: 50px; height: 50px; border-radius: 50%; background: var(--teal); color: #07090F; font-size: 26px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(0,200,150,.4); }
+  .bn-fab .mi { width: 50px; height: 50px; border-radius: 50%; background: var(--teal); color: #07090F; font-size: 26px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(22,163,74,.4); }
 }
 @media(max-width:480px){ .month-nav span { min-width: 34px; font-size: 11px; } }
 
@@ -768,15 +768,15 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 </head>
 <body>
 <div id="toast"></div>
-<div id="loadingBar" style="display:none;position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#00C896,#4D9CFF);z-index:9999;animation:loadpulse 1.2s ease-in-out infinite"></div>
+<div id="loadingBar" style="display:none;position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#16A34A,#4D9CFF);z-index:9999;animation:loadpulse 1.2s ease-in-out infinite"></div>
 <div id="loadingBar" style="display:none;position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal),var(--blue));z-index:9999;animation:loadpulse 1.2s ease-in-out infinite"></div>
 
 <!-- LOGIN -->
 <div class="auth-screen" id="loginScreen" style="display:flex">
   <div class="auth-card">
     <div class="auth-logo">
-      <div class="auth-logo-icon"><span class="mi">auto_awesome</span></div>
-      <h1>Fin<span>track</span></h1>
+      <div class="auth-logo-icon"><svg viewBox="0 0 24 24" width="55%" height="55%" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="7.5" width="15" height="11.5" rx="2.5" fill="#fff"/><circle cx="13.3" cy="13.2" r="1.15" fill="#16A34A"/><circle cx="15.3" cy="6.2" r="4" fill="#FBBF24" stroke="#fff" stroke-width="0.6"/><text x="15.3" y="7.7" font-size="4.6" font-weight="800" fill="#0D1B2A" text-anchor="middle" font-family="Arial,sans-serif">$</text><path d="M17.3 4.1 L21.3 1 M21.3 1 L21.1 3.3 M21.3 1 L19 1.3" stroke="#fff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h1>Bolso <span>Inteligente</span></h1>
       <p>Controle financeiro inteligente</p>
     </div>
     <div class="auth-field">
@@ -806,7 +806,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
     <div class="auth-field"><label>Usu&#225;rio</label><input type="text" id="forgotUser" placeholder="Seu nome de usu&#225;rio" autocomplete="username"></div>
     <button class="auth-btn" id="forgotBtn" onclick="solicitarReset()">Enviar link de recupera&#231;&#227;o</button>
     <div class="auth-error" id="forgotError"></div>
-    <div id="forgotOk" style="display:none;background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);border-radius:10px;padding:12px;font-size:13px;color:#00C896;margin-top:14px;line-height:1.5">
+    <div id="forgotOk" style="display:none;background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.2);border-radius:10px;padding:12px;font-size:13px;color:#16A34A;margin-top:14px;line-height:1.5">
       Se esse usu&#225;rio existir e tiver um e-mail cadastrado, um link de recupera&#231;&#227;o foi enviado. Confira sua caixa de entrada (e o spam).
     </div>
     <div class="auth-switch"><button onclick="voltarLoginDeForgot()">Voltar para o login</button></div>
@@ -864,7 +864,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 <div class="auth-screen" id="changePassScreen" style="display:none">
   <div class="auth-card">
     <div class="auth-logo"><div class="auth-logo-icon"><span class="mi">lock_reset</span></div><h1>Criar sua <span>senha</span></h1><p>Defina uma senha pessoal</p></div>
-    <div style="background:rgba(0,200,150,.08);border:1px solid rgba(0,200,150,.2);border-radius:10px;padding:12px;font-size:12px;color:#00C896;margin-bottom:20px">&#128274; Primeiro acesso. Escolha uma senha segura.</div>
+    <div style="background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.2);border-radius:10px;padding:12px;font-size:12px;color:#16A34A;margin-bottom:20px">&#128274; Primeiro acesso. Escolha uma senha segura.</div>
     <div class="auth-field"><label>Nova senha</label><input type="password" id="cpNewPass" placeholder="M&#237;nimo 4 caracteres"></div>
     <div class="auth-field"><label>Confirmar</label><input type="password" id="cpConfPass" placeholder="Repita a senha"></div>
     <button class="auth-btn" onclick="doChangePass()">Salvar senha e entrar</button>
@@ -875,7 +875,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 <!-- APP -->
 <div id="appScreen" style="display:none">
   <!-- PRO BAR -->
-  <div id="pro-bar" style="display:none;align-items:center;justify-content:space-between;padding:8px 20px;background:linear-gradient(90deg,rgba(0,200,150,.12),rgba(77,156,255,.08));border-bottom:1px solid rgba(0,200,150,.2);font-size:13px;gap:12px;margin-left:240px" class="pro-bar-wrap">
+  <div id="pro-bar" style="display:none;align-items:center;justify-content:space-between;padding:8px 20px;background:linear-gradient(90deg,rgba(22,163,74,.12),rgba(77,156,255,.08));border-bottom:1px solid rgba(22,163,74,.2);font-size:13px;gap:12px;margin-left:240px" class="pro-bar-wrap">
     <span style="color:var(--t1)">⚡ Você está no plano <b>Free</b> — Scanner, Cartão de crédito e mais recursos no <b style="color:var(--teal)">Pro</b></span>
     <button onclick="showUpgrade()" class="btn btn-primary" style="padding:6px 14px;font-size:12px;white-space:nowrap">Assinar Pro R$29/mês</button>
   </div>
@@ -884,8 +884,8 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
     <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
       <div class="sb-head">
-        <div class="sb-logo"><span class="mi" style="font-size:17px;color:#07090F">bolt</span></div>
-        <div><div class="sb-brand">Fin<span>track</span></div></div>
+        <div class="sb-logo"><svg viewBox="0 0 24 24" width="60%" height="60%" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="7.5" width="15" height="11.5" rx="2.5" fill="#fff"/><circle cx="13.3" cy="13.2" r="1.15" fill="#16A34A"/><circle cx="15.3" cy="6.2" r="4" fill="#FBBF24" stroke="#fff" stroke-width="0.6"/><text x="15.3" y="7.7" font-size="4.6" font-weight="800" fill="#0D1B2A" text-anchor="middle" font-family="Arial,sans-serif">$</text><path d="M17.3 4.1 L21.3 1 M21.3 1 L21.1 3.3 M21.3 1 L19 1.3" stroke="#fff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div><div class="sb-brand">Bolso <span>Inteligente</span></div></div>
       </div>
       <div class="sb-user" style="display:none">
         <div class="sb-avatar" id="sbAvatar">?</div>
@@ -1425,7 +1425,7 @@ console.log('Firebase inicializado:', firebase.apps.length > 0);
 
 var S = { user:null, page:'dashboard', month:new Date().getMonth(), year:new Date().getFullYear(), eid:null, etype:null };
 var MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-var COLORS=['#00C896','#4D9CFF','#FF5E5E','#FFB547','#A78BFA','#F06292','#4DB6AC','#FF8A65'];
+var COLORS=['#16A34A','#4D9CFF','#FF5E5E','#FBBF24','#A78BFA','#F06292','#4DB6AC','#FF8A65'];
 
 // ===== LOCAL CACHE (para velocidade) =====
 var _cache = null;
@@ -1571,12 +1571,12 @@ function showRegister(){ g('loginScreen').style.display='none'; g('registerScree
 function showLogin(){ g('registerScreen').style.display='none'; g('loginScreen').style.display='flex'; }
 
 var LEGAL_TERMOS = '<p><b>Última atualização: 25 de julho de 2026</b></p>'+
-'<p>Estes Termos de Uso regulam o uso do aplicativo <b>Fintrack</b>, disponibilizado por <b>Dhiefferton Raposo</b> (pessoa física), contato: monteirodhiefferton@gmail.com. Ao criar uma conta ou usar o Fintrack, você concorda com estes Termos.</p>'+
-'<p><b>O que é o Fintrack.</b> Ferramenta de controle financeiro pessoal (entradas, saídas, parcelas, investimentos, cartão de crédito), com leitura automática de cupons/boletos por IA e registro via WhatsApp. <b>O Fintrack não é uma instituição financeira e não presta consultoria financeira, contábil ou de investimentos.</b> Informações geradas automaticamente (scanner) podem conter erros. Decisões financeiras são de responsabilidade exclusiva do usuário.</p>'+
+'<p>Estes Termos de Uso regulam o uso do aplicativo <b>Bolso Inteligente</b>, disponibilizado por <b>Dhiefferton Raposo</b> (pessoa física), contato: monteirodhiefferton@gmail.com. Ao criar uma conta ou usar o Bolso Inteligente, você concorda com estes Termos.</p>'+
+'<p><b>O que é o Bolso Inteligente.</b> Ferramenta de controle financeiro pessoal (entradas, saídas, parcelas, investimentos, cartão de crédito), com leitura automática de cupons/boletos por IA e registro via WhatsApp. <b>O Bolso Inteligente não é uma instituição financeira e não presta consultoria financeira, contábil ou de investimentos.</b> Informações geradas automaticamente (scanner) podem conter erros. Decisões financeiras são de responsabilidade exclusiva do usuário.</p>'+
 '<p><b>Cadastro.</b> Você deve fornecer dados verdadeiros e é responsável por manter sua senha em sigilo e por tudo que ocorrer na sua conta. Podemos suspender contas que violem estes Termos ou pratiquem fraude.</p>'+
 '<p><b>Planos e cobrança.</b> Há um plano Free (com limites de uso) e um plano Pro (R$ 29,00/mês, sujeito a alteração mediante aviso). A cobrança do Pro é recorrente e automática via Mercado Pago; ao assinar, você autoriza a cobrança mensal até o cancelamento. Cancele quando quiser pela tela de Perfil — não há reembolso proporcional do período já pago, salvo obrigação legal em contrário.</p>'+
-'<p><b>Uso aceitável.</b> É proibido usar o Fintrack para fins ilícitos, tentar acessar dados de terceiros, sobrecarregar o serviço (ex.: automatizar chamadas em massa) ou abusar do scanner de IA para fins não relacionados a controle financeiro pessoal.</p>'+
-'<p><b>Serviços de terceiros.</b> O Fintrack integra Mercado Pago (pagamentos), Anthropic (leitura de imagens por IA), Brevo (e-mail) e Z-API (WhatsApp). O uso desses recursos também está sujeito aos termos desses provedores.</p>'+
+'<p><b>Uso aceitável.</b> É proibido usar o Bolso Inteligente para fins ilícitos, tentar acessar dados de terceiros, sobrecarregar o serviço (ex.: automatizar chamadas em massa) ou abusar do scanner de IA para fins não relacionados a controle financeiro pessoal.</p>'+
+'<p><b>Serviços de terceiros.</b> O Bolso Inteligente integra Mercado Pago (pagamentos), Anthropic (leitura de imagens por IA), Brevo (e-mail) e Z-API (WhatsApp). O uso desses recursos também está sujeito aos termos desses provedores.</p>'+
 '<p><b>Isenção de responsabilidade.</b> O serviço é fornecido "como está", sem garantia de disponibilidade ininterrupta ou ausência de erros. Não nos responsabilizamos por perdas financeiras decorrentes do uso do serviço, na máxima extensão permitida por lei.</p>'+
 '<p><b>Alterações.</b> Podemos alterar estes Termos a qualquer momento, com aviso por e-mail ou no aplicativo em mudanças relevantes.</p>'+
 '<p><b>Encerramento.</b> Você pode encerrar sua conta quando quiser pela tela de Perfil.</p>'+
@@ -1584,7 +1584,7 @@ var LEGAL_TERMOS = '<p><b>Última atualização: 25 de julho de 2026</b></p>'+
 '<p><b>Contato:</b> monteirodhiefferton@gmail.com</p>';
 
 var LEGAL_PRIVACIDADE = '<p><b>Última atualização: 25 de julho de 2026</b></p>'+
-'<p>Esta Política explica como o Fintrack trata seus dados pessoais, em conformidade com a LGPD (Lei nº 13.709/2018). <b>Controlador:</b> Dhiefferton Raposo. <b>Contato:</b> monteirodhiefferton@gmail.com</p>'+
+'<p>Esta Política explica como o Bolso Inteligente trata seus dados pessoais, em conformidade com a LGPD (Lei nº 13.709/2018). <b>Controlador:</b> Dhiefferton Raposo. <b>Contato:</b> monteirodhiefferton@gmail.com</p>'+
 '<p><b>Dados que coletamos:</b> nome de usuário e senha (com hash criptográfico), nome, foto, e-mail, WhatsApp (opcionais), e os dados financeiros que você insere (entradas, saídas, parcelas, investimentos, cartão, categorias). Imagens enviadas ao scanner são processadas e não armazenadas permanentemente pelo provedor de IA. <b>Não coletamos dados de cartão de crédito ou bancários</b> — pagamentos são processados inteiramente pelo Mercado Pago.</p>'+
 '<p><b>Para que usamos:</b> fornecer o app, processar sua assinatura, enviar e-mails operacionais (recuperação de senha), enviar lembretes por WhatsApp (se vinculado), interpretar cupons/boletos no scanner, e prevenir fraude. <b>Não vendemos seus dados nem os usamos para publicidade.</b></p>'+
 '<p><b>Compartilhamento com terceiros:</b></p>'+
@@ -1600,7 +1600,7 @@ var LEGAL_PRIVACIDADE = '<p><b>Última atualização: 25 de julho de 2026</b></p
 '<p><b>Retenção.</b> Mantemos seus dados enquanto a conta estiver ativa. Ao solicitar exclusão, apagamos dados pessoais e financeiros em até 30 dias, exceto obrigações legais de retenção de terceiros (ex.: registros fiscais do Mercado Pago).</p>'+
 '<p><b>Seus direitos (Art. 18 LGPD):</b> acessar, corrigir, solicitar exclusão da conta, portar seus dados (via exportação de backup no app), revogar consentimentos opcionais (ex.: desvincular WhatsApp) e se opor a tratamentos indevidos. Exercite pelo e-mail acima.</p>'+
 '<p><b>Segurança.</b> Senha com hash criptográfico, regras de acesso no banco e chaves de API mantidas só no servidor. Nenhum sistema é 100% imune a falhas.</p>'+
-'<p><b>Menores de idade.</b> O Fintrack não se destina a menores de 18 anos.</p>'+
+'<p><b>Menores de idade.</b> O Bolso Inteligente não se destina a menores de 18 anos.</p>'+
 '<p><b>Alterações.</b> Mudanças relevantes serão comunicadas por e-mail ou aviso no app.</p>'+
 '<p><b>Reclamações:</b> monteirodhiefferton@gmail.com ou Autoridade Nacional de Proteção de Dados (ANPD) — gov.br/anpd</p>';
 
@@ -1709,7 +1709,7 @@ function showUpgrade(feat){
 function assinarPro(){
   closeModal();
   // Abre WhatsApp para pagamento (temporário até integração MP)
-  var msg = encodeURIComponent('Olá! Quero assinar o Fintrack Pro (R$ 29/mês). Meu usuário: '+S.user);
+  var msg = encodeURIComponent('Olá! Quero assinar o Bolso Inteligente Pro (R$ 29/mês). Meu usuário: '+S.user);
   window.open('https://wa.me/5519995572793?text='+msg, '_blank');
 }
 
@@ -1984,7 +1984,7 @@ function drawBarChart(d){
   months.forEach(function(mo,i){
     var gx=pad.l+i*groupW+(groupW-(barW*2+gap))/2;
     var hE=mo.tE/maxVal*cH, hS=mo.tS/maxVal*cH;
-    roundBar(gx, baseY-hE, barW, hE, ['#00C896','#00A878']);
+    roundBar(gx, baseY-hE, barW, hE, ['#16A34A','#0F7A37']);
     roundBar(gx+barW+gap, baseY-hS, barW, hS, ['#FF7B7B','#FF5E5E']);
     // X label
     ctx.fillStyle='rgba(255,255,255,.3)'; ctx.font='10px Inter'; ctx.textAlign='center';
@@ -1992,7 +1992,7 @@ function drawBarChart(d){
   });
 
   // Legend (mesmo padrão do gráfico de linha)
-  ctx.fillStyle='#00C896'; ctx.fillRect(pad.l,8,18,3);
+  ctx.fillStyle='#16A34A'; ctx.fillRect(pad.l,8,18,3);
   ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='10px Inter'; ctx.textAlign='left';
   ctx.fillText('Entradas',pad.l+22,11);
   ctx.fillStyle='#FF5E5E'; ctx.fillRect(pad.l+90,8,18,3);
@@ -2022,7 +2022,7 @@ function drawInvChart(d){
     return;
   }
 
-  var invColors=['#4D9CFF','#A78BFA','#00C896','#FFB547','#F06292','#4DB6AC','#FF8A65','#80CBC4'];
+  var invColors=['#4D9CFF','#A78BFA','#16A34A','#FBBF24','#F06292','#4DB6AC','#FF8A65','#80CBC4'];
   var startAngle=-Math.PI/2;
   items.forEach(function(item,i){
     var slice=item[1]/total*Math.PI*2;
@@ -2763,19 +2763,19 @@ function exportPDF(){
   var tE=ent.reduce(function(a,e){return a+parseFloat(e.val||0);},0);
   var tS=sai.reduce(function(a,s){return a+parseFloat(s.val||0);},0);
   var sal=tE-tS; var mes=MONTHS[S.month]+' '+S.year;
-  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Fintrack</title>'+
-    '<style>body{font-family:Arial,sans-serif;padding:32px}h1{color:#00C896}.sub{color:#888;font-size:13px;margin-bottom:28px}'+
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Bolso Inteligente</title>'+
+    '<style>body{font-family:Arial,sans-serif;padding:32px}h1{color:#16A34A}.sub{color:#888;font-size:13px;margin-bottom:28px}'+
     '.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}.card{border:1px solid #f0f0f0;border-radius:10px;padding:16px}'+
-    '.cl{font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px}.cv{font-size:20px;font-weight:800}.g{color:#00C896}.r{color:#FF5E5E}'+
+    '.cl{font-size:10px;color:#888;text-transform:uppercase;margin-bottom:6px}.cv{font-size:20px;font-weight:800}.g{color:#16A34A}.r{color:#FF5E5E}'+
     'h2{font-size:14px;font-weight:700;margin:20px 0 10px;border-bottom:1px solid #f0f0f0;padding-bottom:6px}'+
     'table{width:100%;border-collapse:collapse;font-size:12px}th{text-align:left;padding:8px;background:#f8f8f8;font-size:10px;color:#888}td{padding:8px;border-bottom:1px solid #f5f5f5}</style></head><body>'+
-    '<h1>Fintrack</h1><div class="sub">'+mes+' | '+new Date().toLocaleDateString('pt-BR')+'</div>'+
+    '<h1>Bolso Inteligente</h1><div class="sub">'+mes+' | '+new Date().toLocaleDateString('pt-BR')+'</div>'+
     '<div class="cards"><div class="card"><div class="cl">Entradas</div><div class="cv g">'+fmt(tE)+'</div></div>'+
     '<div class="card"><div class="cl">Saídas</div><div class="cv r">'+fmt(tS)+'</div></div>'+
     '<div class="card"><div class="cl">Saldo</div><div class="cv '+(sal>=0?'g':'r')+'">'+fmt(sal)+'</div></div></div>';
-  if(ent.length) html+='<h2>Entradas</h2><table><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th></tr>'+ent.map(function(e){return '<tr><td>'+fd(e.date)+'</td><td>'+esc(e.desc)+'</td><td>'+esc(e.cat)+'</td><td style="color:#00C896;font-weight:700">'+fmt(e.val)+'</td></tr>';}).join('')+'</table>';
+  if(ent.length) html+='<h2>Entradas</h2><table><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th></tr>'+ent.map(function(e){return '<tr><td>'+fd(e.date)+'</td><td>'+esc(e.desc)+'</td><td>'+esc(e.cat)+'</td><td style="color:#16A34A;font-weight:700">'+fmt(e.val)+'</td></tr>';}).join('')+'</table>';
   if(sai.length) html+='<h2>Saídas</h2><table><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th></tr>'+sai.map(function(s){return '<tr><td>'+fd(s.date)+'</td><td>'+esc(s.desc)+'</td><td>'+esc(s.cat)+'</td><td style="color:#FF5E5E;font-weight:700">'+fmt(s.val)+'</td></tr>';}).join('')+'</table>';
-  html+='<div style="margin-top:40px;font-size:10px;color:#aaa;text-align:center">Fintrack - dh815.github.io/fintrack</div></body></html>';
+  html+='<div style="margin-top:40px;font-size:10px;color:#aaa;text-align:center">Bolso Inteligente - dh815.github.io/fintrack</div></body></html>';
   var w=window.open('','_blank'); w.document.write(html); w.document.close(); setTimeout(function(){w.print();},500);
 }
 
@@ -2895,15 +2895,15 @@ function contaLancamentos(d, tipo){
 }
 function showUpgrade(motivo){
   var g2=function(id){return document.getElementById(id);};
-  motivo = motivo || 'Desbloqueie todos os recursos do Fintrack';
+  motivo = motivo || 'Desbloqueie todos os recursos do Bolso Inteligente';
   g2('mTitle').textContent='🚀 Upgrade para Pro';
   g2('mBody').innerHTML=
     '<div style="text-align:center;padding:8px 0 16px">'+
     '<div style="font-size:48px;margin-bottom:12px">⚡</div>'+
     '<p style="font-size:15px;color:var(--t1);font-weight:600;margin-bottom:8px">'+motivo+'</p>'+
-    '<p style="font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.6">Assine o Fintrack Pro e tenha acesso a tudo sem limites.</p>'+
+    '<p style="font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.6">Assine o Bolso Inteligente Pro e tenha acesso a tudo sem limites.</p>'+
     '<div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;text-align:left">'+
-    '<div style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Fintrack Pro inclui:</div>'+
+    '<div style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Bolso Inteligente Pro inclui:</div>'+
     '<div style="font-size:13px;color:var(--t1);line-height:2">'+
     '✅ Lançamentos ilimitados<br>'+
     '✅ Scanner com IA (cupom e boleto)<br>'+
@@ -2958,7 +2958,7 @@ function assinarPro(){
   .catch(function(err){
     // Fallback para WhatsApp se servidor falhar
     closeModal();
-    var msg=encodeURIComponent('Olá! Quero assinar o Fintrack Pro (R$ 29/mês). Meu usuário: '+S.user);
+    var msg=encodeURIComponent('Olá! Quero assinar o Bolso Inteligente Pro (R$ 29/mês). Meu usuário: '+S.user);
     window.open('https://wa.me/5519995572793?text='+msg,'_blank');
     console.error('Erro pagamento:', err.message);
   });
