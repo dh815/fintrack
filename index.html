@@ -2481,8 +2481,8 @@ function delIt(type,id){
 
 // CONFIRM
 function cf(title,text,cb){
-  g('cfTitle').textContent=title; g('cfText').textContent=text;
-  g('cfBtn').onclick=function(){closeCf();cb();};
+  g('cfTitle').textContent=title; g('cfMsg').textContent=text;
+  g('cfOk').onclick=function(){closeCf();cb();};
   g('confirmWrap').classList.add('open');
 }
 function closeCf(){ g('confirmWrap').classList.remove('open'); }
