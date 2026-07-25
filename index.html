@@ -1671,7 +1671,7 @@ function showApp(n){
     var adminDiv=g('adminButtons');
     if(adminDiv) adminDiv.style.display=isAdmin?'block':'none';
     var proBar=g('pro-bar');
-    if(proBar) proBar.style.display=(acc.role==='free')?'flex':'none';
+    if(proBar) proBar.style.display=(acc.role!=='pro'&&acc.role!=='admin')?'flex':'none';
     var sbAv=g('sbAvatar');
     if(sbAv && acc.foto) sbAv.innerHTML='<img src="'+acc.foto+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
     var topAv=g('topAvatar');
