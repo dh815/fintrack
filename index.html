@@ -916,6 +916,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
           <button class="sb-logout" style="color:var(--yellow);margin-bottom:4px" onclick="importarDados()"><span class="mi" style="font-size:16px">upload</span><span class="sb-label">Importar backup</span></button>
           <button class="sb-logout" id="btnCriarAcesso" style="color:var(--teal);margin-bottom:4px" onclick="openCreateAccess()"><span class="mi" style="font-size:16px">person_add</span><span class="sb-label">Criar acesso</span></button>
         </div>
+        <a href="https://wa.me/5519995572793?text=Ol%C3%A1!%20Preciso%20de%20ajuda%20com%20o%20Bolso%20Inteligente." target="_blank" rel="noopener" class="sb-logout" style="color:var(--t2);text-decoration:none;margin-bottom:4px"><span class="mi" style="font-size:16px">support_agent</span><span class="sb-label">Suporte</span></a>
         <button class="sb-logout" onclick="doLogout()"><span class="mi" style="font-size:16px">logout</span><span class="sb-label">Sair da conta</span></button>
       </div>
     </aside>
@@ -1143,6 +1144,20 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
           <div class="panel" style="margin-top:16px">
             <div class="panel-head"><span class="panel-title">Trocar senha</span></div>
             <div style="padding:20px"><div class="field"><label>Senha atual</label><input type="password" id="p-atual" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;"></div><div class="field"><label>Nova senha</label><input type="password" id="p-nova" placeholder="M&#237;nimo 4 caracteres"></div><div class="field"><label>Confirmar</label><input type="password" id="p-conf" placeholder="Repita a senha"></div><div class="auth-error" id="p-err" style="margin-bottom:12px"></div><button class="btn btn-primary" style="width:100%" onclick="salvarSenha()">Salvar nova senha</button></div>
+          </div>
+
+          <!-- Suporte -->
+          <div class="panel" style="margin-top:16px">
+            <div class="panel-head"><span class="panel-title"><span class="mi" style="font-size:16px;vertical-align:middle;margin-right:6px;color:var(--teal)">support_agent</span>Precisa de ajuda?</span></div>
+            <div style="padding:20px">
+              <p style="font-size:12.5px;color:var(--t3);margin-bottom:14px;line-height:1.6">D&#250;vidas sobre sua conta, cobran&#231;a ou algum problema no app? Fale direto com a gente.</p>
+              <a href="https://wa.me/5519995572793?text=Ol%C3%A1!%20Preciso%20de%20ajuda%20com%20o%20Bolso%20Inteligente." target="_blank" rel="noopener" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:#25D366;margin-bottom:10px">
+                <span class="mi" style="font-size:16px">chat</span> Falar no WhatsApp
+              </a>
+              <a href="mailto:monteirodhiefferton@gmail.com?subject=Suporte%20Bolso%20Inteligente" class="btn btn-ghost" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none">
+                <span class="mi" style="font-size:16px">mail</span> Enviar e-mail
+              </a>
+            </div>
           </div>
 
           <!-- Zona de perigo -->
