@@ -2678,20 +2678,56 @@ function enviarComandoAssistente(){
 
 // Interpreta o comando localmente no navegador, sem chamar nenhum servidor
 // externo — evita qualquer falha de rede/API, igual resolvemos no app da Gabi Lanza.
-function interpretarComandoLocal(msgOriginal, categorias){
-  var msg = msgOriginal.toLowerCase().trim();
+// Base de conhecimento de cada área do app — usada tanto pra explicar
+// quanto pra guiar o reconhecimento de perguntas
+var CONHECIMENTO_APP = {
+  dashboard: {gatilhos:['dashboard','início','inicio','tela inicial','resumo geral'], texto:'A Dashboard é sua tela inicial — mostra o saldo do mês, os cards de entradas, saídas, investido, parcelas e a pagar, além dos gráficos de gastos por categoria e carteira de investimentos.'},
+  entradas: {gatilhos:['entradas','entrada'], texto:'Em Entradas você vê e cadastra todo dinheiro que entrou — salário, freelance, etc. Dá pra filtrar por categoria e por mês.'},
+  saidas: {gatilhos:['saídas','saidas','saída','saida'], texto:'Em Saídas você vê e cadastra todo dinheiro que saiu — seus gastos do dia a dia. Mesma lógica de filtros das Entradas.'},
+  saldo: {gatilhos:['saldo do mês','saldo do mes'], texto:'Saldo do mês mostra o resumo: total de entradas menos saídas do mês selecionado.'},
+  parcelas: {gatilhos:['parcelas','parcela','financiamento'], texto:'Em Parcelas ficam suas contas parceladas — financiamentos, compras a prazo. Você vê o total, quantas parcelas já pagou, quantas faltam e quando vencem.'},
+  planejamento: {gatilhos:['planejamento','metas','meta','objetivo'], texto:'Planejamento é onde você cria metas financeiras, como reserva de emergência ou uma viagem, define um valor-alvo e acompanha o progresso.'},
+  investimentos: {gatilhos:['investimentos','investimento','carteira'], texto:'Investimentos mostra suas posições investidas — renda fixa, ações, cripto — e o valor total da sua carteira.'},
+  credito: {gatilhos:['crédito','credito','cartão','cartao','fatura'], texto:'Crédito à Vista mostra a fatura do seu cartão de crédito no mês, com os gastos lançados nele.'},
+  perfil: {gatilhos:['perfil','minha conta','assinatura'], texto:'No Perfil você edita seus dados, e-mail, WhatsApp, gerencia sua assinatura, troca a senha, ou exclui a conta se quiser.'},
+  categorias: {gatilhos:['categorias','categoria'], texto:'Em Categorias você gerencia as categorias usadas nos seus lançamentos de entrada e saída.'},
+  scanner: {gatilhos:['scanner','escanear','cupom','boleto'], texto:'O Scanner lê cupons fiscais e boletos automaticamente com IA, preenchendo o lançamento sozinho — é exclusivo do plano Pro.'},
+};
 
+function interpretarComandoLocal(msgOriginal, categorias){
+  var msg = msgOriginal.toLowerCase().trim().replace(/[?!.]/g,'');
+
+  // ===== SAUDAÇÃO =====
+  var saudacoes = ['oi','olá','ola','bom dia','boa tarde','boa noite','tudo bem','e aí','eae','opa'];
+  if(saudacoes.some(function(s){ return msg===s || msg.indexOf(s)===0; }) && msg.length<20){
+    return {acao:'saudacao'};
+  }
+
+  // ===== EXPLICAR (como funciona / o que é / pra que serve / explica) =====
+  var gatilhosExplicar = ['como funciona','o que é','o que faz','pra que serve','para que serve','explica','me explica','não entendo','nao entendo','me ajuda a entender'];
+  var pediuExplicacao = gatilhosExplicar.some(function(g){ return msg.indexOf(g)>=0; });
+  if(pediuExplicacao){
+    for(var chave in CONHECIMENTO_APP){
+      var area = CONHECIMENTO_APP[chave];
+      if(area.gatilhos.some(function(g){ return msg.indexOf(g)>=0; })){
+        return {acao:'explicar', texto:area.texto};
+      }
+    }
+    return {acao:'explicar', texto:'Posso te explicar qualquer área do app: Dashboard, Entradas, Saídas, Saldo do mês, Parcelas, Planejamento, Investimentos, Crédito, Perfil, Categorias ou o Scanner. É só perguntar "como funciona [nome]?"'};
+  }
+
+  // ===== REGISTRAR (tem número + verbo de ação, e não parece pergunta) =====
   var verbosSaida = ['gastei','paguei','comprei','gasto','saiu','desembolsei'];
   var verbosEntrada = ['recebi','ganhei','entrou','depositei','caiu'];
   var temVerboSaida = verbosSaida.some(function(v){ return msg.indexOf(v)>=0; });
   var temVerboEntrada = verbosEntrada.some(function(v){ return msg.indexOf(v)>=0; });
+  var palavrasPergunta = ['quanto','qual','quais','como assim','será que'];
+  var pareceUmaPergunta = palavrasPergunta.some(function(p){ return msg.indexOf(p)>=0; });
 
-  // Extrai o primeiro número da frase (aceita vírgula ou ponto decimal)
   var matchNumero = msg.match(/(\d+(?:[.,]\d{1,2})?)/);
   var valor = matchNumero ? parseFloat(matchNumero[1].replace(',','.')) : null;
 
-  // ===== REGISTRAR (tem número + verbo de ação) =====
-  if(valor !== null && (temVerboSaida || temVerboEntrada)){
+  if(valor !== null && (temVerboSaida || temVerboEntrada) && !pareceUmaPergunta){
     var tipo = temVerboEntrada ? 'entrada' : 'saida';
     var listaCats = tipo==='entrada' ? (categorias.entrada||[]) : (categorias.saida||[]);
     var categoriaEncontrada = listaCats.find(function(c){ return msg.indexOf(c.toLowerCase())>=0; }) || 'Outros';
@@ -2701,7 +2737,6 @@ function interpretarComandoLocal(msgOriginal, categorias){
     else if(msg.indexOf('ontem')>=0) data.setDate(data.getDate()-1);
     var dataStr = data.toISOString().slice(0,10);
 
-    // Descrição: tenta pegar o trecho depois de "em/no/na/com", senão usa a frase toda
     var descMatch = msgOriginal.match(/(?:em|no|na|com|de)\s+([a-zA-ZÀ-ÿ\s]+)/i);
     var descricao = descMatch ? descMatch[1].trim() : msgOriginal;
     descricao = descricao.charAt(0).toUpperCase()+descricao.slice(1);
@@ -2709,33 +2744,44 @@ function interpretarComandoLocal(msgOriginal, categorias){
     return {acao:'registrar', tipo:tipo, valor:valor, categoria:categoriaEncontrada, descricao:descricao, data:dataStr};
   }
 
-  // ===== CONSULTAR =====
-  var palavrasFinanceiras = ['saldo','gasto','gastei','receita','entrada','saída','saida','parcela','invest','meta','planejamento','objetivo','fatura','crédito','credito','cartão','cartao','quanto','extrato'];
-  var pareceFinanceiro = palavrasFinanceiras.some(function(p){ return msg.indexOf(p)>=0; });
+  // ===== CONSULTAR (ordem do mais específico pro mais genérico, evita confusão) =====
+  if(msg.indexOf('parcela')>=0 || msg.indexOf('financiamento')>=0){
+    return {acao:'consultar', tipo:'parcelas', categoria:null, periodo:extrairPeriodo(msg)};
+  }
+  if(msg.indexOf('invest')>=0 || msg.indexOf('carteira')>=0){
+    return {acao:'consultar', tipo:'investimentos', categoria:null, periodo:extrairPeriodo(msg)};
+  }
+  if(msg.indexOf('meta')>=0 || msg.indexOf('planejamento')>=0 || msg.indexOf('objetivo')>=0){
+    return {acao:'consultar', tipo:'planejamento', categoria:null, periodo:extrairPeriodo(msg)};
+  }
+  if(msg.indexOf('fatura')>=0 || msg.indexOf('crédito')>=0 || msg.indexOf('credito')>=0 || msg.indexOf('cartão')>=0 || msg.indexOf('cartao')>=0){
+    return {acao:'consultar', tipo:'credito', categoria:null, periodo:extrairPeriodo(msg)};
+  }
+  var todasCats = (categorias.entrada||[]).concat(categorias.saida||[]);
+  var categoriaFiltro = todasCats.find(function(c){ return msg.indexOf(c.toLowerCase())>=0; }) || null;
 
-  if(pareceFinanceiro){
-    var tipoConsulta = 'saldo';
-    if(msg.indexOf('parcela')>=0) tipoConsulta = 'parcelas';
-    else if(msg.indexOf('invest')>=0) tipoConsulta = 'investimentos';
-    else if(msg.indexOf('meta')>=0 || msg.indexOf('planejamento')>=0 || msg.indexOf('objetivo')>=0) tipoConsulta = 'planejamento';
-    else if(msg.indexOf('fatura')>=0 || msg.indexOf('crédito')>=0 || msg.indexOf('credito')>=0 || msg.indexOf('cartão')>=0 || msg.indexOf('cartao')>=0) tipoConsulta = 'credito';
-    else if(msg.indexOf('gasto')>=0 || msg.indexOf('gastei')>=0 || msg.indexOf('saída')>=0 || msg.indexOf('saida')>=0 || msg.indexOf('despesa')>=0) tipoConsulta = 'saidas';
-    else if(msg.indexOf('receita')>=0 || msg.indexOf('entrada')>=0 || msg.indexOf('ganho')>=0) tipoConsulta = 'entradas';
-    else if(msg.indexOf('saldo')>=0) tipoConsulta = 'saldo';
-
-    var periodo = 'mes_atual';
-    if(msg.indexOf('hoje')>=0) periodo = 'hoje';
-    else if(msg.indexOf('semana')>=0) periodo = 'semana';
-    else if(msg.indexOf('mês passado')>=0 || msg.indexOf('mes passado')>=0) periodo = 'mes_passado';
-    else if(msg.indexOf('ano')>=0) periodo = 'ano';
-
-    var todasCats = (categorias.entrada||[]).concat(categorias.saida||[]);
-    var categoriaFiltro = todasCats.find(function(c){ return msg.indexOf(c.toLowerCase())>=0; }) || null;
-
-    return {acao:'consultar', tipo:tipoConsulta, categoria:categoriaFiltro, periodo:periodo};
+  if(msg.indexOf('gasto')>=0 || msg.indexOf('gastei')>=0 || msg.indexOf('saída')>=0 || msg.indexOf('saida')>=0 || msg.indexOf('despesa')>=0){
+    return {acao:'consultar', tipo:'saidas', categoria:categoriaFiltro, periodo:extrairPeriodo(msg)};
+  }
+  if(msg.indexOf('receita')>=0 || msg.indexOf('entrada')>=0 || msg.indexOf('ganho')>=0 || msg.indexOf('recebi')>=0){
+    return {acao:'consultar', tipo:'entradas', categoria:categoriaFiltro, periodo:extrairPeriodo(msg)};
+  }
+  if(msg.indexOf('saldo')>=0 || msg.indexOf('extrato')>=0){
+    return {acao:'consultar', tipo:'saldo', categoria:null, periodo:extrairPeriodo(msg)};
+  }
+  if(categoriaFiltro){
+    return {acao:'consultar', tipo:'saidas', categoria:categoriaFiltro, periodo:extrairPeriodo(msg)};
   }
 
-  return {acao:'desconhecido', motivo:'Não identifiquei nenhum valor ou pergunta financeira nessa mensagem. Pode tentar algo como "gastei 50 reais no mercado" ou "qual meu saldo do mês?"'};
+  return {acao:'desconhecido', motivo:'Não entendi bem. Posso lançar um gasto/entrada (ex: "gastei 50 no mercado"), consultar seus dados (ex: "qual meu saldo?", "minhas parcelas") ou explicar qualquer aba do app (ex: "como funciona o Planejamento?").'};
+}
+
+function extrairPeriodo(msg){
+  if(msg.indexOf('hoje')>=0) return 'hoje';
+  if(msg.indexOf('semana')>=0) return 'semana';
+  if(msg.indexOf('mês passado')>=0 || msg.indexOf('mes passado')>=0) return 'mes_passado';
+  if(msg.indexOf('ano')>=0) return 'ano';
+  return 'mes_atual';
 }
 
 function processarRespostaAssistente(r){
@@ -2751,6 +2797,10 @@ function processarRespostaAssistente(r){
     assistAddMsg('bot', emoji+' Lancei '+fmtTxt(val)+' em '+(r.categoria||'Outros')+' ('+(isEnt?'entrada':'saída')+'), dia '+fd(r.data)+'.');
   } else if(r.acao === 'consultar'){
     assistAddMsg('bot', calcularRespostaConsulta(r));
+  } else if(r.acao === 'saudacao'){
+    assistAddMsg('bot', 'Olá! Sou a Íris, sua assistente financeira. Posso lançar entradas/saídas, consultar seus dados, ou explicar qualquer área do app. Como posso ajudar?');
+  } else if(r.acao === 'explicar'){
+    assistAddMsg('bot', r.texto);
   } else {
     assistAddMsg('bot', r.motivo || 'Não entendi bem. Pode reformular?');
   }
