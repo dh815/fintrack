@@ -2793,7 +2793,24 @@ function calcularRespostaConsulta(r){
       return a + faltam.reduce(function(s,x){return s+parseFloat(x.val||0);},0);
     },0);
     var qtdFaltando = ativas.reduce(function(a,p){ return a + p.pars.filter(function(x){return !x.pg;}).length; },0);
-    return 'Você tem '+ativas.length+' conta'+(ativas.length===1?'':'s')+' parcelada'+(ativas.length===1?'':'s')+' ativa'+(ativas.length===1?'':'s')+', totalizando '+fmtTxt(totalFalta)+' em '+qtdFaltando+' parcela'+(qtdFaltando===1?'':'s')+' restante'+(qtdFaltando===1?'':'s')+'.';
+
+    // Parcelas que vencem especificamente nesse mês (o que "esse mês" realmente pergunta)
+    var mesRef = new Date();
+    var totalMes = 0, qtdMes = 0;
+    ativas.forEach(function(p){
+      p.pars.forEach(function(x){
+        if(!x.pg){
+          var dd = new Date(x.date+'T12:00:00');
+          if(dd.getMonth()===mesRef.getMonth() && dd.getFullYear()===mesRef.getFullYear()){
+            totalMes += parseFloat(x.val||0); qtdMes++;
+          }
+        }
+      });
+    });
+
+    var resumoGeral = 'Você tem '+ativas.length+' conta'+(ativas.length===1?'':'s')+' parcelada'+(ativas.length===1?'':'s')+' ativa'+(ativas.length===1?'':'s')+', totalizando '+fmtTxt(totalFalta)+' em '+qtdFaltando+' parcela'+(qtdFaltando===1?'':'s')+' restante'+(qtdFaltando===1?'':'s')+'.';
+    if(qtdMes===0) return resumoGeral+' Nenhuma parcela vence esse mês.';
+    return resumoGeral+' Esse mês, faltam pagar '+qtdMes+' parcela'+(qtdMes===1?'':'s')+', totalizando '+fmtTxt(totalMes)+'.';
   }
 
   if(r.tipo === 'investimentos'){
