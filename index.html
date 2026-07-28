@@ -2670,14 +2670,28 @@ function enviarComandoAssistente(){
   input.value='';
   assistAddMsg('user', msg);
 
+  var thinking = document.createElement('div');
+  thinking.id = 'assistThinking';
+  thinking.style.cssText = 'align-self:flex-start;background:var(--s2);color:var(--t3);padding:10px 13px;border-radius:14px;font-size:13px';
+  thinking.textContent = 'Pensando...';
+  g('assistMessages').appendChild(thinking);
+  g('assistMessages').scrollTop = g('assistMessages').scrollHeight;
+
   var d = ud();
   var categorias = d && d.cats ? d.cats : {entrada:[], saida:[]};
-  var resultado = interpretarComandoLocal(msg, categorias);
-  processarRespostaAssistente(resultado);
+  var SERVER='https://fintrack-server-production-9d87.up.railway.app';
+  fetch(SERVER+'/assistente/interpretar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:S.user, mensagem:msg, categorias:categorias})})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var t = g('assistThinking'); if(t) t.remove();
+    if(!data.success){ assistAddMsg('bot', data.error||'Não consegui entender. Tenta de novo?'); return; }
+    processarRespostaAssistente(data.resultado);
+  })
+  .catch(function(e){
+    var t = g('assistThinking'); if(t) t.remove();
+    assistAddMsg('bot', 'Erro de conexão com o servidor. Tenta de novo em instantes?');
+  });
 }
-
-// Interpreta o comando localmente no navegador, sem chamar nenhum servidor
-// externo — evita qualquer falha de rede/API, igual resolvemos no app da Gabi Lanza.
 // Base de conhecimento de cada área do app — usada tanto pra explicar
 // quanto pra guiar o reconhecimento de perguntas
 var CONHECIMENTO_APP = {
@@ -2844,7 +2858,6 @@ function calcularRespostaConsulta(r){
     },0);
     var qtdFaltando = ativas.reduce(function(a,p){ return a + p.pars.filter(function(x){return !x.pg;}).length; },0);
 
-    // Parcelas que vencem especificamente nesse mês (o que "esse mês" realmente pergunta)
     var mesRef = new Date();
     var totalMes = 0, qtdMes = 0;
     ativas.forEach(function(p){
@@ -2858,9 +2871,8 @@ function calcularRespostaConsulta(r){
       });
     });
 
-    var resumoGeral = 'Você tem '+ativas.length+' conta'+(ativas.length===1?'':'s')+' parcelada'+(ativas.length===1?'':'s')+' ativa'+(ativas.length===1?'':'s')+', totalizando '+fmtTxt(totalFalta)+' em '+qtdFaltando+' parcela'+(qtdFaltando===1?'':'s')+' restante'+(qtdFaltando===1?'':'s')+'.';
-    if(qtdMes===0) return resumoGeral+' Nenhuma parcela vence esse mês.';
-    return resumoGeral+' Esse mês, faltam pagar '+qtdMes+' parcela'+(qtdMes===1?'':'s')+', totalizando '+fmtTxt(totalMes)+'.';
+    if(qtdMes===0) return 'Nenhuma parcela vence esse mês. No total, você tem '+qtdFaltando+' parcela'+(qtdFaltando===1?'':'s')+' restante'+(qtdFaltando===1?'':'s')+' em aberto ('+fmtTxt(totalFalta)+').';
+    return 'Esse mês, faltam pagar '+qtdMes+' parcela'+(qtdMes===1?'':'s')+', totalizando '+fmtTxt(totalMes)+'.';
   }
 
   if(r.tipo === 'investimentos'){
