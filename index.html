@@ -2669,27 +2669,73 @@ function enviarComandoAssistente(){
   if(!msg) return;
   input.value='';
   assistAddMsg('user', msg);
-  var thinking = document.createElement('div');
-  thinking.id = 'assistThinking';
-  thinking.style.cssText = 'align-self:flex-start;background:var(--s2);color:var(--t3);padding:10px 13px;border-radius:14px;font-size:13px';
-  thinking.textContent = 'Pensando...';
-  g('assistMessages').appendChild(thinking);
-  g('assistMessages').scrollTop = g('assistMessages').scrollHeight;
 
   var d = ud();
   var categorias = d && d.cats ? d.cats : {entrada:[], saida:[]};
-  var SERVER='https://fintrack-server-production-9d87.up.railway.app';
-  fetch(SERVER+'/assistente/interpretar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:S.user, mensagem:msg, categorias:categorias})})
-  .then(function(r){return r.json();})
-  .then(function(data){
-    var t = g('assistThinking'); if(t) t.remove();
-    if(!data.success){ assistAddMsg('bot', data.error||'Não consegui entender. Tenta de novo?'); return; }
-    processarRespostaAssistente(data.resultado);
-  })
-  .catch(function(e){
-    var t = g('assistThinking'); if(t) t.remove();
-    assistAddMsg('bot', 'Erro de conexão. Tenta de novo?');
-  });
+  var resultado = interpretarComandoLocal(msg, categorias);
+  processarRespostaAssistente(resultado);
+}
+
+// Interpreta o comando localmente no navegador, sem chamar nenhum servidor
+// externo — evita qualquer falha de rede/API, igual resolvemos no app da Gabi Lanza.
+function interpretarComandoLocal(msgOriginal, categorias){
+  var msg = msgOriginal.toLowerCase().trim();
+
+  var verbosSaida = ['gastei','paguei','comprei','gasto','saiu','desembolsei'];
+  var verbosEntrada = ['recebi','ganhei','entrou','depositei','caiu'];
+  var temVerboSaida = verbosSaida.some(function(v){ return msg.indexOf(v)>=0; });
+  var temVerboEntrada = verbosEntrada.some(function(v){ return msg.indexOf(v)>=0; });
+
+  // Extrai o primeiro número da frase (aceita vírgula ou ponto decimal)
+  var matchNumero = msg.match(/(\d+(?:[.,]\d{1,2})?)/);
+  var valor = matchNumero ? parseFloat(matchNumero[1].replace(',','.')) : null;
+
+  // ===== REGISTRAR (tem número + verbo de ação) =====
+  if(valor !== null && (temVerboSaida || temVerboEntrada)){
+    var tipo = temVerboEntrada ? 'entrada' : 'saida';
+    var listaCats = tipo==='entrada' ? (categorias.entrada||[]) : (categorias.saida||[]);
+    var categoriaEncontrada = listaCats.find(function(c){ return msg.indexOf(c.toLowerCase())>=0; }) || 'Outros';
+
+    var data = new Date();
+    if(msg.indexOf('anteontem')>=0) data.setDate(data.getDate()-2);
+    else if(msg.indexOf('ontem')>=0) data.setDate(data.getDate()-1);
+    var dataStr = data.toISOString().slice(0,10);
+
+    // Descrição: tenta pegar o trecho depois de "em/no/na/com", senão usa a frase toda
+    var descMatch = msgOriginal.match(/(?:em|no|na|com|de)\s+([a-zA-ZÀ-ÿ\s]+)/i);
+    var descricao = descMatch ? descMatch[1].trim() : msgOriginal;
+    descricao = descricao.charAt(0).toUpperCase()+descricao.slice(1);
+
+    return {acao:'registrar', tipo:tipo, valor:valor, categoria:categoriaEncontrada, descricao:descricao, data:dataStr};
+  }
+
+  // ===== CONSULTAR =====
+  var palavrasFinanceiras = ['saldo','gasto','gastei','receita','entrada','saída','saida','parcela','invest','meta','planejamento','objetivo','fatura','crédito','credito','cartão','cartao','quanto','extrato'];
+  var pareceFinanceiro = palavrasFinanceiras.some(function(p){ return msg.indexOf(p)>=0; });
+
+  if(pareceFinanceiro){
+    var tipoConsulta = 'saldo';
+    if(msg.indexOf('parcela')>=0) tipoConsulta = 'parcelas';
+    else if(msg.indexOf('invest')>=0) tipoConsulta = 'investimentos';
+    else if(msg.indexOf('meta')>=0 || msg.indexOf('planejamento')>=0 || msg.indexOf('objetivo')>=0) tipoConsulta = 'planejamento';
+    else if(msg.indexOf('fatura')>=0 || msg.indexOf('crédito')>=0 || msg.indexOf('credito')>=0 || msg.indexOf('cartão')>=0 || msg.indexOf('cartao')>=0) tipoConsulta = 'credito';
+    else if(msg.indexOf('gasto')>=0 || msg.indexOf('gastei')>=0 || msg.indexOf('saída')>=0 || msg.indexOf('saida')>=0 || msg.indexOf('despesa')>=0) tipoConsulta = 'saidas';
+    else if(msg.indexOf('receita')>=0 || msg.indexOf('entrada')>=0 || msg.indexOf('ganho')>=0) tipoConsulta = 'entradas';
+    else if(msg.indexOf('saldo')>=0) tipoConsulta = 'saldo';
+
+    var periodo = 'mes_atual';
+    if(msg.indexOf('hoje')>=0) periodo = 'hoje';
+    else if(msg.indexOf('semana')>=0) periodo = 'semana';
+    else if(msg.indexOf('mês passado')>=0 || msg.indexOf('mes passado')>=0) periodo = 'mes_passado';
+    else if(msg.indexOf('ano')>=0) periodo = 'ano';
+
+    var todasCats = (categorias.entrada||[]).concat(categorias.saida||[]);
+    var categoriaFiltro = todasCats.find(function(c){ return msg.indexOf(c.toLowerCase())>=0; }) || null;
+
+    return {acao:'consultar', tipo:tipoConsulta, categoria:categoriaFiltro, periodo:periodo};
+  }
+
+  return {acao:'desconhecido', motivo:'Não identifiquei nenhum valor ou pergunta financeira nessa mensagem. Pode tentar algo como "gastei 50 reais no mercado" ou "qual meu saldo do mês?"'};
 }
 
 function processarRespostaAssistente(r){
