@@ -916,7 +916,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
           <button class="sb-logout" style="color:var(--yellow);margin-bottom:4px" onclick="importarDados()"><span class="mi" style="font-size:16px">upload</span><span class="sb-label">Importar backup</span></button>
           <button class="sb-logout" id="btnCriarAcesso" style="color:var(--teal);margin-bottom:4px" onclick="openCreateAccess()"><span class="mi" style="font-size:16px">person_add</span><span class="sb-label">Criar acesso</span></button>
         </div>
-        <a href="https://wa.me/5519995572793?text=Ol%C3%A1!%20Preciso%20de%20ajuda%20com%20o%20Bolso%20Inteligente." target="_blank" rel="noopener" class="sb-logout" style="color:var(--t2);text-decoration:none;margin-bottom:4px"><span class="mi" style="font-size:16px">support_agent</span><span class="sb-label">Suporte</span></a>
+        <a href="https://wa.me/5519989656364?text=Ol%C3%A1!%20Preciso%20de%20ajuda%20com%20o%20Bolso%20Inteligente." target="_blank" rel="noopener" class="sb-logout" style="color:var(--t2);text-decoration:none;margin-bottom:4px"><span class="mi" style="font-size:16px">support_agent</span><span class="sb-label">Suporte</span></a>
         <button class="sb-logout" onclick="doLogout()"><span class="mi" style="font-size:16px">logout</span><span class="sb-label">Sair da conta</span></button>
       </div>
     </aside>
@@ -1151,10 +1151,10 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
             <div class="panel-head"><span class="panel-title"><span class="mi" style="font-size:16px;vertical-align:middle;margin-right:6px;color:var(--teal)">support_agent</span>Precisa de ajuda?</span></div>
             <div style="padding:20px">
               <p style="font-size:12.5px;color:var(--t3);margin-bottom:14px;line-height:1.6">D&#250;vidas sobre sua conta, cobran&#231;a ou algum problema no app? Fale direto com a gente.</p>
-              <a href="https://wa.me/5519995572793?text=Ol%C3%A1!%20Preciso%20de%20ajuda%20com%20o%20Bolso%20Inteligente." target="_blank" rel="noopener" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:#25D366;margin-bottom:10px">
+              <a href="https://wa.me/5519989656364?text=Ol%C3%A1!%20Preciso%20de%20ajuda%20com%20o%20Bolso%20Inteligente." target="_blank" rel="noopener" class="btn btn-primary" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:#25D366;margin-bottom:10px">
                 <span class="mi" style="font-size:16px">chat</span> Falar no WhatsApp
               </a>
-              <a href="mailto:monteirodhiefferton@gmail.com?subject=Suporte%20Bolso%20Inteligente" class="btn btn-ghost" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none">
+              <a href="mailto:bolsointeligenteapp@outlook.com?subject=Suporte%20Bolso%20Inteligente" class="btn btn-ghost" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none">
                 <span class="mi" style="font-size:16px">mail</span> Enviar e-mail
               </a>
             </div>
@@ -1246,27 +1246,6 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
         <span style="width:36px;height:36px;border-radius:10px;background:var(--red-dim);display:flex;align-items:center;justify-content:center"><span class="mi" style="color:var(--red);font-size:20px">trending_down</span></span>
         Registrar Sa&#237;da
       </button>
-    </div>
-  </div>
-
-  <!-- ASSISTENTE -->
-  <button id="assistFab" onclick="toggleAssistente()" style="position:fixed;right:20px;bottom:90px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#0F7A37);border:none;box-shadow:0 8px 24px var(--teal-glow);z-index:97;display:flex;align-items:center;justify-content:center;cursor:pointer">
-    <span class="mi" style="font-size:26px;color:#fff">forum</span>
-  </button>
-
-  <div id="assistPanel" style="display:none;position:fixed;right:20px;bottom:160px;left:20px;max-width:380px;margin-left:auto;max-height:min(480px,70dvh);background:var(--s1);border:1px solid var(--border2);border-radius:18px;box-shadow:0 20px 50px rgba(0,0,0,.5);z-index:98;overflow:hidden;flex-direction:column">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--s2);border-bottom:1px solid var(--border)">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--teal),#0F7A37);display:flex;align-items:center;justify-content:center"><span class="mi" style="font-size:16px;color:#fff">forum</span></div>
-        <span style="font-weight:700;font-size:14px">Íris</span>
-      </div>
-      <button onclick="toggleAssistente()" style="background:none;border:none;color:var(--t2);cursor:pointer;display:flex"><span class="mi" style="font-size:18px">close</span></button>
-    </div>
-    <div id="assistMessages" style="flex:1;min-height:0;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px"></div>
-    <div style="display:flex;align-items:center;gap:8px;padding:12px;border-top:1px solid var(--border)">
-      <button id="assistMicBtn" style="width:38px;height:38px;border-radius:50%;background:var(--s3);border:1px solid var(--border2);color:var(--t2);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center"><span class="mi" style="font-size:18px">mic</span></button>
-      <input type="text" id="assistInput" placeholder="Digite ou toque no microfone..." style="flex:1;padding:10px 12px;background:var(--s2);border:1px solid var(--border);border-radius:10px;color:var(--t1);font-size:16px;font-family:inherit;outline:none">
-      <button onclick="enviarComandoAssistente()" style="width:38px;height:38px;border-radius:50%;background:var(--teal);border:none;color:#07090F;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center"><span class="mi" style="font-size:18px">send</span></button>
     </div>
   </div>
 </div>
@@ -1609,7 +1588,7 @@ function showRegister(){ g('loginScreen').style.display='none'; g('registerScree
 function showLogin(){ g('registerScreen').style.display='none'; g('loginScreen').style.display='flex'; }
 
 var LEGAL_TERMOS = '<p><b>Última atualização: 25 de julho de 2026</b></p>'+
-'<p>Estes Termos de Uso regulam o uso do aplicativo <b>Bolso Inteligente</b>, disponibilizado por <b>Dhiefferton Raposo</b> (pessoa física), contato: monteirodhiefferton@gmail.com. Ao criar uma conta ou usar o Bolso Inteligente, você concorda com estes Termos.</p>'+
+'<p>Estes Termos de Uso regulam o uso do aplicativo <b>Bolso Inteligente</b>, disponibilizado por <b>Dhiefferton Raposo</b> (pessoa física), contato: bolsointeligenteapp@outlook.com. Ao criar uma conta ou usar o Bolso Inteligente, você concorda com estes Termos.</p>'+
 '<p><b>O que é o Bolso Inteligente.</b> Ferramenta de controle financeiro pessoal (entradas, saídas, parcelas, investimentos, cartão de crédito), com leitura automática de cupons/boletos por IA e registro via WhatsApp. <b>O Bolso Inteligente não é uma instituição financeira e não presta consultoria financeira, contábil ou de investimentos.</b> Informações geradas automaticamente (scanner) podem conter erros. Decisões financeiras são de responsabilidade exclusiva do usuário.</p>'+
 '<p><b>Cadastro.</b> Você deve fornecer dados verdadeiros e é responsável por manter sua senha em sigilo e por tudo que ocorrer na sua conta. Podemos suspender contas que violem estes Termos ou pratiquem fraude.</p>'+
 '<p><b>Planos e cobrança.</b> Há um plano Free (com limites de uso) e um plano Pro (R$ 29,00/mês, sujeito a alteração mediante aviso). A cobrança do Pro é recorrente e automática via Mercado Pago; ao assinar, você autoriza a cobrança mensal até o cancelamento. Cancele quando quiser pela tela de Perfil — não há reembolso proporcional do período já pago, salvo obrigação legal em contrário.</p>'+
@@ -1619,10 +1598,10 @@ var LEGAL_TERMOS = '<p><b>Última atualização: 25 de julho de 2026</b></p>'+
 '<p><b>Alterações.</b> Podemos alterar estes Termos a qualquer momento, com aviso por e-mail ou no aplicativo em mudanças relevantes.</p>'+
 '<p><b>Encerramento.</b> Você pode encerrar sua conta quando quiser pela tela de Perfil.</p>'+
 '<p><b>Lei aplicável.</b> Estes Termos são regidos pelas leis do Brasil, com foro do domicílio do usuário conforme legislação consumerista.</p>'+
-'<p><b>Contato:</b> monteirodhiefferton@gmail.com</p>';
+'<p><b>Contato:</b> bolsointeligenteapp@outlook.com</p>';
 
 var LEGAL_PRIVACIDADE = '<p><b>Última atualização: 25 de julho de 2026</b></p>'+
-'<p>Esta Política explica como o Bolso Inteligente trata seus dados pessoais, em conformidade com a LGPD (Lei nº 13.709/2018). <b>Controlador:</b> Dhiefferton Raposo. <b>Contato:</b> monteirodhiefferton@gmail.com</p>'+
+'<p>Esta Política explica como o Bolso Inteligente trata seus dados pessoais, em conformidade com a LGPD (Lei nº 13.709/2018). <b>Controlador:</b> Dhiefferton Raposo. <b>Contato:</b> bolsointeligenteapp@outlook.com</p>'+
 '<p><b>Dados que coletamos:</b> nome de usuário e senha (com hash criptográfico), nome, foto, e-mail, WhatsApp (opcionais), e os dados financeiros que você insere (entradas, saídas, parcelas, investimentos, cartão, categorias). Imagens enviadas ao scanner são processadas e não armazenadas permanentemente pelo provedor de IA. <b>Não coletamos dados de cartão de crédito ou bancários</b> — pagamentos são processados inteiramente pelo Mercado Pago.</p>'+
 '<p><b>Para que usamos:</b> fornecer o app, processar sua assinatura, enviar e-mails operacionais (recuperação de senha), enviar lembretes por WhatsApp (se vinculado), interpretar cupons/boletos no scanner, e prevenir fraude. <b>Não vendemos seus dados nem os usamos para publicidade.</b></p>'+
 '<p><b>Compartilhamento com terceiros:</b></p>'+
@@ -1640,7 +1619,7 @@ var LEGAL_PRIVACIDADE = '<p><b>Última atualização: 25 de julho de 2026</b></p
 '<p><b>Segurança.</b> Senha com hash criptográfico, regras de acesso no banco e chaves de API mantidas só no servidor. Nenhum sistema é 100% imune a falhas.</p>'+
 '<p><b>Menores de idade.</b> O Bolso Inteligente não se destina a menores de 18 anos.</p>'+
 '<p><b>Alterações.</b> Mudanças relevantes serão comunicadas por e-mail ou aviso no app.</p>'+
-'<p><b>Reclamações:</b> monteirodhiefferton@gmail.com ou Autoridade Nacional de Proteção de Dados (ANPD) — gov.br/anpd</p>';
+'<p><b>Reclamações:</b> bolsointeligenteapp@outlook.com ou Autoridade Nacional de Proteção de Dados (ANPD) — gov.br/anpd</p>';
 
 function abrirLegal(which){
   if(which==='termos'){ g('legalTitle').textContent='Termos de Uso'; g('legalBody').innerHTML=LEGAL_TERMOS; }
@@ -1748,7 +1727,7 @@ function assinarPro(){
   closeModal();
   // Abre WhatsApp para pagamento (temporário até integração MP)
   var msg = encodeURIComponent('Olá! Quero assinar o Bolso Inteligente Pro (R$ 29/mês). Meu usuário: '+S.user);
-  window.open('https://wa.me/5519995572793?text='+msg, '_blank');
+  window.open('https://wa.me/5519989656364?text='+msg, '_blank');
 }
 
 async function hashPass(s){
@@ -2621,362 +2600,6 @@ function toggleFabMenu(){
   m.style.display = (m.style.display==='none') ? 'block' : 'none';
 }
 
-// ===== ASSISTENTE =====
-var assistHistorico = [];
-
-// Mantém o painel ancorado corretamente quando o teclado do celular abre/fecha,
-// em vez de deixar o navegador "esticar" a tela.
-(function(){
-  if(!window.visualViewport) return;
-  function ajustarPosicao(){
-    var vv = window.visualViewport;
-    var offsetInferior = window.innerHeight - vv.height - vv.offsetTop;
-    var panel = g('assistPanel');
-    var fab = g('assistFab');
-    if(panel) panel.style.bottom = (offsetInferior + 160) + 'px';
-    if(fab) fab.style.bottom = (offsetInferior + 90) + 'px';
-  }
-  window.visualViewport.addEventListener('resize', ajustarPosicao);
-  window.visualViewport.addEventListener('scroll', ajustarPosicao);
-})();
-
-function toggleAssistente(){
-  if(!isPro()){ showUpgrade('Assistente Inteligente'); return; }
-  var p = g('assistPanel');
-  var isOpen = p.style.display !== 'none';
-  p.style.display = isOpen ? 'none' : 'flex';
-  if(!isOpen && assistHistorico.length===0){
-    assistAddMsg('bot', 'Olá, eu sou a Íris, sua assistente financeira. Posso lançar entradas e saídas, ou responder sobre seu saldo, parcelas, investimentos, planejamento e fatura do cartão. Como posso ajudar?');
-  }
-}
-
-function assistAddMsg(quem, texto){
-  var wrap = g('assistMessages');
-  var bubble = document.createElement('div');
-  var isUser = quem==='user';
-  bubble.style.cssText = 'max-width:85%;padding:10px 13px;border-radius:14px;font-size:13px;line-height:1.5;' +
-    (isUser ? 'align-self:flex-end;background:var(--teal-dim);color:var(--t1);border-bottom-right-radius:4px;'
-            : 'align-self:flex-start;background:var(--s2);color:var(--t1);border-bottom-left-radius:4px;');
-  bubble.textContent = texto;
-  wrap.appendChild(bubble);
-  wrap.scrollTop = wrap.scrollHeight;
-  assistHistorico.push({quem:quem, texto:texto});
-}
-
-function enviarComandoAssistente(){
-  var input = g('assistInput');
-  var msg = input.value.trim();
-  if(!msg) return;
-  input.value='';
-  assistAddMsg('user', msg);
-
-  var thinking = document.createElement('div');
-  thinking.id = 'assistThinking';
-  thinking.style.cssText = 'align-self:flex-start;background:var(--s2);color:var(--t3);padding:10px 13px;border-radius:14px;font-size:13px';
-  thinking.textContent = 'Pensando...';
-  g('assistMessages').appendChild(thinking);
-  g('assistMessages').scrollTop = g('assistMessages').scrollHeight;
-
-  var d = ud();
-  var categorias = d && d.cats ? d.cats : {entrada:[], saida:[]};
-  var SERVER='https://fintrack-server-production-9d87.up.railway.app';
-  fetch(SERVER+'/assistente/interpretar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:S.user, mensagem:msg, categorias:categorias})})
-  .then(function(r){return r.json();})
-  .then(function(data){
-    var t = g('assistThinking'); if(t) t.remove();
-    if(!data.success){ assistAddMsg('bot', data.error||'Não consegui entender. Tenta de novo?'); return; }
-    processarRespostaAssistente(data.resultado);
-  })
-  .catch(function(e){
-    var t = g('assistThinking'); if(t) t.remove();
-    assistAddMsg('bot', 'Erro de conexão com o servidor. Tenta de novo em instantes?');
-  });
-}
-// Base de conhecimento de cada área do app — usada tanto pra explicar
-// quanto pra guiar o reconhecimento de perguntas
-var CONHECIMENTO_APP = {
-  dashboard: {gatilhos:['dashboard','início','inicio','tela inicial','resumo geral'], texto:'A Dashboard é sua tela inicial — mostra o saldo do mês, os cards de entradas, saídas, investido, parcelas e a pagar, além dos gráficos de gastos por categoria e carteira de investimentos.'},
-  entradas: {gatilhos:['entradas','entrada'], texto:'Em Entradas você vê e cadastra todo dinheiro que entrou — salário, freelance, etc. Dá pra filtrar por categoria e por mês.'},
-  saidas: {gatilhos:['saídas','saidas','saída','saida'], texto:'Em Saídas você vê e cadastra todo dinheiro que saiu — seus gastos do dia a dia. Mesma lógica de filtros das Entradas.'},
-  saldo: {gatilhos:['saldo do mês','saldo do mes'], texto:'Saldo do mês mostra o resumo: total de entradas menos saídas do mês selecionado.'},
-  parcelas: {gatilhos:['parcelas','parcela','financiamento'], texto:'Em Parcelas ficam suas contas parceladas — financiamentos, compras a prazo. Você vê o total, quantas parcelas já pagou, quantas faltam e quando vencem.'},
-  planejamento: {gatilhos:['planejamento','metas','meta','objetivo'], texto:'Planejamento é onde você cria metas financeiras, como reserva de emergência ou uma viagem, define um valor-alvo e acompanha o progresso.'},
-  investimentos: {gatilhos:['investimentos','investimento','carteira'], texto:'Investimentos mostra suas posições investidas — renda fixa, ações, cripto — e o valor total da sua carteira.'},
-  credito: {gatilhos:['crédito','credito','cartão','cartao','fatura'], texto:'Crédito à Vista mostra a fatura do seu cartão de crédito no mês, com os gastos lançados nele.'},
-  perfil: {gatilhos:['perfil','minha conta','assinatura'], texto:'No Perfil você edita seus dados, e-mail, WhatsApp, gerencia sua assinatura, troca a senha, ou exclui a conta se quiser.'},
-  categorias: {gatilhos:['categorias','categoria'], texto:'Em Categorias você gerencia as categorias usadas nos seus lançamentos de entrada e saída.'},
-  scanner: {gatilhos:['scanner','escanear','cupom','boleto'], texto:'O Scanner lê cupons fiscais e boletos automaticamente com IA, preenchendo o lançamento sozinho — é exclusivo do plano Pro.'},
-};
-
-function interpretarComandoLocal(msgOriginal, categorias){
-  var msg = msgOriginal.toLowerCase().trim().replace(/[?!.]/g,'');
-
-  // ===== SAUDAÇÃO =====
-  var saudacoes = ['oi','olá','ola','bom dia','boa tarde','boa noite','tudo bem','e aí','eae','opa'];
-  if(saudacoes.some(function(s){ return msg===s || msg.indexOf(s)===0; }) && msg.length<20){
-    return {acao:'saudacao'};
-  }
-
-  // ===== EXPLICAR (como funciona / o que é / pra que serve / explica) =====
-  var gatilhosExplicar = ['como funciona','o que é','o que faz','pra que serve','para que serve','explica','me explica','não entendo','nao entendo','me ajuda a entender'];
-  var pediuExplicacao = gatilhosExplicar.some(function(g){ return msg.indexOf(g)>=0; });
-  if(pediuExplicacao){
-    for(var chave in CONHECIMENTO_APP){
-      var area = CONHECIMENTO_APP[chave];
-      if(area.gatilhos.some(function(g){ return msg.indexOf(g)>=0; })){
-        return {acao:'explicar', texto:area.texto};
-      }
-    }
-    return {acao:'explicar', texto:'Posso te explicar qualquer área do app: Dashboard, Entradas, Saídas, Saldo do mês, Parcelas, Planejamento, Investimentos, Crédito, Perfil, Categorias ou o Scanner. É só perguntar "como funciona [nome]?"'};
-  }
-
-  // ===== REGISTRAR (tem número + verbo de ação, e não parece pergunta) =====
-  var verbosSaida = ['gastei','paguei','comprei','gasto','saiu','desembolsei'];
-  var verbosEntrada = ['recebi','ganhei','entrou','depositei','caiu'];
-  var temVerboSaida = verbosSaida.some(function(v){ return msg.indexOf(v)>=0; });
-  var temVerboEntrada = verbosEntrada.some(function(v){ return msg.indexOf(v)>=0; });
-  var palavrasPergunta = ['quanto','qual','quais','como assim','será que'];
-  var pareceUmaPergunta = palavrasPergunta.some(function(p){ return msg.indexOf(p)>=0; });
-
-  var matchNumero = msg.match(/(\d+(?:[.,]\d{1,2})?)/);
-  var valor = matchNumero ? parseFloat(matchNumero[1].replace(',','.')) : null;
-
-  if(valor !== null && (temVerboSaida || temVerboEntrada) && !pareceUmaPergunta){
-    var tipo = temVerboEntrada ? 'entrada' : 'saida';
-    var listaCats = tipo==='entrada' ? (categorias.entrada||[]) : (categorias.saida||[]);
-    var categoriaEncontrada = listaCats.find(function(c){ return msg.indexOf(c.toLowerCase())>=0; }) || 'Outros';
-
-    var data = new Date();
-    if(msg.indexOf('anteontem')>=0) data.setDate(data.getDate()-2);
-    else if(msg.indexOf('ontem')>=0) data.setDate(data.getDate()-1);
-    var dataStr = data.toISOString().slice(0,10);
-
-    var descMatch = msgOriginal.match(/(?:em|no|na|com|de)\s+([a-zA-ZÀ-ÿ\s]+)/i);
-    var descricao = descMatch ? descMatch[1].trim() : msgOriginal;
-    descricao = descricao.charAt(0).toUpperCase()+descricao.slice(1);
-
-    return {acao:'registrar', tipo:tipo, valor:valor, categoria:categoriaEncontrada, descricao:descricao, data:dataStr};
-  }
-
-  // ===== CONSULTAR (ordem do mais específico pro mais genérico, evita confusão) =====
-  if(msg.indexOf('parcela')>=0 || msg.indexOf('financiamento')>=0){
-    return {acao:'consultar', tipo:'parcelas', categoria:null, periodo:extrairPeriodo(msg)};
-  }
-  if(msg.indexOf('invest')>=0 || msg.indexOf('carteira')>=0){
-    return {acao:'consultar', tipo:'investimentos', categoria:null, periodo:extrairPeriodo(msg)};
-  }
-  if(msg.indexOf('meta')>=0 || msg.indexOf('planejamento')>=0 || msg.indexOf('objetivo')>=0){
-    return {acao:'consultar', tipo:'planejamento', categoria:null, periodo:extrairPeriodo(msg)};
-  }
-  if(msg.indexOf('fatura')>=0 || msg.indexOf('crédito')>=0 || msg.indexOf('credito')>=0 || msg.indexOf('cartão')>=0 || msg.indexOf('cartao')>=0){
-    return {acao:'consultar', tipo:'credito', categoria:null, periodo:extrairPeriodo(msg)};
-  }
-  var todasCats = (categorias.entrada||[]).concat(categorias.saida||[]);
-  var categoriaFiltro = todasCats.find(function(c){ return msg.indexOf(c.toLowerCase())>=0; }) || null;
-
-  if(msg.indexOf('gasto')>=0 || msg.indexOf('gastei')>=0 || msg.indexOf('saída')>=0 || msg.indexOf('saida')>=0 || msg.indexOf('despesa')>=0){
-    return {acao:'consultar', tipo:'saidas', categoria:categoriaFiltro, periodo:extrairPeriodo(msg)};
-  }
-  if(msg.indexOf('receita')>=0 || msg.indexOf('entrada')>=0 || msg.indexOf('ganho')>=0 || msg.indexOf('recebi')>=0){
-    return {acao:'consultar', tipo:'entradas', categoria:categoriaFiltro, periodo:extrairPeriodo(msg)};
-  }
-  if(msg.indexOf('saldo')>=0 || msg.indexOf('extrato')>=0){
-    return {acao:'consultar', tipo:'saldo', categoria:null, periodo:extrairPeriodo(msg)};
-  }
-  if(categoriaFiltro){
-    return {acao:'consultar', tipo:'saidas', categoria:categoriaFiltro, periodo:extrairPeriodo(msg)};
-  }
-
-  return {acao:'desconhecido', motivo:'Não entendi bem. Posso lançar um gasto/entrada (ex: "gastei 50 no mercado"), consultar seus dados (ex: "qual meu saldo?", "minhas parcelas") ou explicar qualquer aba do app (ex: "como funciona o Planejamento?").'};
-}
-
-function extrairPeriodo(msg){
-  if(msg.indexOf('hoje')>=0) return 'hoje';
-  if(msg.indexOf('semana')>=0) return 'semana';
-  if(msg.indexOf('mês passado')>=0 || msg.indexOf('mes passado')>=0) return 'mes_passado';
-  if(msg.indexOf('ano')>=0) return 'ano';
-  return 'mes_atual';
-}
-
-function processarRespostaAssistente(r){
-  if(r.acao === 'registrar'){
-    var d = ud();
-    var isEnt = r.tipo === 'entrada';
-    var arr = isEnt ? d.ent : d.sai;
-    var val = parseFloat(r.valor);
-    if(isNaN(val)){ assistAddMsg('bot', 'Não consegui identificar o valor. Pode tentar de novo dizendo o valor certinho?'); return; }
-    arr.push({id:uid(), desc:r.descricao||'Lançamento via assistente', val:val, date:r.data||new Date().toISOString().slice(0,10), cat:r.categoria||'Outros', obs:''});
-    saveAndRender(d);
-    var emoji = isEnt ? '📈' : '📉';
-    assistAddMsg('bot', emoji+' Lancei '+fmtTxt(val)+' em '+(r.categoria||'Outros')+' ('+(isEnt?'entrada':'saída')+'), dia '+fd(r.data)+'.');
-  } else if(r.acao === 'consultar'){
-    assistAddMsg('bot', calcularRespostaConsulta(r));
-  } else if(r.acao === 'saudacao'){
-    assistAddMsg('bot', 'Olá! Sou a Íris, sua assistente financeira. Posso lançar entradas/saídas, consultar seus dados, ou explicar qualquer área do app. Como posso ajudar?');
-  } else if(r.acao === 'explicar'){
-    assistAddMsg('bot', r.texto);
-  } else {
-    assistAddMsg('bot', r.motivo || 'Não entendi bem. Pode reformular?');
-  }
-}
-
-function calcularRespostaConsulta(r){
-  var d = ud();
-  if(!d) return 'Ainda não consegui carregar seus dados.';
-  var hoje = new Date();
-  var inicio, fim;
-  if(r.periodo === 'hoje'){
-    inicio = new Date(hoje); inicio.setHours(0,0,0,0);
-    fim = new Date(hoje); fim.setHours(23,59,59,999);
-  } else if(r.periodo === 'semana'){
-    inicio = new Date(hoje); inicio.setDate(inicio.getDate()-7);
-    fim = hoje;
-  } else if(r.periodo === 'mes_passado'){
-    inicio = new Date(hoje.getFullYear(), hoje.getMonth()-1, 1);
-    fim = new Date(hoje.getFullYear(), hoje.getMonth(), 0, 23,59,59);
-  } else if(r.periodo === 'ano'){
-    inicio = new Date(hoje.getFullYear(), 0, 1);
-    fim = new Date(hoje.getFullYear(), 11, 31, 23,59,59);
-  } else {
-    inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-    fim = new Date(hoje.getFullYear(), hoje.getMonth()+1, 0, 23,59,59);
-  }
-
-  function noPeriodo(dt){
-    var dd = new Date(dt+'T12:00:00');
-    return dd >= inicio && dd <= fim;
-  }
-
-  var periodoTxt = {hoje:'hoje', semana:'nos últimos 7 dias', mes_atual:'esse mês', mes_passado:'mês passado', ano:'esse ano'}[r.periodo] || 'esse mês';
-
-  if(r.tipo === 'parcelas'){
-    var ativas = d.parc.filter(function(p){return p.st==='ativo';});
-    if(ativas.length===0) return 'Você não tem nenhuma parcela ativa no momento.';
-    var totalFalta = ativas.reduce(function(a,p){
-      var faltam = p.pars.filter(function(x){return !x.pg;});
-      return a + faltam.reduce(function(s,x){return s+parseFloat(x.val||0);},0);
-    },0);
-    var qtdFaltando = ativas.reduce(function(a,p){ return a + p.pars.filter(function(x){return !x.pg;}).length; },0);
-
-    var mesRef = new Date();
-    var totalMes = 0, qtdMes = 0;
-    ativas.forEach(function(p){
-      p.pars.forEach(function(x){
-        if(!x.pg){
-          var dd = new Date(x.date+'T12:00:00');
-          if(dd.getMonth()===mesRef.getMonth() && dd.getFullYear()===mesRef.getFullYear()){
-            totalMes += parseFloat(x.val||0); qtdMes++;
-          }
-        }
-      });
-    });
-
-    if(qtdMes===0) return 'Nenhuma parcela vence esse mês. No total, você tem '+qtdFaltando+' parcela'+(qtdFaltando===1?'':'s')+' restante'+(qtdFaltando===1?'':'s')+' em aberto ('+fmtTxt(totalFalta)+').';
-    return 'Esse mês, faltam pagar '+qtdMes+' parcela'+(qtdMes===1?'':'s')+', totalizando '+fmtTxt(totalMes)+'.';
-  }
-
-  if(r.tipo === 'investimentos'){
-    if(!d.inv || d.inv.length===0) return 'Você ainda não tem nenhuma posição de investimento cadastrada.';
-    var totalInv = d.inv.reduce(function(a,x){return a+parseFloat(x.val||0);},0);
-    return 'Sua carteira de investimentos totaliza '+fmtTxt(totalInv)+' em '+d.inv.length+' posiç'+(d.inv.length===1?'ão':'ões')+'.';
-  }
-
-  if(r.tipo === 'planejamento'){
-    if(!d.plans || d.plans.length===0) return 'Você ainda não criou nenhuma meta no Planejamento.';
-    var linhas = d.plans.map(function(p){
-      var pct = p.tgt>0 ? Math.min(100,(p.cur||0)/p.tgt*100) : 0;
-      return p.name+': '+fmtTxt(p.cur||0)+' de '+fmtTxt(p.tgt)+' ('+pct.toFixed(0)+'%)';
-    });
-    return 'Suas metas — '+linhas.join('; ')+'.';
-  }
-
-  if(r.tipo === 'credito'){
-    if(!d.cartoes || d.cartoes.length===0) return 'Você ainda não tem nenhum cartão de crédito cadastrado.';
-    var gastosMes = (d.gastos_credito||[]).filter(function(gc){
-      var dd = new Date(gc.date+'T12:00:00');
-      return dd.getMonth()===hoje.getMonth() && dd.getFullYear()===hoje.getFullYear();
-    });
-    var totalFatura = gastosMes.reduce(function(a,x){return a+parseFloat(x.val||0);},0);
-    return 'Sua fatura atual do cartão de crédito está em '+fmtTxt(totalFatura)+', com '+gastosMes.length+' lançamento'+(gastosMes.length===1?'':'s')+'.';
-  }
-
-  if(r.tipo === 'saldo'){
-    var tE = d.ent.filter(function(x){return noPeriodo(x.date);}).reduce(function(a,x){return a+parseFloat(x.val||0);},0);
-    var tS = d.sai.filter(function(x){return noPeriodo(x.date);}).reduce(function(a,x){return a+parseFloat(x.val||0);},0);
-    return 'Seu saldo '+periodoTxt+' é '+fmtTxt(tE-tS)+' (entradas: '+fmtTxt(tE)+', saídas: '+fmtTxt(tS)+').';
-  }
-
-  var arr = r.tipo === 'entradas' ? d.ent : d.sai;
-  var filtrado = arr.filter(function(x){return noPeriodo(x.date);});
-  if(r.categoria){
-    filtrado = filtrado.filter(function(x){ return x.cat && x.cat.toLowerCase()===String(r.categoria).toLowerCase(); });
-  }
-  var total = filtrado.reduce(function(a,x){return a+parseFloat(x.val||0);},0);
-  var label = r.tipo === 'entradas' ? 'entrou' : 'gastou';
-  var catTxt = r.categoria ? (' em '+r.categoria) : '';
-  return 'Você '+label+' '+fmtTxt(total)+catTxt+' '+periodoTxt+' ('+filtrado.length+' lançamento'+(filtrado.length===1?'':'s')+').';
-}
-
-// ===== Reconhecimento de voz (toca uma vez pra começar, toca de novo pra parar) =====
-(function(){
-  var micBtn = g('assistMicBtn');
-  if(!micBtn) return;
-
-  var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SpeechRec){
-    micBtn.addEventListener('click', function(){
-      toast('Seu navegador não suporta comando de voz. Tenta digitar, ou usa o Chrome.','err');
-    });
-    return;
-  }
-
-  var recognizer = new SpeechRec();
-  recognizer.lang = 'pt-BR';
-  recognizer.continuous = false;
-  recognizer.interimResults = false;
-  var gravando = false;
-
-  function visualGravando(on){
-    micBtn.style.background = on ? 'var(--red)' : 'var(--s3)';
-    micBtn.style.color = on ? '#fff' : 'var(--t2)';
-  }
-
-  recognizer.onresult = function(e){
-    var texto = e.results[0][0].transcript;
-    g('assistInput').value = texto;
-    enviarComandoAssistente();
-  };
-  recognizer.onend = function(){ gravando = false; visualGravando(false); };
-  recognizer.onerror = function(e){
-    gravando = false; visualGravando(false);
-    if(e.error === 'not-allowed' || e.error === 'permission-denied'){
-      toast('Permita o acesso ao microfone nas configurações do navegador.','err');
-    } else if(e.error !== 'no-speech' && e.error !== 'aborted'){
-      toast('Não consegui te ouvir. Tenta de novo?','err');
-    }
-  };
-
-  micBtn.addEventListener('click', function(){
-    if(gravando){
-      try{ recognizer.stop(); }catch(e){}
-      return;
-    }
-    try{
-      recognizer.start();
-      gravando = true;
-      visualGravando(true);
-    }catch(e){
-      toast('Não consegui acessar o microfone.','err');
-    }
-  });
-
-  var assistInputEl = g('assistInput');
-  if(assistInputEl){
-    assistInputEl.addEventListener('keydown', function(e){
-      if(e.key==='Enter'){ enviarComandoAssistente(); }
-    });
-  }
-})();
 function closeSb(){ g('sidebar').classList.remove('open'); g('sbOverlay').classList.remove('open'); }
 function toggleSbCollapse(){
   var collapsed=g('sidebar').classList.toggle('collapsed');
@@ -3354,7 +2977,7 @@ function assinarPro(){
     // Fallback para WhatsApp se servidor falhar
     closeModal();
     var msg=encodeURIComponent('Olá! Quero assinar o Bolso Inteligente Pro (R$ 29/mês). Meu usuário: '+S.user);
-    window.open('https://wa.me/5519995572793?text='+msg,'_blank');
+    window.open('https://wa.me/5519989656364?text='+msg,'_blank');
     console.error('Erro pagamento:', err.message);
   });
 }
