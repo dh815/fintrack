@@ -1842,6 +1842,7 @@ function rDash(){
   var tE=sum(ent), tS=sum(sai), sal=tE-tS;
   var invT=sum(d.inv), pAb=d.parc.filter(function(p){return p.st==='ativo';}).length;
   var gfTotal=(d.gastosFixos||[]).reduce(function(a,x){return a+parseFloat(x.val||0);},0);
+  var cartTotal=totalFaturaMes(d,null);
   var parcTotal=d.parc.filter(function(p){return p.st==='ativo';}).reduce(function(a,p){
     var resto=p.pars.filter(function(x){return !x.pg;}).reduce(function(s,x){return s+parseFloat(x.val||0);},0);
     return a+resto;
@@ -1886,6 +1887,7 @@ function rDash(){
     mc('<span class="mi">trending_down</span>','Saídas',fmt(tS),'red',sai.length+' registros')+
     mc('<span class="mi">candlestick_chart</span>','Investido',fmt(invT),'blue',d.inv.length+' posições')+
     mc('<span class="mi">event_repeat</span>','Gastos Fixos',fmt(gfTotal),'yellow',(d.gastosFixos||[]).length+' cadastrados')+
+    mc('<span class="mi">credit_card</span>','Cart\u00f5es',fmt(cartTotal),'blue',(d.cartoes||[]).length+' cart\u00e3o(ões)')+
     mc('<span class="mi">payments</span>','A Pagar',fmt(parcTotal),'purple','total em aberto')+
     mc('<span class="mi">calendar_month</span>','Var. '+MONTHS[S.month].slice(0,3),fmt(parcMes),'yellow',parcMesQtd+' venc. no m\u00eas');
 
