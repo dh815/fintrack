@@ -2436,10 +2436,20 @@ function rGastosFixos(){
         '<div style="font-size:12px;color:var(--t3);margin-top:3px">'+esc(gf.cat||'Outros')+' · todo dia '+(gf.dia||1)+'</div>'+
         '</div><div style="display:flex;align-items:center;gap:10px">'+
         '<span style="font-size:15px;font-weight:700;color:var(--yellow)">'+fmt(gf.val)+'</span>'+
+        '<button class="btn btn-pay btn-sm" onclick="pagarGastoFixo(\''+escq(gf.id)+'\')"><span class="mi" style="font-size:13px;vertical-align:middle">check_circle</span> Pagar</button>'+
         '<button class="btn btn-edit btn-sm" onclick="editIt(\'gf\',\''+escq(gf.id)+'\')">Editar</button>'+
         '<button class="btn btn-del btn-sm" onclick="delIt(\'gf\',\''+escq(gf.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
         '</div></div></div>';
     }).join(''):empt('Nenhum gasto fixo cadastrado'));
+}
+function pagarGastoFixo(id){
+  var d=ud();
+  var gf=(d.gastosFixos||[]).find(function(x){return x.id===id;});
+  if(!gf) return;
+  cf('Registrar pagamento?','Isso vai criar uma saída de '+fmt(gf.val)+' referente a "'+esc(gf.desc)+'" hoje.',function(){
+    d.sai.push({id:uid(),desc:gf.desc,val:gf.val,date:new Date().toISOString().slice(0,10),cat:gf.cat||'Outros',obs:'Gasto fixo'});
+    sud(d, function(){ toast('Pagamento registrado em Saídas!','ok'); render(S.page); });
+  });
 }
 
 // INVESTIMENTOS
