@@ -3024,6 +3024,7 @@ function irisSugestao(el){
 }
 
 function enviarIris(){
+  var SERVER='https://fintrack-server-production-9d87.up.railway.app';
   if(irisState.busy) return;
   var inp=g('iris-input'); if(!inp) return;
   var texto=(inp.value||'').trim();
