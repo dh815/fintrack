@@ -732,6 +732,17 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 .mc-prog { background: var(--s3); border-radius: 100px; height: 5px; overflow: hidden; margin: 8px 0 4px; }
 .mc-pf { height: 100%; border-radius: 100px; }
 .mc-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--t3); margin-top: 6px; }
+.iris-fab { position: fixed; right: 16px; bottom: 96px; z-index: 90; width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--teal), var(--blue)); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(22,163,74,.35); border: none; cursor: pointer; }
+.iris-fab .mi { color: #07090F; font-size: 24px; }
+.iris-chat { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; }
+.iris-msg { max-width: 82%; padding: 10px 14px; border-radius: 14px; font-size: 13.5px; line-height: 1.5; white-space: pre-wrap; }
+.iris-msg.user { align-self: flex-end; background: var(--teal); color: #07090F; border-bottom-right-radius: 4px; }
+.iris-msg.bot { align-self: flex-start; background: var(--s2); color: var(--t1); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+.iris-typing { align-self: flex-start; background: var(--s2); border: 1px solid var(--border); border-radius: 14px; padding: 10px 14px; display: flex; gap: 4px; }
+.iris-typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--t3); animation: irisBlink 1.2s infinite ease-in-out; display: inline-block; }
+.iris-typing span:nth-child(2) { animation-delay: .2s; }
+.iris-typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes irisBlink { 0%,80%,100% { opacity: .3; } 40% { opacity: 1; } }
 .bottom-nav { display: none; }
 @keyframes loadpulse{0%{opacity:1}50%{opacity:.4}100%{opacity:1}}
 @media(max-width:768px){
@@ -1266,6 +1277,20 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
   </div>
 </div>
 
+<button class="iris-fab" id="irisFab" onclick="abrirIris()" title="Assistente Íris"><span class="mi">auto_awesome</span></button>
+
+<!-- ASSISTENTE ÍRIS -->
+<div class="modal-wrap" id="irisModal" style="display:none;align-items:flex-end;justify-content:center">
+  <div class="modal" style="max-width:440px;height:78vh;max-height:78vh;display:flex;flex-direction:column;padding:0;overflow:hidden">
+    <div class="modal-head" style="flex-shrink:0"><span class="modal-title">&#10024; Íris</span><button class="modal-x" onclick="fecharIris()"><span class="mi" style="font-size:16px">close</span></button></div>
+    <div class="iris-chat" id="iris-msgs" style="padding:16px"></div>
+    <div style="flex-shrink:0;padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px">
+      <input type="text" id="iris-input" placeholder="Fale com a Íris..." autocomplete="off" style="flex:1;background:var(--s2);border:1px solid var(--border);border-radius:100px;padding:10px 16px;color:var(--t1);font-family:inherit;font-size:13.5px" onkeydown="if(event.key==='Enter'){event.preventDefault();enviarIris();}">
+      <button class="btn btn-primary" style="border-radius:50%;width:40px;height:40px;padding:0;display:flex;align-items:center;justify-content:center;flex-shrink:0" onclick="enviarIris()"><span class="mi" style="font-size:18px">send</span></button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL -->
 <div class="modal-wrap" id="mainModal">
   <div class="modal">
@@ -1727,6 +1752,7 @@ function showUpgrade(feat){
     msg+
     '<div style="margin:20px 0;background:var(--s2);border-radius:12px;padding:16px;text-align:left;font-size:13px;color:var(--t2)">'+
     '<div style="margin-bottom:6px;color:var(--t1);font-weight:700">PRO inclui:</div>'+
+    '✅ Assistente Íris (IA)<br>'+
     '✅ Scanner de cupons e boletos com IA<br>'+
     '✅ Cartão de crédito com fatura<br>'+
     '✅ Planejamento e metas<br>'+
@@ -2938,6 +2964,142 @@ function analisarBoletoComClaude(base64,mediaType){
 function salvarDoBoleto(){ var nome=g('sb-nome').value.trim(),valor=parseFloat(g('sb-valor').value),venc=g('sb-venc').value,nparc=parseInt(g('sb-parc').value)||1,vparc=parseFloat(g('sb-vparc').value)||0,cat=g('sb-cat').value; if(!nome||isNaN(valor)||!venc){toast('Preencha os campos.','err');return;} var d=ud(); if(!d) return; var vp=vparc>0?vparc:parseFloat((valor/nparc).toFixed(2)); var pars=[]; for(var i=0;i<nparc;i++){var dd=new Date(venc+'T12:00:00');dd.setMonth(dd.getMonth()+i);pars.push({seq:i+1,date:dd.toISOString().slice(0,10),val:vp,pg:false});} d.parc.push({id:uid(),name:nome,cat:cat,tot:valor,pars:pars,st:'ativo'}); sud(d,function(){fecharScannerBoleto();toast('Parcela cadastrada!','ok');if(S.page==='parcelas')rParc();if(S.page==='dashboard')rDash();}); }
 window.addEventListener('resize',function(){updMonth();});
 
+// ===== ASSISTENTE ÍRIS =====
+var irisState = { msgs: [], busy: false, opened: false };
+
+function abrirIris(){
+  if(!isPro()){ showUpgrade('Assistente Íris'); return; }
+  g('irisModal').style.display='flex';
+  if(!irisState.opened){
+    irisState.opened=true;
+    irisPush('bot','Oi, eu sou a Íris 👋 Posso registrar entradas e saídas pra você, ou responder sobre saldo, gastos, parcelas, investimentos, planejamento e cartão. É só me contar em texto normal — ex: "gastei 50 no almoço" ou "qual meu saldo?".');
+  }
+  setTimeout(function(){ var inp=g('iris-input'); if(inp) inp.focus(); },100);
+}
+function fecharIris(){ g('irisModal').style.display='none'; }
+
+function irisPush(who,text){
+  irisState.msgs.push({who:who,text:text});
+  irisRender();
+}
+function irisRender(){
+  var box=g('iris-msgs'); if(!box) return;
+  box.innerHTML=irisState.msgs.map(function(m){
+    return '<div class="iris-msg '+(m.who==='user'?'user':'bot')+'">'+esc(m.text)+'</div>';
+  }).join('');
+  box.scrollTop=box.scrollHeight;
+}
+function irisTypingOn(){
+  var box=g('iris-msgs'); if(!box) return;
+  box.insertAdjacentHTML('beforeend','<div class="iris-typing" id="iris-typing-ind"><span></span><span></span><span></span></div>');
+  box.scrollTop=box.scrollHeight;
+}
+function irisTypingOff(){ var el=g('iris-typing-ind'); if(el) el.remove(); }
+
+function enviarIris(){
+  if(irisState.busy) return;
+  var inp=g('iris-input'); if(!inp) return;
+  var texto=(inp.value||'').trim();
+  if(!texto) return;
+  inp.value='';
+  irisPush('user',texto);
+  irisState.busy=true;
+  irisTypingOn();
+  var d=ud();
+  var categorias={ entrada:(d&&d.cats&&d.cats.entrada)||[], saida:(d&&d.cats&&d.cats.saida)||[] };
+  var hojeStr=new Date().toISOString().slice(0,10);
+  fetch(SERVER+'/assistente/comando',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:S.user,mensagem:texto,categorias:categorias,hoje:hojeStr})})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      irisTypingOff(); irisState.busy=false;
+      if(data.error){ irisPush('bot','⚠️ '+data.error); return; }
+      irisExecutar(data.resultado);
+    })
+    .catch(function(e){
+      irisTypingOff(); irisState.busy=false;
+      irisPush('bot','⚠️ Não consegui falar com o servidor agora. Tente de novo em instantes.');
+    });
+}
+
+function irisExecutar(r){
+  if(!r || !r.acao){ irisPush('bot','Não entendi. Pode reformular?'); return; }
+  var d=ud(); if(!d){ irisPush('bot','Não consegui acessar seus dados agora.'); return; }
+
+  if(r.acao==='registrar'){
+    var valor=parseFloat(r.valor); if(isNaN(valor)){ irisPush('bot','Não entendi o valor. Pode me dizer de novo com o valor em números?'); return; }
+    var cat=r.categoria||'Outros';
+    var tipo=(r.tipo==='entrada')?'entrada':'saida';
+    var listaCats=(tipo==='entrada')?d.cats.entrada:d.cats.saida;
+    if(!listaCats || listaCats.indexOf(cat)<0) cat='Outros';
+    var item={ id:uid(), desc:r.descricao||'Sem descrição', val:valor, cat:cat, date:r.data||new Date().toISOString().slice(0,10), ori:'Íris' };
+    if(tipo==='entrada'){ d.ent.push(item); } else { d.sai.push(item); }
+    sud(d, function(){
+      if(S.page==='dashboard') rDash();
+      if(S.page==='entradas') rEnt();
+      if(S.page==='saidas') rSai();
+      var emoji=(tipo==='entrada')?'💰':'💸';
+      irisPush('bot', emoji+' '+(tipo==='entrada'?'Entrada registrada':'Saída registrada')+': '+item.desc+' — '+fmtTxt(item.val)+' ('+item.cat+', '+fd(item.date)+')');
+    });
+    return;
+  }
+
+  if(r.acao==='consultar'){ irisPush('bot', irisResponderConsulta(d, r)); return; }
+  if(r.acao==='desconhecido'){ irisPush('bot', r.motivo || 'Não entendi bem. Pode explicar de outro jeito?'); return; }
+  irisPush('bot','Não entendi. Pode reformular?');
+}
+
+function irisNoPeriodo(dateStr, periodo){
+  var d=new Date(dateStr+'T12:00:00'); var hoje=new Date(); hoje.setHours(12,0,0,0);
+  if(periodo==='hoje'){ return d.toDateString()===hoje.toDateString(); }
+  if(periodo==='semana'){ var seteDias=new Date(hoje); seteDias.setDate(hoje.getDate()-7); return d>=seteDias && d<=hoje; }
+  if(periodo==='mes_passado'){ var pm=hoje.getMonth()-1,py=hoje.getFullYear(); if(pm<0){pm=11;py--;} return d.getMonth()===pm && d.getFullYear()===py; }
+  if(periodo==='ano'){ return d.getFullYear()===hoje.getFullYear(); }
+  return d.getMonth()===hoje.getMonth() && d.getFullYear()===hoje.getFullYear();
+}
+
+function irisResponderConsulta(d, r){
+  var periodo=r.periodo||'mes_atual';
+  var periodoTxt={hoje:'hoje',semana:'nos últimos 7 dias',mes_atual:'neste mês',mes_passado:'no mês passado',ano:'neste ano'}[periodo]||'neste mês';
+
+  if(r.tipo==='saldo'){
+    var ent=d.ent.filter(function(e){return irisNoPeriodo(e.date,periodo);});
+    var sai=d.sai.filter(function(s){return irisNoPeriodo(s.date,periodo);});
+    var tE=sum(ent), tS=sum(sai);
+    return '📊 Resumo '+periodoTxt+':\nEntradas: '+fmtTxt(tE)+'\nSaídas: '+fmtTxt(tS)+'\nSaldo: '+fmtTxt(tE-tS);
+  }
+  if(r.tipo==='entradas'){
+    var ent=d.ent.filter(function(e){return irisNoPeriodo(e.date,periodo)&&(!r.categoria||e.cat===r.categoria);});
+    return '💰 Entradas '+periodoTxt+(r.categoria?' em '+r.categoria:'')+': '+fmtTxt(sum(ent))+' ('+ent.length+' lançamento'+(ent.length===1?'':'s')+')';
+  }
+  if(r.tipo==='saidas'){
+    var sai=d.sai.filter(function(s){return irisNoPeriodo(s.date,periodo)&&(!r.categoria||s.cat===r.categoria);});
+    return '💸 Saídas '+periodoTxt+(r.categoria?' em '+r.categoria:'')+': '+fmtTxt(sum(sai))+' ('+sai.length+' lançamento'+(sai.length===1?'':'s')+')';
+  }
+  if(r.tipo==='parcelas'){
+    if(isFree()) return '📋 Contas parceladas é um recurso do plano Pro.';
+    var ativas=(d.parc||[]).filter(function(p){return p.st==='ativo';});
+    if(!ativas.length) return '📋 Você não tem parcelas ativas no momento.';
+    var restante=ativas.reduce(function(a,p){return a+p.pars.filter(function(x){return !x.pg;}).reduce(function(s,x){return s+parseFloat(x.val||0);},0);},0);
+    return '📋 Você tem '+ativas.length+' conta'+(ativas.length===1?'':'s')+' parcelada'+(ativas.length===1?'':'s')+' ativa'+(ativas.length===1?'':'s')+', totalizando '+fmtTxt(restante)+' em aberto.';
+  }
+  if(r.tipo==='investimentos'){
+    if(isFree()) return '📈 Investimentos é um recurso do plano Pro.';
+    if(!(d.inv||[]).length) return '📈 Você ainda não tem posições de investimento cadastradas.';
+    return '📈 Sua carteira tem '+d.inv.length+' posiç'+(d.inv.length===1?'ão':'ões')+', totalizando '+fmtTxt(sum(d.inv))+' investidos.';
+  }
+  if(r.tipo==='planejamento'){
+    if(isFree()) return '🎯 Planejamento é um recurso do plano Pro.';
+    if(!(d.plans||[]).length) return '🎯 Você ainda não criou nenhum planejamento.';
+    var linhas=d.plans.map(function(p){var pct=Math.min(100,((p.cur||0)/p.tgt*100));return '• '+p.name+': '+fmtTxt(p.cur||0)+' de '+fmtTxt(p.tgt)+' ('+pct.toFixed(0)+'%)';});
+    return '🎯 Seus planejamentos:\n'+linhas.join('\n');
+  }
+  if(r.tipo==='credito'){
+    if(isFree()) return '💳 Cartão de crédito é um recurso do plano Pro.';
+    return '💳 A fatura deste mês está em '+fmtTxt(totalFaturaMes(d,null))+'.';
+  }
+  return 'Não consegui buscar essa informação agora.';
+}
+
 // INIT
 window.addEventListener('load',function(){
   var resetParams=new URLSearchParams(window.location.search);
@@ -3005,6 +3167,7 @@ function showUpgrade(motivo){
     '<div style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Bolso Inteligente Pro inclui:</div>'+
     '<div style="font-size:13px;color:var(--t1);line-height:2">'+
     '✅ Lançamentos ilimitados<br>'+
+    '✅ Assistente Íris (IA)<br>'+
     '✅ Scanner com IA (cupom e boleto)<br>'+
     '✅ Cartão de crédito com fatura<br>'+
     '✅ Planejamento e metas<br>'+
