@@ -751,6 +751,13 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 .iris-suggest { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px 12px; flex-shrink: 0; }
 .iris-chip { background: transparent; border: 1px solid var(--border2); color: var(--t2); font-size: 11.5px; padding: 6px 12px; border-radius: 100px; cursor: pointer; font-family: inherit; }
 .iris-chip:hover { background: var(--s2); }
+.iris-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.iris-mic { background: transparent; border: 1px solid var(--border2); color: var(--t2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.iris-mic:hover { background: var(--s2); }
+.iris-mic.rec { background: var(--red-dim); color: var(--red); border-color: transparent; }
+.iris-rec-ind { font-size: 11.5px; color: var(--red); display: flex; align-items: center; gap: 5px; padding: 0 16px 6px; flex-shrink: 0; }
+.iris-rec-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); animation: irisRecPulse 1s infinite; }
+@keyframes irisRecPulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 .bottom-nav { display: none; }
 @keyframes loadpulse{0%{opacity:1}50%{opacity:.4}100%{opacity:1}}
 @media(max-width:768px){
@@ -1303,8 +1310,10 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
       <button class="iris-chip" onclick="irisSugestao(this)">Meu planejamento</button>
       <button class="iris-chip" onclick="irisSugestao(this)">Meu cartão de crédito</button>
     </div>
+    <div class="iris-rec-ind" id="iris-rec-ind" style="display:none"><span class="iris-rec-dot"></span>Ouvindo... fale agora</div>
     <div style="flex-shrink:0;padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px">
       <input type="text" id="iris-input" placeholder="Fale com a Íris..." autocomplete="off" style="flex:1;background:var(--s2);border:1px solid var(--border);border-radius:100px;padding:10px 16px;color:var(--t1);font-family:inherit;font-size:13.5px" onkeydown="if(event.key==='Enter'){event.preventDefault();enviarIris();}">
+      <button class="iris-mic" id="iris-mic-btn" style="display:none" onclick="irisToggleMic()"><span class="mi" style="font-size:18px" id="iris-mic-ico">mic</span></button>
       <button class="btn btn-primary" style="border-radius:50%;width:40px;height:40px;padding:0;display:flex;align-items:center;justify-content:center;flex-shrink:0" onclick="enviarIris()"><span class="mi" style="font-size:18px">send</span></button>
     </div>
   </div>
@@ -2994,6 +3003,7 @@ function abrirIris(){
     irisPush('bot','Oi, eu sou a Íris 👋 Posso registrar entradas e saídas pra você, ou responder sobre saldo, gastos, parcelas, investimentos, planejamento e cartão. É só me contar em texto normal — ex: "gastei 50 no almoço" ou "qual meu saldo?".');
   }
   var sug=g('iris-suggest'); if(sug) sug.style.display = irisState.msgs.length<=1 ? 'flex' : 'none';
+  var micBtn=g('iris-mic-btn'); if(micBtn) micBtn.style.display = irisMicSupported() ? 'flex' : 'none';
   setTimeout(function(){ var inp=g('iris-input'); if(inp) inp.focus(); },100);
 }
 function fecharIris(){ g('irisModal').style.display='none'; }
@@ -3004,10 +3014,18 @@ function irisPush(who,text){
 }
 function irisRender(){
   var box=g('iris-msgs'); if(!box) return;
-  box.innerHTML=irisState.msgs.map(function(m){
+  box.innerHTML=irisState.msgs.map(function(m,i){
     var who=(m.who==='user'?'user':'bot');
     var ico=(who==='user'?'person':'smart_toy');
-    return '<div class="iris-row '+who+'"><div class="iris-avatar"><span class="mi">'+ico+'</span></div><div class="iris-msg '+who+'">'+esc(m.text)+'</div></div>';
+    var acoes='';
+    if(m.draft && !m.draft.resolved){
+      acoes='<div class="iris-actions">'
+        +'<button class="btn btn-primary btn-sm" onclick="irisConfirmDraft('+i+')"><span class="mi" style="font-size:14px">check</span>Confirmar</button>'
+        +'<button class="btn btn-edit btn-sm" onclick="irisEditDraft('+i+')"><span class="mi" style="font-size:14px">edit</span>Editar</button>'
+        +'<button class="btn btn-ghost btn-sm" onclick="irisCancelDraft('+i+')"><span class="mi" style="font-size:14px">close</span>Cancelar</button>'
+        +'</div>';
+    }
+    return '<div class="iris-row '+who+'"><div class="iris-avatar"><span class="mi">'+ico+'</span></div><div class="iris-msg '+who+'">'+esc(m.text)+acoes+'</div></div>';
   }).join('');
   box.scrollTop=box.scrollHeight;
 }
@@ -3021,6 +3039,75 @@ function irisSugestao(el){
   var inp=g('iris-input'); if(!inp) return;
   inp.value=el.textContent;
   enviarIris();
+}
+
+function irisMicSupported(){ return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
+var irisRec=null, irisRecOn=false;
+function irisToggleMic(){
+  if(irisRecOn){ irisStopMic(); return; }
+  var SR=window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return;
+  irisRec=new SR();
+  irisRec.lang='pt-BR';
+  irisRec.interimResults=false;
+  irisRec.maxAlternatives=1;
+  irisRec.onresult=function(e){
+    var texto=e.results[0][0].transcript;
+    var inp=g('iris-input'); if(inp) inp.value=texto;
+  };
+  irisRec.onerror=function(){ irisStopMic(); };
+  irisRec.onend=function(){
+    irisRecOn=false;
+    var btn=g('iris-mic-btn'); if(btn) btn.classList.remove('rec');
+    var ico=g('iris-mic-ico'); if(ico) ico.textContent='mic';
+    var ind=g('iris-rec-ind'); if(ind) ind.style.display='none';
+    var inp=g('iris-input');
+    if(inp && inp.value.trim()) enviarIris();
+  };
+  try{
+    irisRec.start();
+    irisRecOn=true;
+    var btn=g('iris-mic-btn'); if(btn) btn.classList.add('rec');
+    var ico=g('iris-mic-ico'); if(ico) ico.textContent='stop';
+    var ind=g('iris-rec-ind'); if(ind) ind.style.display='flex';
+  }catch(e){ irisRecOn=false; }
+}
+function irisStopMic(){ if(irisRec){ try{ irisRec.stop(); }catch(e){} } }
+
+function irisPushDraft(item,tipo){
+  var emoji=(tipo==='entrada')?'💰':'💸';
+  var texto=emoji+' Confirma '+(tipo==='entrada'?'esta entrada':'esta saída')+'? '+item.desc+' — '+fmtTxt(item.val)+' ('+item.cat+', '+fd(item.date)+')';
+  irisState.msgs.push({who:'bot', text:texto, draft:{item:item, tipo:tipo}});
+  irisRender();
+}
+function irisConfirmDraft(i){
+  var m=irisState.msgs[i]; if(!m || !m.draft || m.draft.resolved) return;
+  m.draft.resolved=true;
+  var item=m.draft.item, tipo=m.draft.tipo;
+  var d=ud(); if(!d){ irisPush('bot','Não consegui acessar seus dados agora.'); return; }
+  if(tipo==='entrada'){ d.ent.push(item); } else { d.sai.push(item); }
+  irisRender();
+  sud(d, function(){
+    if(S.page==='dashboard') rDash();
+    if(S.page==='entradas') rEnt();
+    if(S.page==='saidas') rSai();
+    var emoji=(tipo==='entrada')?'💰':'💸';
+    irisPush('bot', emoji+' '+(tipo==='entrada'?'Entrada registrada':'Saída registrada')+': '+item.desc+' — '+fmtTxt(item.val)+' ('+item.cat+', '+fd(item.date)+')');
+  });
+}
+function irisEditDraft(i){
+  var m=irisState.msgs[i]; if(!m || !m.draft || m.draft.resolved) return;
+  m.draft.resolved=true;
+  irisRender();
+  var item=m.draft.item, tipo=m.draft.tipo;
+  var inp=g('iris-input'); if(inp){ inp.value=(tipo==='entrada'?'Registrar entrada de ':'Registrar saída de ')+item.val+' em '+item.cat+': '+item.desc; inp.focus(); }
+  irisPush('bot','Sem problemas, ajusta o texto abaixo do jeito certo e manda de novo.');
+}
+function irisCancelDraft(i){
+  var m=irisState.msgs[i]; if(!m || !m.draft || m.draft.resolved) return;
+  m.draft.resolved=true;
+  irisRender();
+  irisPush('bot','Combinado, cancelei esse lançamento. Pode me dizer de outra forma.');
 }
 
 function enviarIris(){
@@ -3061,14 +3148,7 @@ function irisExecutar(r){
     var listaCats=(tipo==='entrada')?d.cats.entrada:d.cats.saida;
     if(!listaCats || listaCats.indexOf(cat)<0) cat='Outros';
     var item={ id:uid(), desc:r.descricao||'Sem descrição', val:valor, cat:cat, date:r.data||new Date().toISOString().slice(0,10), ori:'Íris' };
-    if(tipo==='entrada'){ d.ent.push(item); } else { d.sai.push(item); }
-    sud(d, function(){
-      if(S.page==='dashboard') rDash();
-      if(S.page==='entradas') rEnt();
-      if(S.page==='saidas') rSai();
-      var emoji=(tipo==='entrada')?'💰':'💸';
-      irisPush('bot', emoji+' '+(tipo==='entrada'?'Entrada registrada':'Saída registrada')+': '+item.desc+' — '+fmtTxt(item.val)+' ('+item.cat+', '+fd(item.date)+')');
-    });
+    irisPushDraft(item, tipo);
     return;
   }
 
