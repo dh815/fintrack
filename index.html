@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Bolso Inteligente — Controle Financeiro</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -3205,6 +3205,13 @@ function irisResponderConsulta(d, r){
   if(r.tipo==='credito'){
     if(isFree()) return '💳 Cartão de crédito é um recurso do plano Pro.';
     return '💳 A fatura deste mês está em '+fmtTxt(totalFaturaMes(d,null))+'.';
+  }
+  if(r.tipo==='gastos_fixos'){
+    var listaF=(d.gastosFixos||[]).slice();
+    if(r.dia){ listaF=listaF.filter(function(x){return parseInt(x.dia,10)===parseInt(r.dia,10);}); }
+    if(!listaF.length) return r.dia?('📌 Nenhum gasto fixo cadastrado pro dia '+r.dia+'.'):'📌 Nenhum gasto fixo cadastrado.';
+    var linhasF=listaF.map(function(x){return '• '+x.desc+' — '+fmtTxt(x.val)+' (todo dia '+(x.dia||1)+')';});
+    return '📌 Gastos fixos'+(r.dia?(' no dia '+r.dia):'')+':\n'+linhasF.join('\n')+'\nTotal: '+fmtTxt(sum(listaF));
   }
   return 'Não consegui buscar essa informação agora.';
 }
