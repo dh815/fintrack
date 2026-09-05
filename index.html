@@ -3118,13 +3118,14 @@ function enviarIris(){
   if(!texto) return;
   inp.value='';
   var sug=g('iris-suggest'); if(sug) sug.style.display='none';
+  var historico=irisState.msgs.slice(-8).map(function(m){return {role:(m.who==='user'?'user':'assistant'),content:m.text};});
   irisPush('user',texto);
   irisState.busy=true;
   irisTypingOn();
   var d=ud();
   var categorias={ entrada:(d&&d.cats&&d.cats.entrada)||[], saida:(d&&d.cats&&d.cats.saida)||[] };
   var hojeStr=new Date().toISOString().slice(0,10);
-  fetch(SERVER+'/assistente/comando',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:S.user,mensagem:texto,categorias:categorias,hoje:hojeStr})})
+  fetch(SERVER+'/assistente/comando',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:S.user,mensagem:texto,categorias:categorias,hoje:hojeStr,historico:historico})})
     .then(function(r){return r.json();})
     .then(function(data){
       irisTypingOff(); irisState.busy=false;
