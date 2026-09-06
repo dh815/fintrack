@@ -3273,6 +3273,18 @@ function irisNoPeriodo(dateStr, periodo){
     return itens;
   }
 
+  // Remove da lista itens cujo texto (desc, ou o texto indicado por pegaDesc) contém algum dos termos de exclusão
+  // pedidos numa pergunta de acompanhamento (ex: "sem a parcela da Claro, quanto fica?").
+  function irisExcluiPorNome(lista, excluir, pegaDesc){
+    if(!excluir || !excluir.length) return lista;
+    var termos=excluir.map(function(e){return String(e).toLowerCase();}).filter(function(t){return t;});
+    if(!termos.length) return lista;
+    return lista.filter(function(x){
+      var d=((pegaDesc?pegaDesc(x):x.desc)||'').toLowerCase();
+      return !termos.some(function(t){return d.indexOf(t)>=0;});
+    });
+  }
+
   function irisResponderConsulta(d, r){
     var periodo=r.periodo||'mes_atual';
     var periodoTxt={hoje:'hoje',amanha:'amanhã',semana:'nos últimos 7 dias',mes_atual:'neste mês',mes_passado:'no mês passado',mes_que_vem:'no mês que vem',ano:'neste ano'}[periodo]||'neste mês';
@@ -3330,9 +3342,10 @@ function irisNoPeriodo(dateStr, periodo){
   });
         if(r.status==='pago') itensP=itensP.filter(function(x){return x.pago;});
         else if(r.status!=='todos') itensP=itensP.filter(function(x){return !x.pago;}); // default: pendente
+        itensP=irisExcluiPorNome(itensP, r.excluir);
         if(!itensP.length) return '📋 Nenhuma parcela '+(r.status==='pago'?'paga':'pendente')+' '+irisFormatarAlvo(alvo)+'.';
         var linhasP=itensP.map(function(x){return '• '+x.desc+' — '+fmtTxt(x.val);});
-        return '📋 Parcelas '+irisFormatarAlvo(alvo)+':\n'+linhasP.join('\n')+'\nTotal: '+fmtTxt(itensP.reduce(function(s,x){return s+x.val;},0));
+        return '📋 Parcelas '+irisFormatarAlvo(alvo)+(r.excluir&&r.excluir.length?' (desconsiderando '+r.excluir.join(', ')+')':'')+':\n'+linhasP.join('\n')+'\nTotal: '+fmtTxt(itensP.reduce(function(s,x){return s+x.val;},0));
   }
       var ativas=(d.parc||[]).filter(function(p){return p.st==='ativo';});
       if(!ativas.length) return '📋 Você não tem parcelas ativas no momento.';
@@ -3364,9 +3377,10 @@ function irisNoPeriodo(dateStr, periodo){
         });
         if(r.status==='pago') itensC=itensC.filter(function(x){return x.pago;});
         else if(r.status!=='todos') itensC=itensC.filter(function(x){return !x.pago;});
+        itensC=irisExcluiPorNome(itensC, r.excluir);
         if(!itensC.length) return '💳 Nenhuma fatura '+(r.status==='pago'?'paga':'em aberto')+' com vencimento '+irisFormatarAlvo(alvo)+'.';
         var linhasC=itensC.map(function(x){return '• '+x.desc+' — '+fmtTxt(x.val);});
-        return '💳 Fatura(s) com vencimento '+irisFormatarAlvo(alvo)+':\n'+linhasC.join('\n')+'\nTotal: '+fmtTxt(itensC.reduce(function(s,x){return s+x.val;},0));
+        return '💳 Fatura(s) com vencimento '+irisFormatarAlvo(alvo)+(r.excluir&&r.excluir.length?' (desconsiderando '+r.excluir.join(', ')+')':'')+':\n'+linhasC.join('\n')+'\nTotal: '+fmtTxt(itensC.reduce(function(s,x){return s+x.val;},0));
       }
       return '💳 A fatura deste mês está em '+fmtTxt(totalFaturaMes(d,null))+'.';
   }
@@ -3378,15 +3392,17 @@ function irisNoPeriodo(dateStr, periodo){
       var anotado=listaF.map(function(x){return {item:x, pago:irisFixoPago(d,x,alvo)};});
       if(r.status==='pendente') anotado=anotado.filter(function(a){return !a.pago;});
       else if(r.status==='pago') anotado=anotado.filter(function(a){return a.pago;});
+      anotado=irisExcluiPorNome(anotado, r.excluir, function(a){return a.item.desc;});
       if(!anotado.length) return r.status==='pago'?('📌 Nenhum gasto fixo pago ainda '+(alvo.dia!=null?irisFormatarAlvo(alvo):'')+'.'):'📌 Nenhum gasto fixo pendente'+(alvo.dia!=null?(' '+irisFormatarAlvo(alvo)):'')+' — já está tudo pago!';
       var linhasF=anotado.map(function(a){return '• '+a.item.desc+' — '+fmtTxt(a.item.val)+' (todo dia '+(a.item.dia||1)+')'+(r.status?'':(a.pago?' (pago)':' (pendente)'));});
       var totalF=anotado.reduce(function(s,a){return s+(parseFloat(a.item.val)||0);},0);
-      return '📌 Gastos fixos'+(alvo.dia!=null?(' '+irisFormatarAlvo(alvo)):'')+(r.status==='pendente'?' pendentes':r.status==='pago'?' pagos':'')+':\n'+linhasF.join('\n')+'\nTotal: '+fmtTxt(totalF);
+      return '📌 Gastos fixos'+(alvo.dia!=null?(' '+irisFormatarAlvo(alvo)):'')+(r.status==='pendente'?' pendentes':r.status==='pago'?' pagos':'')+(r.excluir&&r.excluir.length?' (desconsiderando '+r.excluir.join(', ')+')':'')+':\n'+linhasF.join('\n')+'\nTotal: '+fmtTxt(totalF);
   }
     if(r.tipo==='geral'){
       var itensG=irisItensObrigacao(d, alvo, r.categoria||null);
       if(r.status==='pago') itensG=itensG.filter(function(x){return x.pago;});
       else itensG=itensG.filter(function(x){return !x.pago;}); // default: pendente
+      itensG=irisExcluiPorNome(itensG, r.excluir);
       var rotuloG=alvo.dia!=null?irisFormatarAlvo(alvo):periodoTxt;
       if(!itensG.length) return '💰 Não encontrei nada '+(r.status==='pago'?'pago':'pendente')+' '+rotuloG+'.';
       var porGrupo={};
@@ -3394,7 +3410,7 @@ function irisNoPeriodo(dateStr, periodo){
       var linhasGrupo=Object.keys(porGrupo).map(function(g){return g+': '+fmtTxt(porGrupo[g]);});
       var linhasItens=itensG.map(function(x){return '• '+x.desc+' — '+fmtTxt(x.val)+' ('+x.grupo+')';});
       var totalGeral=itensG.reduce(function(s,x){return s+x.val;},0);
-      return '💰 Você tem '+fmtTxt(totalGeral)+' '+(r.status==='pago'?'pago':'pra pagar')+' '+rotuloG+':\n'+linhasItens.join('\n')+'\n\n'+linhasGrupo.join(' · ');
+      return '💰 Você tem '+fmtTxt(totalGeral)+' '+(r.status==='pago'?'pago':'pra pagar')+' '+rotuloG+(r.excluir&&r.excluir.length?' (desconsiderando '+r.excluir.join(', ')+')':'')+':\n'+linhasItens.join('\n')+'\n\n'+linhasGrupo.join(' · ');
   }
     return 'Não consegui buscar essa informação agora.';
   }
