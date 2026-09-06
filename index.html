@@ -1987,7 +1987,6 @@ function irisMostrarInsightDoDia(){
 
 function rDash(){
   var d=ud(); if(!d) return;
-  renderInsightsCard(d);
   var ent=d.ent.filter(function(e){return inM(e.date);});
   var sai=d.sai.filter(function(s){return inM(s.date);});
   var tE=sum(ent), tS=sum(sai), sal=tE-tS;
