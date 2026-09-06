@@ -3181,14 +3181,17 @@ function irisResponderConsulta(d, r){
     var ent=d.ent.filter(function(e){return irisNoPeriodo(e.date,periodo)&&(!r.categoria||e.cat===r.categoria)&&(!r.dia||new Date(e.date+'T12:00:00').getDate()===parseInt(r.dia,10));});
       return '💰 Entradas '+periodoTxt+(r.categoria?' em '+r.categoria:'')+(r.dia?' no dia '+r.dia:'')+': '+fmtTxt(sum(ent))+' ('+ent.length+' lançamento'+(ent.length===1?'':'s')+')';
   }
-if(r.tipo==='saidas'){
+    if(r.tipo==='saidas'){
       var sai=d.sai.filter(function(s){return irisNoPeriodo(s.date,periodo)&&(!r.categoria||s.cat===r.categoria)&&(!r.dia||new Date(s.date+'T12:00:00').getDate()===parseInt(r.dia,10));});
       if(r.dia){
         var gfDia=(d.gastosFixos||[]).filter(function(x){return parseInt(x.dia,10)===parseInt(r.dia,10)&&(!r.categoria||x.cat===r.categoria);});
         var fixosPend=gfDia.filter(function(x){return !(d.sai||[]).some(function(s){return s.obs==='Gasto fixo'&&s.desc===x.desc&&irisNoPeriodo(s.date,periodo);});});
-        var linhasDia=sai.map(function(s){return '• '+(s.desc||s.cat||'Saída')+' — '+fmtTxt(s.val);}).concat(fixosPend.map(function(x){return '• '+x.desc+' — '+fmtTxt(x.val)+' (fixo)';}));
-        var totalDia=sum(sai)+sum(fixosPend);
-        if(!linhasDia.length) return '💸 Nenhum gasto encontrado no dia '+r.dia+' '+periodoTxt+'.';
+        var totalDia=sum(fixosPend);
+        if(!fixosPend.length){
+          if(sai.length) return '💸 Nenhum gasto fixo pendente pro dia '+r.dia+'. Você já tem '+sai.length+' saída avulsa'+(sai.length===1?'':'s')+' lançada'+(sai.length===1?'':'s')+' nesse dia, totalizando '+fmtTxt(sum(sai))+' (já paga'+(sai.length===1?'':'s')+').';
+          return '💸 Nenhum gasto fixo pendente nem saída avulsa encontrada pro dia '+r.dia+'.';
+  }
+        var linhasDia=fixosPend.map(function(x){return '• '+x.desc+' — '+fmtTxt(x.val);});
         return '💸 Você tem '+fmtTxt(totalDia)+' pra pagar no dia '+r.dia+(r.categoria?' em '+r.categoria:'')+':\n'+linhasDia.join('\n');
   }
       return '💸 Saídas '+periodoTxt+(r.categoria?' em '+r.categoria:'')+': '+fmtTxt(sum(sai))+' ('+sai.length+' lançamento'+(sai.length===1?'':'s')+')';
