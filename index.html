@@ -3357,17 +3357,17 @@ function irisNoPeriodo(dateStr, periodo){
       return '📌 Gastos fixos'+(alvo.dia!=null?(' '+irisFormatarAlvo(alvo)):'')+(r.status==='pendente'?' pendentes':r.status==='pago'?' pagos':'')+':\n'+linhasF.join('\n')+'\nTotal: '+fmtTxt(totalF);
   }
     if(r.tipo==='geral'){
-      if(alvo.dia==null) return 'Me diz o dia que você quer consultar (ex: "quanto tenho pra pagar dia 10") que eu calculo certinho pra você.';
       var itensG=irisItensObrigacao(d, alvo, r.categoria||null);
       if(r.status==='pago') itensG=itensG.filter(function(x){return x.pago;});
       else itensG=itensG.filter(function(x){return !x.pago;}); // default: pendente
-      if(!itensG.length) return '💰 Não encontrei nada '+(r.status==='pago'?'pago':'pendente')+' '+irisFormatarAlvo(alvo)+'.';
+      var rotuloG=alvo.dia!=null?irisFormatarAlvo(alvo):periodoTxt;
+      if(!itensG.length) return '💰 Não encontrei nada '+(r.status==='pago'?'pago':'pendente')+' '+rotuloG+'.';
       var porGrupo={};
       itensG.forEach(function(x){ porGrupo[x.grupo]=(porGrupo[x.grupo]||0)+x.val; });
       var linhasGrupo=Object.keys(porGrupo).map(function(g){return g+': '+fmtTxt(porGrupo[g]);});
       var linhasItens=itensG.map(function(x){return '• '+x.desc+' — '+fmtTxt(x.val)+' ('+x.grupo+')';});
       var totalGeral=itensG.reduce(function(s,x){return s+x.val;},0);
-      return '💰 Você tem '+fmtTxt(totalGeral)+' '+(r.status==='pago'?'pago':'pra pagar')+' '+irisFormatarAlvo(alvo)+':\n'+linhasItens.join('\n')+'\n\n'+linhasGrupo.join(' · ');
+      return '💰 Você tem '+fmtTxt(totalGeral)+' '+(r.status==='pago'?'pago':'pra pagar')+' '+rotuloG+':\n'+linhasItens.join('\n')+'\n\n'+linhasGrupo.join(' · ');
   }
     return 'Não consegui buscar essa informação agora.';
   }
