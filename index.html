@@ -3307,13 +3307,12 @@ function irisNoPeriodo(dateStr, periodo){
   }
     if(r.tipo==='saidas'){
       var sai=d.sai.filter(function(s){
-        if(s.obs==='Gasto fixo'||s.ori==='Parcela'||s.ori==='Fatura') return false;
         if(r.categoria&&s.cat!==r.categoria) return false;
         if(alvo.dia!=null) return irisMesAnoBate(s.date,alvo)&&irisDiaBate(new Date(s.date+'T12:00:00').getDate(),alvo);
         return irisNoPeriodo(s.date,periodo);
   });
       var rotuloS=alvo.dia!=null?irisFormatarAlvo(alvo):periodoTxt;
-      var txtS='💸 Gasto variável '+rotuloS+(r.categoria?' em '+r.categoria:'')+': '+fmtTxt(sum(sai))+' ('+sai.length+' lançamento'+(sai.length===1?'':'s')+')';
+      var txtS='💸 Saídas '+rotuloS+(r.categoria?' em '+r.categoria:'')+': '+fmtTxt(sum(sai))+' ('+sai.length+' lançamento'+(sai.length===1?'':'s')+')';
       if(alvo.dia!=null&&!sai.length){
         var gfDia=(d.gastosFixos||[]).filter(function(x){return irisDiaBate(parseInt(x.dia,10)||1,alvo)&&(!r.categoria||x.cat===r.categoria);});
         if(gfDia.length){
@@ -3321,7 +3320,7 @@ function irisNoPeriodo(dateStr, periodo){
             var pago=irisFixoPago(d,x,alvo);
             return '• '+x.desc+' — '+fmtTxt(x.val)+(pago?' (já pago)':' (fixo, ainda não pago)');
   });
-          txtS+='\n\nNão achei gasto variável avulso nesse período. Isso é diferente de gasto fixo, mas só pra avisar, tem gasto fixo cadastrado pro dia '+r.dia+':\n'+linhasGf.join('\n');
+          txtS+='\n\nNão achei saída cadastrada nesse período. Isso é diferente de gasto fixo, mas só pra avisar, tem gasto fixo cadastrado pro dia '+r.dia+':\n'+linhasGf.join('\n');
   }
   }
       return txtS;
