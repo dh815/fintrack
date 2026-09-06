@@ -3075,8 +3075,13 @@ function irisToggleMic(){
 function irisStopMic(){ if(irisRec){ try{ irisRec.stop(); }catch(e){} } }
 
 function irisPushDraft(item,tipo){
-  var emoji=(tipo==='entrada')?'💰':'💸';
-  var texto=emoji+' Confirma '+(tipo==='entrada'?'esta entrada':'esta saída')+'? '+item.desc+' — '+fmtTxt(item.val)+' ('+item.cat+', '+fd(item.date)+')';
+  var texto;
+  if(tipo==='parcela'){
+    texto='🧾 Confirma esta conta parcelada? '+item.desc+' — '+item.parcelas+'x de '+fmtTxt(item.val)+' (total '+fmtTxt(item.val*item.parcelas)+', '+item.cat+', 1ª parcela em '+fd(item.date)+')';
+  } else {
+    var emoji=(tipo==='entrada')?'💰':'💸';
+    texto=emoji+' Confirma '+(tipo==='entrada'?'esta entrada':'esta saída')+'? '+item.desc+' — '+fmtTxt(item.val)+' ('+item.cat+', '+fd(item.date)+')';
+  }
   irisState.msgs.push({who:'bot', text:texto, draft:{item:item, tipo:tipo}});
   irisRender();
 }
@@ -3085,14 +3090,26 @@ function irisConfirmDraft(i){
   m.draft.resolved=true;
   var item=m.draft.item, tipo=m.draft.tipo;
   var d=ud(); if(!d){ irisPush('bot','Não consegui acessar seus dados agora.'); return; }
-  if(tipo==='entrada'){ d.ent.push(item); } else { d.sai.push(item); }
+  if(tipo==='parcela'){
+    var numP=item.parcelas||1, pars=[];
+    for(var iP=0;iP<numP;iP++){
+      var ddP=new Date(item.date+'T12:00:00'); ddP.setMonth(ddP.getMonth()+iP);
+      pars.push({seq:iP+1,date:ddP.toISOString().slice(0,10),val:item.val,pg:false});
+    }
+    d.parc.push({id:item.id,name:item.desc,cat:item.cat,tot:parseFloat((item.val*numP).toFixed(2)),pars:pars,st:'ativo',ori:item.ori});
+  } else if(tipo==='entrada'){ d.ent.push(item); } else { d.sai.push(item); }
   irisRender();
   sud(d, function(){
     if(S.page==='dashboard') rDash();
     if(S.page==='entradas') rEnt();
     if(S.page==='saidas') rSai();
-    var emoji=(tipo==='entrada')?'💰':'💸';
-    irisPush('bot', emoji+' '+(tipo==='entrada'?'Entrada registrada':'Saída registrada')+': '+item.desc+' — '+fmtTxt(item.val)+' ('+item.cat+', '+fd(item.date)+')');
+    if(S.page==='parcelas') rParc();
+    if(tipo==='parcela'){
+      irisPush('bot', '🧾 Conta parcelada registrada: '+item.desc+' — '+item.parcelas+'x de '+fmtTxt(item.val)+' ('+item.cat+')');
+    } else {
+      var emoji=(tipo==='entrada')?'💰':'💸';
+      irisPush('bot', emoji+' '+(tipo==='entrada'?'Entrada registrada':'Saída registrada')+': '+item.desc+' — '+fmtTxt(item.val)+' ('+item.cat+', '+fd(item.date)+')');
+    }
   });
 }
 function irisEditDraft(i){
@@ -3100,7 +3117,12 @@ function irisEditDraft(i){
   m.draft.resolved=true;
   irisRender();
   var item=m.draft.item, tipo=m.draft.tipo;
-  var inp=g('iris-input'); if(inp){ inp.value=(tipo==='entrada'?'Registrar entrada de ':'Registrar saída de ')+item.val+' em '+item.cat+': '+item.desc; inp.focus(); }
+  var inp=g('iris-input');
+  if(inp){
+    if(tipo==='parcela'){ inp.value='Registrar compra parcelada de '+item.val+' em '+item.parcelas+'x em '+item.cat+': '+item.desc; }
+    else { inp.value=(tipo==='entrada'?'Registrar entrada de ':'Registrar saída de ')+item.val+' em '+item.cat+': '+item.desc; }
+    inp.focus();
+  }
   irisPush('bot','Sem problemas, ajusta o texto abaixo do jeito certo e manda de novo.');
 }
 function irisCancelDraft(i){
@@ -3145,6 +3167,13 @@ function irisExecutar(r){
   if(r.acao==='registrar'){
     var valor=parseFloat(r.valor); if(isNaN(valor)){ irisPush('bot','Não entendi o valor. Pode me dizer de novo com o valor em números?'); return; }
     var cat=r.categoria||'Outros';
+    if(r.tipo==='parcela'){
+      var numParc=parseInt(r.parcelas)||1; if(numParc<1) numParc=1;
+      if(!d.cats.saida || d.cats.saida.indexOf(cat)<0) cat='Outros';
+      var itemP={ id:uid(), desc:r.descricao||'Sem descrição', val:valor, cat:cat, date:r.data||new Date().toISOString().slice(0,10), parcelas:numParc, ori:'Bolso Inteligente' };
+      irisPushDraft(itemP, 'parcela');
+      return;
+    }
     var tipo=(r.tipo==='entrada')?'entrada':'saida';
     var listaCats=(tipo==='entrada')?d.cats.entrada:d.cats.saida;
     if(!listaCats || listaCats.indexOf(cat)<0) cat='Outros';
