@@ -981,6 +981,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
         <div class="page" id="page-dashboard">
           <div class="hero-saldo" id="d-hero"></div>
           <div class="metrics" id="d-metrics"></div>
+          <div id="d-insights"></div>
 
           <!-- CHART ROW 1: Carteira + Entradas x Saídas + Gastos por Categoria -->
           <div class="chart-grid chart-grid-3">
@@ -1887,8 +1888,106 @@ function hideEl(id){ var e=g(id); if(e) e.style.display='none'; }
 var _charts = {};
 function destroyChart(id){ if(_charts[id]){ try{_charts[id].destroy();}catch(e){} delete _charts[id]; } }
 
+// ===== INSIGHTS / ALERTAS INTELIGENTES (Pro) =====
+function irisInsights(d){
+  if(!d) return [];
+  var insights=[];
+  var ent=d.ent.filter(function(e){return inM(e.date);});
+  var sai=d.sai.filter(function(s){return inM(s.date);});
+  var tE=sum(ent), tS=sum(sai), saldo=tE-tS;
+
+  if(tE>0){
+    var pct=(tS/tE)*100;
+    if(pct>=100){
+      insights.push({id:'pct_100',prioridade:100,tom:'alerta',texto:'⚠️ Suas saídas já passaram das entradas esse mês ('+pct.toFixed(0)+'% da renda). Vale dar uma olhada onde dá pra cortar.'});
+    } else if(pct>=90){
+      insights.push({id:'pct_90',prioridade:90,tom:'alerta',texto:'🚨 Você já gastou '+pct.toFixed(0)+'% da sua renda esse mês. Melhor segurar os gastos até o fim do mês.'});
+    } else if(pct>=70){
+      insights.push({id:'pct_70',prioridade:70,tom:'aviso',texto:'💡 Você já gastou '+pct.toFixed(0)+'% do que entrou esse mês. Que tal guardar uma parte do que sobrou?'});
+    } else if(pct>=50){
+      insights.push({id:'pct_50',prioridade:40,tom:'info',texto:'📊 Você já usou '+pct.toFixed(0)+'% da sua renda esse mês.'});
+    }
+  }
+
+  if(tE>0){
+    if(saldo<0){
+      insights.push({id:'saldo_neg',prioridade:95,tom:'alerta',texto:'🔴 Seu saldo esse mês está negativo: '+fmtTxt(saldo)+'.'});
+    } else if(saldo/tE<0.05){
+      insights.push({id:'saldo_baixo',prioridade:65,tom:'aviso',texto:'⚠️ Sobrou pouco esse mês: '+fmtTxt(saldo)+' de saldo ('+((saldo/tE)*100).toFixed(0)+'% da renda).'});
+    } else if(saldo/tE>=0.3){
+      insights.push({id:'saldo_bom',prioridade:20,tom:'positivo',texto:'🎉 Mandou bem! Você guardou '+((saldo/tE)*100).toFixed(0)+'% da sua renda esse mês ('+fmtTxt(saldo)+').'});
+    }
+  }
+
+  var meses3=[]; var mm=S.month, yy=S.year;
+  for(var i=0;i<3;i++){ mm--; if(mm<0){mm=11;yy--;} meses3.push({mes:mm,ano:yy}); }
+  var saiHist=meses3.map(function(mA){
+    return sum(d.sai.filter(function(s){var dd=new Date(s.date+'T12:00:00');return dd.getMonth()===mA.mes&&dd.getFullYear()===mA.ano;}));
+  });
+  var mediaHist=saiHist.length?saiHist.reduce(function(a,b){return a+b;},0)/saiHist.length:0;
+  if(mediaHist>10&&tS>mediaHist){
+    var pctAcima=((tS-mediaHist)/mediaHist)*100;
+    insights.push({id:'acima_media',prioridade:60,tom:'alerta',texto:'📈 Você já gastou '+fmtTxt(tS)+' esse mês, '+pctAcima.toFixed(0)+'% acima da sua média dos últimos meses ('+fmtTxt(mediaHist)+').'});
+  }
+
+  var catAtual={};
+  sai.forEach(function(s){ catAtual[s.cat]=(catAtual[s.cat]||0)+parseFloat(s.val||0); });
+  var catHist={};
+  meses3.forEach(function(mA){
+    d.sai.filter(function(s){var dd=new Date(s.date+'T12:00:00');return dd.getMonth()===mA.mes&&dd.getFullYear()===mA.ano;}).forEach(function(s){
+      catHist[s.cat]=(catHist[s.cat]||0)+parseFloat(s.val||0);
+    });
+  });
+  var catTop=null, catRazao=0;
+  Object.keys(catAtual).forEach(function(cat){
+    var mediaCat=(catHist[cat]||0)/3;
+    if(mediaCat>=10&&catAtual[cat]>mediaCat*1.5){
+      var razao=catAtual[cat]/mediaCat;
+      if(razao>catRazao){ catRazao=razao; catTop={cat:cat,atual:catAtual[cat],media:mediaCat}; }
+    }
+  });
+  if(catTop){
+    insights.push({id:'cat_atipica_'+catTop.cat,prioridade:55,tom:'aviso',texto:'🔍 Seu gasto em "'+catTop.cat+'" esse mês já está '+catRazao.toFixed(1).replace('.',',')+'x acima da sua média ('+fmtTxt(catTop.atual)+' vs '+fmtTxt(catTop.media)+').'});
+  }
+
+  var gfTotal=(d.gastosFixos||[]).reduce(function(a,x){return a+parseFloat(x.val||0);},0);
+  if(tE>0&&gfTotal/tE>=0.5){
+    insights.push({id:'fixos_altos',prioridade:45,tom:'info',texto:'📌 Seus gastos fixos consomem '+((gfTotal/tE)*100).toFixed(0)+'% da sua renda esse mês ('+fmtTxt(gfTotal)+').'});
+  }
+
+  insights.sort(function(a,b){return b.prioridade-a.prioridade;});
+  return insights;
+}
+function renderInsightsCard(d){
+  var box=g('d-insights'); if(!box) return;
+  if(isFree()){
+    box.innerHTML='<div class="panel" style="padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">'
+      +'<div style="display:flex;align-items:center;gap:10px"><span class="mi" style="font-size:22px;color:var(--yellow)">insights</span><div><div style="font-weight:600">Alertas inteligentes de gastos</div><div style="font-size:12px;color:var(--t3)">Avisos automáticos tipo "você já gastou X% da sua renda esse mês" — recurso do plano Pro</div></div></div>'
+      +'<button class="btn btn-primary btn-sm" onclick="showUpgrade()">Assinar Pro</button>'
+      +'</div>';
+    return;
+  }
+  var insights=irisInsights(d);
+  if(!insights.length){ box.innerHTML=''; return; }
+  var cor={alerta:'var(--red)',aviso:'var(--yellow)',info:'var(--blue)',positivo:'var(--teal)'};
+  box.innerHTML=insights.slice(0,2).map(function(ins){
+    return '<div class="panel" style="padding:14px 16px;margin-bottom:10px;border-left:3px solid '+(cor[ins.tom]||'var(--blue)')+'">'+esc(ins.texto)+'</div>';
+  }).join('');
+}
+function irisMostrarInsightDoDia(){
+  var d=ud(); if(!d||!isPro()) return;
+  var hoje=new Date().toISOString().slice(0,10);
+  if(!d.irisInsightsSeen) d.irisInsightsSeen={};
+  var pendentes=irisInsights(d).filter(function(ins){ return d.irisInsightsSeen[ins.id]!==hoje; });
+  if(!pendentes.length) return;
+  irisPush('bot', pendentes[0].texto);
+  d.irisInsightsSeen[pendentes[0].id]=hoje;
+  sud(d);
+}
+
 function rDash(){
   var d=ud(); if(!d) return;
+  renderInsightsCard(d);
   var ent=d.ent.filter(function(e){return inM(e.date);});
   var sai=d.sai.filter(function(s){return inM(s.date);});
   var tE=sum(ent), tS=sum(sai), sal=tE-tS;
@@ -2999,6 +3098,7 @@ function abrirIris(){
   if(!irisState.opened){
     irisState.opened=true;
     irisPush('bot','Oi, eu sou o Bolso Inteligente 👋 Posso registrar entradas e saídas pra você, ou responder sobre saldo, gastos, parcelas, investimentos, planejamento e cartão. É só me contar em texto normal — ex: "gastei 50 no almoço" ou "qual meu saldo?".');
+    irisMostrarInsightDoDia();
   }
   var sug=g('iris-suggest'); if(sug) sug.style.display = irisState.msgs.length<=1 ? 'flex' : 'none';
   var micBtn=g('iris-mic-btn'); if(micBtn) micBtn.style.display = irisMicSupported() ? 'flex' : 'none';
