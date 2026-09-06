@@ -3448,6 +3448,18 @@ function irisNoPeriodo(dateStr, periodo){
   }
       var ativas=(d.parc||[]).filter(function(p){return p.st==='ativo';});
       if(!ativas.length) return '📋 Você não tem parcelas ativas no momento.';
+      if(r.prazo){
+        var pendentes=[];
+        ativas.forEach(function(p){
+          (p.pars||[]).forEach(function(par,idx){
+            if(!par.pg) pendentes.push({nome:p.name,seq:idx+1,total:p.pars.length,date:par.date});
+          });
+        });
+        if(!pendentes.length) return '📋 Você não tem parcelas pendentes — todas as suas contas parceladas já estão quitadas.';
+        pendentes.sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+        var ultima=pendentes[pendentes.length-1];
+        return '📋 Sua última parcela pendente é de "'+ultima.nome+'" ('+ultima.seq+'/'+ultima.total+'), vencendo em '+fd(ultima.date)+'. Depois dessa data, todas as suas contas parceladas de hoje estarão quitadas (considerando só o que já está cadastrado).';
+  }
       var restante=ativas.reduce(function(a,p){return a+p.pars.filter(function(x){return !x.pg;}).reduce(function(s,x){return s+parseFloat(x.val||0);},0);},0);
       return '📋 Você tem '+ativas.length+' conta'+(ativas.length===1?'':'s')+' parcelada'+(ativas.length===1?'':'s')+' ativa'+(ativas.length===1?'':'s')+', totalizando '+fmtTxt(restante)+' em aberto.';
   }
