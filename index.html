@@ -1292,14 +1292,14 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
   </div>
 </div>
 
-<button class="iris-fab" id="irisFab" onclick="abrirIris()" title="Assistente Íris"><span class="mi">smart_toy</span></button>
+<button class="iris-fab" id="irisFab" onclick="abrirIris()" title="Assistente Bolso Inteligente"><span class="mi">auto_awesome</span></button>
 
-<!-- ASSISTENTE ÍRIS -->
+<!-- ASSISTENTE BOLSO INTELIGENTE -->
 <div class="modal-wrap" id="irisModal" style="display:none;align-items:flex-end;justify-content:center">
   <div class="modal" style="max-width:440px;height:78vh;max-height:78vh;display:flex;flex-direction:column;padding:0;overflow:hidden">
     <div class="modal-head" style="flex-shrink:0;gap:10px">
-      <div class="iris-head-ico"><span class="mi">smart_toy</span></div>
-      <div style="flex:1;min-width:0"><span class="modal-title" style="display:block">Íris</span><span class="iris-head-sub">Fale naturalmente sobre suas finanças</span></div>
+      <div class="iris-head-ico"><span class="mi">auto_awesome</span></div>
+      <div style="flex:1;min-width:0"><span class="modal-title" style="display:block">Bolso Inteligente</span><span class="iris-head-sub">Fale naturalmente sobre suas finanças</span></div>
       <button class="modal-x" onclick="fecharIris()"><span class="mi" style="font-size:16px">close</span></button>
     </div>
     <div class="iris-chat" id="iris-msgs" style="padding:16px"></div>
@@ -1312,7 +1312,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
     </div>
     <div class="iris-rec-ind" id="iris-rec-ind" style="display:none"><span class="iris-rec-dot"></span>Ouvindo... fale agora</div>
     <div style="flex-shrink:0;padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px">
-      <input type="text" id="iris-input" placeholder="Fale com a Íris..." autocomplete="off" style="flex:1;background:var(--s2);border:1px solid var(--border);border-radius:100px;padding:10px 16px;color:var(--t1);font-family:inherit;font-size:13.5px" onkeydown="if(event.key==='Enter'){event.preventDefault();enviarIris();}">
+      <input type="text" id="iris-input" placeholder="Fale com o Bolso Inteligente..." autocomplete="off" style="flex:1;background:var(--s2);border:1px solid var(--border);border-radius:100px;padding:10px 16px;color:var(--t1);font-family:inherit;font-size:13.5px" onkeydown="if(event.key==='Enter'){event.preventDefault();enviarIris();}">
       <button class="iris-mic" id="iris-mic-btn" style="display:none" onclick="irisToggleMic()"><span class="mi" style="font-size:18px" id="iris-mic-ico">mic</span></button>
       <button class="btn btn-primary" style="border-radius:50%;width:40px;height:40px;padding:0;display:flex;align-items:center;justify-content:center;flex-shrink:0" onclick="enviarIris()"><span class="mi" style="font-size:18px">send</span></button>
     </div>
@@ -1780,7 +1780,7 @@ function showUpgrade(feat){
     msg+
     '<div style="margin:20px 0;background:var(--s2);border-radius:12px;padding:16px;text-align:left;font-size:13px;color:var(--t2)">'+
     '<div style="margin-bottom:6px;color:var(--t1);font-weight:700">PRO inclui:</div>'+
-    '✅ Assistente Íris (IA)<br>'+
+    '✅ Assistente Bolso Inteligente (IA)<br>'+
     '✅ Scanner de cupons e boletos com IA<br>'+
     '✅ Cartão de crédito com fatura<br>'+
     '✅ Planejamento e metas<br>'+
@@ -2992,15 +2992,15 @@ function analisarBoletoComClaude(base64,mediaType){
 function salvarDoBoleto(){ var nome=g('sb-nome').value.trim(),valor=parseFloat(g('sb-valor').value),venc=g('sb-venc').value,nparc=parseInt(g('sb-parc').value)||1,vparc=parseFloat(g('sb-vparc').value)||0,cat=g('sb-cat').value; if(!nome||isNaN(valor)||!venc){toast('Preencha os campos.','err');return;} var d=ud(); if(!d) return; var vp=vparc>0?vparc:parseFloat((valor/nparc).toFixed(2)); var pars=[]; for(var i=0;i<nparc;i++){var dd=new Date(venc+'T12:00:00');dd.setMonth(dd.getMonth()+i);pars.push({seq:i+1,date:dd.toISOString().slice(0,10),val:vp,pg:false});} d.parc.push({id:uid(),name:nome,cat:cat,tot:valor,pars:pars,st:'ativo'}); sud(d,function(){fecharScannerBoleto();toast('Parcela cadastrada!','ok');if(S.page==='parcelas')rParc();if(S.page==='dashboard')rDash();}); }
 window.addEventListener('resize',function(){updMonth();});
 
-// ===== ASSISTENTE ÍRIS =====
+// ===== ASSISTENTE BOLSO INTELIGENTE =====
 var irisState = { msgs: [], busy: false, opened: false };
 
 function abrirIris(){
-  if(!isPro()){ showUpgrade('Assistente Íris'); return; }
+  if(!isPro()){ showUpgrade('Assistente Bolso Inteligente'); return; }
   g('irisModal').style.display='flex';
   if(!irisState.opened){
     irisState.opened=true;
-    irisPush('bot','Oi, eu sou a Íris 👋 Posso registrar entradas e saídas pra você, ou responder sobre saldo, gastos, parcelas, investimentos, planejamento e cartão. É só me contar em texto normal — ex: "gastei 50 no almoço" ou "qual meu saldo?".');
+    irisPush('bot','Oi, eu sou o Bolso Inteligente 👋 Posso registrar entradas e saídas pra você, ou responder sobre saldo, gastos, parcelas, investimentos, planejamento e cartão. É só me contar em texto normal — ex: "gastei 50 no almoço" ou "qual meu saldo?".');
   }
   var sug=g('iris-suggest'); if(sug) sug.style.display = irisState.msgs.length<=1 ? 'flex' : 'none';
   var micBtn=g('iris-mic-btn'); if(micBtn) micBtn.style.display = irisMicSupported() ? 'flex' : 'none';
@@ -3016,7 +3016,7 @@ function irisRender(){
   var box=g('iris-msgs'); if(!box) return;
   box.innerHTML=irisState.msgs.map(function(m,i){
     var who=(m.who==='user'?'user':'bot');
-    var ico=(who==='user'?'person':'smart_toy');
+    var ico=(who==='user'?'person':'auto_awesome');
     var acoes='';
     if(m.draft && !m.draft.resolved){
       acoes='<div class="iris-actions">'
@@ -3031,7 +3031,7 @@ function irisRender(){
 }
 function irisTypingOn(){
   var box=g('iris-msgs'); if(!box) return;
-  box.insertAdjacentHTML('beforeend','<div class="iris-row bot" id="iris-typing-ind"><div class="iris-avatar"><span class="mi">smart_toy</span></div><div class="iris-msg bot" style="color:var(--t3)">digitando...</div></div>');
+  box.insertAdjacentHTML('beforeend','<div class="iris-row bot" id="iris-typing-ind"><div class="iris-avatar"><span class="mi">auto_awesome</span></div><div class="iris-msg bot" style="color:var(--t3)">digitando...</div></div>');
   box.scrollTop=box.scrollHeight;
 }
 function irisTypingOff(){ var el=g('iris-typing-ind'); if(el) el.remove(); }
@@ -3148,7 +3148,7 @@ function irisExecutar(r){
     var tipo=(r.tipo==='entrada')?'entrada':'saida';
     var listaCats=(tipo==='entrada')?d.cats.entrada:d.cats.saida;
     if(!listaCats || listaCats.indexOf(cat)<0) cat='Outros';
-    var item={ id:uid(), desc:r.descricao||'Sem descrição', val:valor, cat:cat, date:r.data||new Date().toISOString().slice(0,10), ori:'Íris' };
+    var item={ id:uid(), desc:r.descricao||'Sem descrição', val:valor, cat:cat, date:r.data||new Date().toISOString().slice(0,10), ori:'Bolso Inteligente' };
     irisPushDraft(item, tipo);
     return;
   }
@@ -3439,7 +3439,7 @@ function showUpgrade(motivo){
     '<div style="font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Bolso Inteligente Pro inclui:</div>'+
     '<div style="font-size:13px;color:var(--t1);line-height:2">'+
     '✅ Lançamentos ilimitados<br>'+
-    '✅ Assistente Íris (IA)<br>'+
+    '✅ Assistente Bolso Inteligente (IA)<br>'+
     '✅ Scanner com IA (cupom e boleto)<br>'+
     '✅ Cartão de crédito com fatura<br>'+
     '✅ Planejamento e metas<br>'+
