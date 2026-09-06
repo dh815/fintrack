@@ -2502,7 +2502,7 @@ function pagarGastoFixo(id){
   var gf=(d.gastosFixos||[]).find(function(x){return x.id===id;});
   if(!gf) return;
   cf('Registrar pagamento?','Isso vai criar uma saída de '+fmt(gf.val)+' referente a "'+esc(gf.desc)+'" hoje.',function(){
-    d.sai.push({id:uid(),desc:gf.desc,val:gf.val,date:new Date().toISOString().slice(0,10),cat:gf.cat||'Outros',obs:'Gasto fixo'});
+    d.sai.push({id:uid(),desc:gf.desc,val:gf.val,date:new Date().toISOString().slice(0,10),cat:gf.cat||'Outros',obs:'Gasto fixo',gfId:gf.id});
     sud(d, function(){ toast('Pagamento registrado em Saídas!','ok'); render(S.page); });
   });
 }
@@ -3159,75 +3159,219 @@ function irisExecutar(r){
 }
 
 function irisNoPeriodo(dateStr, periodo){
-  var d=new Date(dateStr+'T12:00:00'); var hoje=new Date(); hoje.setHours(12,0,0,0);
-  if(periodo==='hoje'){ return d.toDateString()===hoje.toDateString(); }
-  if(periodo==='semana'){ var seteDias=new Date(hoje); seteDias.setDate(hoje.getDate()-7); return d>=seteDias && d<=hoje; }
-  if(periodo==='mes_passado'){ var pm=hoje.getMonth()-1,py=hoje.getFullYear(); if(pm<0){pm=11;py--;} return d.getMonth()===pm && d.getFullYear()===py; }
-  if(periodo==='ano'){ return d.getFullYear()===hoje.getFullYear(); }
-  return d.getMonth()===hoje.getMonth() && d.getFullYear()===hoje.getFullYear();
-}
-
-function irisResponderConsulta(d, r){
-  var periodo=r.periodo||'mes_atual';
-  var periodoTxt={hoje:'hoje',semana:'nos últimos 7 dias',mes_atual:'neste mês',mes_passado:'no mês passado',ano:'neste ano'}[periodo]||'neste mês';
-
-  if(r.tipo==='saldo'){
-    var ent=d.ent.filter(function(e){return irisNoPeriodo(e.date,periodo);});
-    var sai=d.sai.filter(function(s){return irisNoPeriodo(s.date,periodo);});
-    var tE=sum(ent), tS=sum(sai);
-    return '📊 Resumo '+periodoTxt+':\nEntradas: '+fmtTxt(tE)+'\nSaídas: '+fmtTxt(tS)+'\nSaldo: '+fmtTxt(tE-tS);
+    var d=new Date(dateStr+'T12:00:00'); var hoje=new Date(); hoje.setHours(12,0,0,0);
+    if(periodo==='hoje'){ return d.toDateString()===hoje.toDateString(); }
+    if(periodo==='amanha'){ var am=new Date(hoje); am.setDate(hoje.getDate()+1); return d.toDateString()===am.toDateString(); }
+    if(periodo==='semana'){ var seteDias=new Date(hoje); seteDias.setDate(hoje.getDate()-7); return d>=seteDias && d<=hoje; }
+    if(periodo==='mes_passado'){ var pm=hoje.getMonth()-1,py=hoje.getFullYear(); if(pm<0){pm=11;py--;} return d.getMonth()===pm && d.getFullYear()===py; }
+    if(periodo==='mes_que_vem'){ var nm=hoje.getMonth()+1,ny=hoje.getFullYear(); if(nm>11){nm=0;ny++;} return d.getMonth()===nm && d.getFullYear()===ny; }
+    if(periodo==='ano'){ return d.getFullYear()===hoje.getFullYear(); }
+    return d.getMonth()===hoje.getMonth() && d.getFullYear()===hoje.getFullYear();
   }
-  if(r.tipo==='entradas'){
-    var ent=d.ent.filter(function(e){return irisNoPeriodo(e.date,periodo)&&(!r.categoria||e.cat===r.categoria)&&(!r.dia||new Date(e.date+'T12:00:00').getDate()===parseInt(r.dia,10));});
-      return '💰 Entradas '+periodoTxt+(r.categoria?' em '+r.categoria:'')+(r.dia?' no dia '+r.dia:'')+': '+fmtTxt(sum(ent))+' ('+ent.length+' lançamento'+(ent.length===1?'':'s')+')';
+
+  // Resolve o dia/mês/ano-alvo de uma consulta da Íris a partir de r.periodo/r.dia/r.mes/r.ano/r.dia_fim,
+  // sempre calculado a partir da data real de hoje (nunca fixo em "dia 10" nem em um mês específico).
+  function irisAlvo(r){
+    var hoje=new Date(); hoje.setHours(12,0,0,0);
+    var mes=hoje.getMonth(), ano=hoje.getFullYear();
+    var dia=(r.dia!=null&&r.dia!=='')?parseInt(r.dia,10):null;
+    if(r.periodo==='mes_passado'){ mes--; if(mes<0){mes=11;ano--;} }
+    else if(r.periodo==='mes_que_vem'){ mes++; if(mes>11){mes=0;ano++;} }
+    else if(r.periodo==='amanha'){ var t=new Date(hoje); t.setDate(hoje.getDate()+1); if(dia==null) dia=t.getDate(); mes=t.getMonth(); ano=t.getFullYear(); }
+    else if(r.periodo==='hoje'&&dia==null){ dia=hoje.getDate(); }
+    if(r.mes){ mes=parseInt(r.mes,10)-1; }
+    if(r.ano){ ano=parseInt(r.ano,10); }
+    var diaFim=(r.dia_fim!=null&&r.dia_fim!=='')?parseInt(r.dia_fim,10):null;
+    return {dia:dia, diaFim:diaFim, mes:mes, ano:ano};
+  }
+  function irisDiaBate(diaItem, alvo){
+    if(alvo.dia==null) return true;
+    if(alvo.diaFim) return diaItem>=alvo.dia && diaItem<=alvo.diaFim;
+    return diaItem===alvo.dia;
+  }
+  function irisMesAnoBate(dateStr, alvo){
+    var dd=new Date(dateStr+'T12:00:00');
+    return dd.getMonth()===alvo.mes && dd.getFullYear()===alvo.ano;
+  }
+  function irisFormatarAlvo(alvo){
+    var hoje=new Date();
+    var mesmoMes=(alvo.mes===hoje.getMonth()&&alvo.ano===hoje.getFullYear());
+    var base=alvo.diaFim?('entre os dias '+alvo.dia+' e '+alvo.diaFim):('no dia '+alvo.dia);
+    if(!mesmoMes) base+=' de '+(MONTHS[alvo.mes]||'')+'/'+alvo.ano;
+    return base;
+  }
+  function irisFixoPago(d, gf, alvo){
+    return (d.sai||[]).some(function(s){
+      if(!irisMesAnoBate(s.date, alvo)) return false;
+      if(gf.id&&s.gfId) return s.gfId===gf.id;
+      return s.obs==='Gasto fixo'&&s.desc===gf.desc;
+  });
+  }
+  // Normaliza TODAS as obrigações/gastos do sistema (gasto fixo, parcela, fatura de cartão,
+  // saída avulsa) num formato único {desc,val,grupo,pago}, pra consultas combinadas por dia/mês.
+  function irisItensObrigacao(d, alvo, categoria){
+    var itens=[];
+    (d.gastosFixos||[]).forEach(function(gf){
+      var diaGf=parseInt(gf.dia,10)||1;
+      if(!irisDiaBate(diaGf, alvo)) return;
+      if(categoria&&gf.cat!==categoria) return;
+      itens.push({desc:gf.desc, val:parseFloat(gf.val)||0, grupo:'Gasto Fixo', pago:irisFixoPago(d,gf,alvo)});
+  });
+    (d.parc||[]).forEach(function(p){
+      if(p.st!=='ativo') return;
+      if(categoria&&p.cat!==categoria) return;
+      (p.pars||[]).forEach(function(par,idx){
+        if(!irisMesAnoBate(par.date, alvo)) return;
+        var dd=new Date(par.date+'T12:00:00');
+        if(!irisDiaBate(dd.getDate(), alvo)) return;
+        itens.push({desc:p.name+' ('+(idx+1)+'/'+p.pars.length+')', val:parseFloat(par.val)||0, grupo:'Parcela', pago:!!par.pg});
+  });
+  });
+    (d.cartoes||[]).forEach(function(c){
+      var vencDia=parseInt(c.venc,10);
+      if(!vencDia||!irisDiaBate(vencDia, alvo)) return;
+      var total=(d.gastos_credito||[]).filter(function(g){return g.cartao_id===c.id&&irisMesAnoBate(g.date,alvo);}).reduce(function(a,g){return a+parseFloat(g.val||0);},0);
+      if(total<=0) return;
+      var key='fat_'+alvo.ano+'_'+alvo.mes+'_'+c.id;
+      itens.push({desc:'Fatura '+c.nome, val:total, grupo:'Cartão', pago:(d.faturas||{})[key]==='paga'});
+  });
+    (d.sai||[]).forEach(function(s){
+      if(s.obs==='Gasto fixo'||s.ori==='Parcela'||s.ori==='Fatura') return; // já contado acima, evita duplicidade
+      if(!irisMesAnoBate(s.date, alvo)) return;
+      var dd=new Date(s.date+'T12:00:00');
+      if(!irisDiaBate(dd.getDate(), alvo)) return;
+      if(categoria&&s.cat!==categoria) return;
+      itens.push({desc:s.desc||s.cat||'Saída', val:parseFloat(s.val)||0, grupo:'Gasto Variável', pago:true});
+  });
+    return itens;
+  }
+
+  function irisResponderConsulta(d, r){
+    var periodo=r.periodo||'mes_atual';
+    var periodoTxt={hoje:'hoje',amanha:'amanhã',semana:'nos últimos 7 dias',mes_atual:'neste mês',mes_passado:'no mês passado',mes_que_vem:'no mês que vem',ano:'neste ano'}[periodo]||'neste mês';
+    var alvo=irisAlvo(r);
+
+    if(r.tipo==='saldo'){
+      var ent=d.ent.filter(function(e){return irisNoPeriodo(e.date,periodo);});
+      var sai=d.sai.filter(function(s){return irisNoPeriodo(s.date,periodo);});
+      var tE=sum(ent), tS=sum(sai);
+      return '📊 Resumo '+periodoTxt+':\nEntradas: '+fmtTxt(tE)+'\nSaídas: '+fmtTxt(tS)+'\nSaldo: '+fmtTxt(tE-tS);
+  }
+    if(r.tipo==='entradas'){
+      var ent=d.ent.filter(function(e){
+        if(r.categoria&&e.cat!==r.categoria) return false;
+        if(alvo.dia!=null) return irisMesAnoBate(e.date,alvo)&&irisDiaBate(new Date(e.date+'T12:00:00').getDate(),alvo);
+        return irisNoPeriodo(e.date,periodo);
+  });
+      var rotulo=alvo.dia!=null?irisFormatarAlvo(alvo):periodoTxt;
+      return '💰 Entradas '+rotulo+(r.categoria?' em '+r.categoria:'')+': '+fmtTxt(sum(ent))+' ('+ent.length+' lançamento'+(ent.length===1?'':'s')+')';
   }
     if(r.tipo==='saidas'){
-        var sai=d.sai.filter(function(s){return irisNoPeriodo(s.date,periodo)&&(!r.categoria||s.cat===r.categoria)&&(!r.dia||new Date(s.date+'T12:00:00').getDate()===parseInt(r.dia,10));});
-        var txtS='💸 Gasto variável '+periodoTxt+(r.categoria?' em '+r.categoria:'')+(r.dia?' no dia '+r.dia:'')+': '+fmtTxt(sum(sai))+' ('+sai.length+' lançamento'+(sai.length===1?'':'s')+')';
-        if(r.dia&&!sai.length){
-          var gfDia=(d.gastosFixos||[]).filter(function(x){return parseInt(x.dia,10)===parseInt(r.dia,10)&&(!r.categoria||x.cat===r.categoria);});
-          if(gfDia.length){
-            var linhasGf=gfDia.map(function(x){
-              var pago=(d.sai||[]).some(function(s){return s.obs==='Gasto fixo'&&s.desc===x.desc&&irisNoPeriodo(s.date,periodo);});
-              return '• '+x.desc+' — '+fmtTxt(x.val)+(pago?' (já pago esse mês)':' (fixo, ainda não pago)');
+      var sai=d.sai.filter(function(s){
+        if(s.obs==='Gasto fixo'||s.ori==='Parcela'||s.ori==='Fatura') return false;
+        if(r.categoria&&s.cat!==r.categoria) return false;
+        if(alvo.dia!=null) return irisMesAnoBate(s.date,alvo)&&irisDiaBate(new Date(s.date+'T12:00:00').getDate(),alvo);
+        return irisNoPeriodo(s.date,periodo);
   });
-            txtS+='\n\nNão achei gasto variável avulso nesse dia. Isso é diferente de gasto fixo, mas só pra avisar, tem gasto fixo cadastrado pro dia '+r.dia+':\n'+linhasGf.join('\n');
+      var rotuloS=alvo.dia!=null?irisFormatarAlvo(alvo):periodoTxt;
+      var txtS='💸 Gasto variável '+rotuloS+(r.categoria?' em '+r.categoria:'')+': '+fmtTxt(sum(sai))+' ('+sai.length+' lançamento'+(sai.length===1?'':'s')+')';
+      if(alvo.dia!=null&&!sai.length){
+        var gfDia=(d.gastosFixos||[]).filter(function(x){return irisDiaBate(parseInt(x.dia,10)||1,alvo)&&(!r.categoria||x.cat===r.categoria);});
+        if(gfDia.length){
+          var linhasGf=gfDia.map(function(x){
+            var pago=irisFixoPago(d,x,alvo);
+            return '• '+x.desc+' — '+fmtTxt(x.val)+(pago?' (já pago)':' (fixo, ainda não pago)');
+  });
+          txtS+='\n\nNão achei gasto variável avulso nesse período. Isso é diferente de gasto fixo, mas só pra avisar, tem gasto fixo cadastrado pro dia '+r.dia+':\n'+linhasGf.join('\n');
   }
   }
-        return txtS;
+      return txtS;
   }
-  if(r.tipo==='parcelas'){
-    if(isFree()) return '📋 Contas parceladas é um recurso do plano Pro.';
-    var ativas=(d.parc||[]).filter(function(p){return p.st==='ativo';});
-    if(!ativas.length) return '📋 Você não tem parcelas ativas no momento.';
-    var restante=ativas.reduce(function(a,p){return a+p.pars.filter(function(x){return !x.pg;}).reduce(function(s,x){return s+parseFloat(x.val||0);},0);},0);
-    return '📋 Você tem '+ativas.length+' conta'+(ativas.length===1?'':'s')+' parcelada'+(ativas.length===1?'':'s')+' ativa'+(ativas.length===1?'':'s')+', totalizando '+fmtTxt(restante)+' em aberto.';
+    if(r.tipo==='parcelas'){
+      if(isFree()) return '📋 Contas parceladas é um recurso do plano Pro.';
+      if(alvo.dia!=null){
+        var itensP=[];
+        (d.parc||[]).forEach(function(p){
+          if(p.st!=='ativo') return;
+          if(r.categoria&&p.cat!==r.categoria) return;
+          (p.pars||[]).forEach(function(par,idx){
+            if(!irisMesAnoBate(par.date,alvo)) return;
+            var dd=new Date(par.date+'T12:00:00');
+            if(!irisDiaBate(dd.getDate(),alvo)) return;
+            itensP.push({desc:p.name+' ('+(idx+1)+'/'+p.pars.length+')', val:parseFloat(par.val)||0, pago:!!par.pg});
+          });
+  });
+        if(r.status==='pago') itensP=itensP.filter(function(x){return x.pago;});
+        else if(r.status!=='todos') itensP=itensP.filter(function(x){return !x.pago;}); // default: pendente
+        if(!itensP.length) return '📋 Nenhuma parcela '+(r.status==='pago'?'paga':'pendente')+' '+irisFormatarAlvo(alvo)+'.';
+        var linhasP=itensP.map(function(x){return '• '+x.desc+' — '+fmtTxt(x.val);});
+        return '📋 Parcelas '+irisFormatarAlvo(alvo)+':\n'+linhasP.join('\n')+'\nTotal: '+fmtTxt(itensP.reduce(function(s,x){return s+x.val;},0));
   }
-  if(r.tipo==='investimentos'){
-    if(isFree()) return '📈 Investimentos é um recurso do plano Pro.';
-    if(!(d.inv||[]).length) return '📈 Você ainda não tem posições de investimento cadastradas.';
-    return '📈 Sua carteira tem '+d.inv.length+' posiç'+(d.inv.length===1?'ão':'ões')+', totalizando '+fmtTxt(sum(d.inv))+' investidos.';
+      var ativas=(d.parc||[]).filter(function(p){return p.st==='ativo';});
+      if(!ativas.length) return '📋 Você não tem parcelas ativas no momento.';
+      var restante=ativas.reduce(function(a,p){return a+p.pars.filter(function(x){return !x.pg;}).reduce(function(s,x){return s+parseFloat(x.val||0);},0);},0);
+      return '📋 Você tem '+ativas.length+' conta'+(ativas.length===1?'':'s')+' parcelada'+(ativas.length===1?'':'s')+' ativa'+(ativas.length===1?'':'s')+', totalizando '+fmtTxt(restante)+' em aberto.';
   }
-  if(r.tipo==='planejamento'){
-    if(isFree()) return '🎯 Planejamento é um recurso do plano Pro.';
-    if(!(d.plans||[]).length) return '🎯 Você ainda não criou nenhum planejamento.';
-    var linhas=d.plans.map(function(p){var pct=Math.min(100,((p.cur||0)/p.tgt*100));return '• '+p.name+': '+fmtTxt(p.cur||0)+' de '+fmtTxt(p.tgt)+' ('+pct.toFixed(0)+'%)';});
-    return '🎯 Seus planejamentos:\n'+linhas.join('\n');
+    if(r.tipo==='investimentos'){
+      if(isFree()) return '📈 Investimentos é um recurso do plano Pro.';
+      if(!(d.inv||[]).length) return '📈 Você ainda não tem posições de investimento cadastradas.';
+      return '📈 Sua carteira tem '+d.inv.length+' posiç'+(d.inv.length===1?'ão':'ões')+', totalizando '+fmtTxt(sum(d.inv))+' investidos.';
   }
-  if(r.tipo==='credito'){
-    if(isFree()) return '💳 Cartão de crédito é um recurso do plano Pro.';
-    return '💳 A fatura deste mês está em '+fmtTxt(totalFaturaMes(d,null))+'.';
+    if(r.tipo==='planejamento'){
+      if(isFree()) return '🎯 Planejamento é um recurso do plano Pro.';
+      if(!(d.plans||[]).length) return '🎯 Você ainda não criou nenhum planejamento.';
+      var linhas=d.plans.map(function(p){var pct=Math.min(100,((p.cur||0)/p.tgt*100));return '• '+p.name+': '+fmtTxt(p.cur||0)+' de '+fmtTxt(p.tgt)+' ('+pct.toFixed(0)+'%)';});
+      return '🎯 Seus planejamentos:\n'+linhas.join('\n');
   }
-  if(r.tipo==='gastos_fixos'){
-    var listaF=(d.gastosFixos||[]).slice();
-    if(r.dia){ listaF=listaF.filter(function(x){return parseInt(x.dia,10)===parseInt(r.dia,10);}); }
-    if(!listaF.length) return r.dia?('📌 Nenhum gasto fixo cadastrado pro dia '+r.dia+'.'):'📌 Nenhum gasto fixo cadastrado.';
-    var linhasF=listaF.map(function(x){return '• '+x.desc+' — '+fmtTxt(x.val)+' (todo dia '+(x.dia||1)+')';});
-    return '📌 Gastos fixos'+(r.dia?(' no dia '+r.dia):'')+':\n'+linhasF.join('\n')+'\nTotal: '+fmtTxt(sum(listaF));
+    if(r.tipo==='credito'){
+      if(isFree()) return '💳 Cartão de crédito é um recurso do plano Pro.';
+      if(alvo.dia!=null){
+        var itensC=[];
+        (d.cartoes||[]).forEach(function(c){
+          var vencDia=parseInt(c.venc,10);
+          if(!vencDia||!irisDiaBate(vencDia,alvo)) return;
+          var total=(d.gastos_credito||[]).filter(function(g){return g.cartao_id===c.id&&irisMesAnoBate(g.date,alvo);}).reduce(function(a,g){return a+parseFloat(g.val||0);},0);
+          if(total<=0) return;
+          var key='fat_'+alvo.ano+'_'+alvo.mes+'_'+c.id;
+          itensC.push({desc:'Fatura '+c.nome, val:total, pago:(d.faturas||{})[key]==='paga'});
+        });
+        if(r.status==='pago') itensC=itensC.filter(function(x){return x.pago;});
+        else if(r.status!=='todos') itensC=itensC.filter(function(x){return !x.pago;});
+        if(!itensC.length) return '💳 Nenhuma fatura '+(r.status==='pago'?'paga':'em aberto')+' com vencimento '+irisFormatarAlvo(alvo)+'.';
+        var linhasC=itensC.map(function(x){return '• '+x.desc+' — '+fmtTxt(x.val);});
+        return '💳 Fatura(s) com vencimento '+irisFormatarAlvo(alvo)+':\n'+linhasC.join('\n')+'\nTotal: '+fmtTxt(itensC.reduce(function(s,x){return s+x.val;},0));
+      }
+      return '💳 A fatura deste mês está em '+fmtTxt(totalFaturaMes(d,null))+'.';
   }
-  return 'Não consegui buscar essa informação agora.';
-}
-
+    if(r.tipo==='gastos_fixos'){
+      var listaF=(d.gastosFixos||[]).slice();
+      if(r.categoria) listaF=listaF.filter(function(x){return x.cat===r.categoria;});
+      if(alvo.dia!=null) listaF=listaF.filter(function(x){return irisDiaBate(parseInt(x.dia,10)||1,alvo);});
+      if(!listaF.length) return alvo.dia!=null?('📌 Nenhum gasto fixo cadastrado '+irisFormatarAlvo(alvo)+'.'):'📌 Nenhum gasto fixo cadastrado.';
+      var anotado=listaF.map(function(x){return {item:x, pago:irisFixoPago(d,x,alvo)};});
+      if(r.status==='pendente') anotado=anotado.filter(function(a){return !a.pago;});
+      else if(r.status==='pago') anotado=anotado.filter(function(a){return a.pago;});
+      if(!anotado.length) return r.status==='pago'?('📌 Nenhum gasto fixo pago ainda '+(alvo.dia!=null?irisFormatarAlvo(alvo):'')+'.'):'📌 Nenhum gasto fixo pendente'+(alvo.dia!=null?(' '+irisFormatarAlvo(alvo)):'')+' — já está tudo pago!';
+      var linhasF=anotado.map(function(a){return '• '+a.item.desc+' — '+fmtTxt(a.item.val)+' (todo dia '+(a.item.dia||1)+')'+(r.status?'':(a.pago?' (pago)':' (pendente)'));});
+      var totalF=anotado.reduce(function(s,a){return s+(parseFloat(a.item.val)||0);},0);
+      return '📌 Gastos fixos'+(alvo.dia!=null?(' '+irisFormatarAlvo(alvo)):'')+(r.status==='pendente'?' pendentes':r.status==='pago'?' pagos':'')+':\n'+linhasF.join('\n')+'\nTotal: '+fmtTxt(totalF);
+  }
+    if(r.tipo==='geral'){
+      if(alvo.dia==null) return 'Me diz o dia que você quer consultar (ex: "quanto tenho pra pagar dia 10") que eu calculo certinho pra você.';
+      var itensG=irisItensObrigacao(d, alvo, r.categoria||null);
+      if(r.status==='pago') itensG=itensG.filter(function(x){return x.pago;});
+      else itensG=itensG.filter(function(x){return !x.pago;}); // default: pendente
+      if(!itensG.length) return '💰 Não encontrei nada '+(r.status==='pago'?'pago':'pendente')+' '+irisFormatarAlvo(alvo)+'.';
+      var porGrupo={};
+      itensG.forEach(function(x){ porGrupo[x.grupo]=(porGrupo[x.grupo]||0)+x.val; });
+      var linhasGrupo=Object.keys(porGrupo).map(function(g){return g+': '+fmtTxt(porGrupo[g]);});
+      var linhasItens=itensG.map(function(x){return '• '+x.desc+' — '+fmtTxt(x.val)+' ('+x.grupo+')';});
+      var totalGeral=itensG.reduce(function(s,x){return s+x.val;},0);
+      return '💰 Você tem '+fmtTxt(totalGeral)+' '+(r.status==='pago'?'pago':'pra pagar')+' '+irisFormatarAlvo(alvo)+':\n'+linhasItens.join('\n')+'\n\n'+linhasGrupo.join(' · ');
+  }
+    return 'Não consegui buscar essa informação agora.';
+  }
+  
 // INIT
 window.addEventListener('load',function(){
   var resetParams=new URLSearchParams(window.location.search);
