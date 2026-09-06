@@ -3178,12 +3178,12 @@ function irisResponderConsulta(d, r){
     return '📊 Resumo '+periodoTxt+':\nEntradas: '+fmtTxt(tE)+'\nSaídas: '+fmtTxt(tS)+'\nSaldo: '+fmtTxt(tE-tS);
   }
   if(r.tipo==='entradas'){
-    var ent=d.ent.filter(function(e){return irisNoPeriodo(e.date,periodo)&&(!r.categoria||e.cat===r.categoria);});
-    return '💰 Entradas '+periodoTxt+(r.categoria?' em '+r.categoria:'')+': '+fmtTxt(sum(ent))+' ('+ent.length+' lançamento'+(ent.length===1?'':'s')+')';
+    var ent=d.ent.filter(function(e){return irisNoPeriodo(e.date,periodo)&&(!r.categoria||e.cat===r.categoria)&&(!r.dia||new Date(e.date+'T12:00:00').getDate()===parseInt(r.dia,10));});
+      return '💰 Entradas '+periodoTxt+(r.categoria?' em '+r.categoria:'')+(r.dia?' no dia '+r.dia:'')+': '+fmtTxt(sum(ent))+' ('+ent.length+' lançamento'+(ent.length===1?'':'s')+')';
   }
   if(r.tipo==='saidas'){
-    var sai=d.sai.filter(function(s){return irisNoPeriodo(s.date,periodo)&&(!r.categoria||s.cat===r.categoria);});
-    return '💸 Saídas '+periodoTxt+(r.categoria?' em '+r.categoria:'')+': '+fmtTxt(sum(sai))+' ('+sai.length+' lançamento'+(sai.length===1?'':'s')+')';
+    var sai=d.sai.filter(function(s){return irisNoPeriodo(s.date,periodo)&&(!r.categoria||s.cat===r.categoria)&&(!r.dia||new Date(s.date+'T12:00:00').getDate()===parseInt(r.dia,10));});
+      return '💸 Saídas '+periodoTxt+(r.categoria?' em '+r.categoria:'')+(r.dia?' no dia '+r.dia:'')+': '+fmtTxt(sum(sai))+' ('+sai.length+' lançamento'+(sai.length===1?'':'s')+')';
   }
   if(r.tipo==='parcelas'){
     if(isFree()) return '📋 Contas parceladas é um recurso do plano Pro.';
