@@ -773,6 +773,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
   .table-wrap { display: none !important; } .mobile-cards { display: block !important; }
   .field-row { grid-template-columns: 1fr; } .auth-card { padding: 40px 28px; } .auth-field input { padding: 15px 16px; font-size: 16px; } .auth-btn { padding: 16px; font-size: 16px; }
   .bottom-nav { display: flex !important; background: var(--s1); border-top: 1px solid var(--border); padding: 8px 0 env(safe-area-inset-bottom, 20px); position: fixed; bottom: 0; left: 0; right: 0; z-index: 95; }
+  .iris-fab { display: none; }
   .bn-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 4px; border: none; background: none; cursor: pointer; color: var(--t3); font-size: 11px; font-weight: 500; font-family: inherit; transition: color .15s; }
   .bn-item.active { color: var(--teal); } .bn-item .mi { font-size: 26px; }
   .bn-fab { flex: 1; display: flex; align-items: center; justify-content: center; border: none; background: none; padding: 0; cursor: pointer; margin-top: -26px; -webkit-tap-highlight-color: transparent; }
@@ -1291,6 +1292,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
       </button>
     </div>
   </div>
+  <button class="iris-fab" onclick="abrirIris()" id="irisFab"><span class="mi">auto_awesome</span></button>
 </div>
 
 <!-- ASSISTENTE BOLSO INTELIGENTE -->
