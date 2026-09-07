@@ -3714,7 +3714,7 @@ function rCredito(){
   if(ccv){
     var last4=cart&&cart.id?String(cart.id).replace(/\D/g,'').slice(-4).padStart(4,'0'):'••••';
     ccv.innerHTML=
-      '<div class="ccv-top"><span>FINTRACK</span><span>'+(cart?esc(cart.nome).toUpperCase():'TODOS OS CARTÕES')+'</span></div>'+
+      '<div class="ccv-top"><span>BOLSO INTELIGENTE</span><span>'+(cart?esc(cart.nome).toUpperCase():'TODOS OS CARTÕES')+'</span></div>'+
       '<div class="ccv-number">•••• •••• •••• '+last4+'</div>'+
       '<div class="ccv-bottom">'+
       '<div><div class="ccv-label">Fatura atual</div><div class="ccv-val">'+fmt(fatAtual)+'</div></div>'+
