@@ -3344,7 +3344,7 @@ function irisNoPeriodo(dateStr, periodo){
       var diaGf=parseInt(gf.dia,10)||1;
       if(!irisDiaBate(diaGf, alvo)) return;
       if(categoria&&gf.cat!==categoria) return;
-      itens.push({desc:gf.desc, val:parseFloat(gf.val)||0, grupo:'Gasto Fixo', pago:irisFixoPago(d,gf,alvo)});
+      itens.push({desc:gf.desc, val:parseFloat(gf.val)||0, grupo:'Gasto Fixo', pago:irisFixoPago(d,gf,alvo), data:new Date(alvo.ano, alvo.mes, diaGf, 12,0,0)});
   });
     (d.parc||[]).forEach(function(p){
       if(p.st!=='ativo') return;
@@ -3353,7 +3353,7 @@ function irisNoPeriodo(dateStr, periodo){
         if(!irisMesAnoBate(par.date, alvo)) return;
         var dd=new Date(par.date+'T12:00:00');
         if(!irisDiaBate(dd.getDate(), alvo)) return;
-        itens.push({desc:p.name+' ('+(idx+1)+'/'+p.pars.length+')', val:parseFloat(par.val)||0, grupo:'Parcela', pago:!!par.pg});
+        itens.push({desc:p.name+' ('+(idx+1)+'/'+p.pars.length+')', val:parseFloat(par.val)||0, grupo:'Parcela', pago:!!par.pg, data:new Date(par.date+'T12:00:00')});
   });
   });
     (d.cartoes||[]).forEach(function(c){
@@ -3362,7 +3362,7 @@ function irisNoPeriodo(dateStr, periodo){
       var total=(d.gastos_credito||[]).filter(function(g){return g.cartao_id===c.id&&irisMesAnoBate(g.date,alvo);}).reduce(function(a,g){return a+parseFloat(g.val||0);},0);
       if(total<=0) return;
       var key='fat_'+alvo.ano+'_'+alvo.mes+'_'+c.id;
-      itens.push({desc:'Fatura '+c.nome, val:total, grupo:'Cartão', pago:(d.faturas||{})[key]==='paga'});
+      itens.push({desc:'Fatura '+c.nome, val:total, grupo:'Cartão', pago:(d.faturas||{})[key]==='paga', data:new Date(alvo.ano, alvo.mes, vencDia, 12,0,0)});
   });
     (d.sai||[]).forEach(function(s){
       if(s.obs==='Gasto fixo'||s.ori==='Parcela'||s.ori==='Fatura') return; // já contado acima, evita duplicidade
@@ -3370,9 +3370,16 @@ function irisNoPeriodo(dateStr, periodo){
       var dd=new Date(s.date+'T12:00:00');
       if(!irisDiaBate(dd.getDate(), alvo)) return;
       if(categoria&&s.cat!==categoria) return;
-      itens.push({desc:s.desc||s.cat||'Saída', val:parseFloat(s.val)||0, grupo:'Gasto Variável', pago:true});
+      itens.push({desc:s.desc||s.cat||'Saída', val:parseFloat(s.val)||0, grupo:'Gasto Variável', pago:true, data:new Date(s.date+'T12:00:00')});
   });
     return itens;
+  }
+
+  // Verifica se a data de vencimento de um item ja passou (compara so a data, ignorando hora) e ainda não foi paga.
+  function irisEhVencida(itemData){
+    var hoje=new Date(); hoje.setHours(0,0,0,0);
+    var d2=new Date(itemData); d2.setHours(0,0,0,0);
+    return d2.getTime() < hoje.getTime();
   }
 
   // Remove da lista itens cujo texto (desc, ou o texto indicado por pegaDesc) contém algum dos termos de exclusão
@@ -3514,15 +3521,20 @@ function irisNoPeriodo(dateStr, periodo){
     if(r.tipo==='geral'){
       var itensG=irisItensObrigacao(d, alvo, r.categoria||null);
       if(r.status==='pago') itensG=itensG.filter(function(x){return x.pago;});
+      else if(r.status==='vencido') itensG=itensG.filter(function(x){return !x.pago && irisEhVencida(x.data);});
       else itensG=itensG.filter(function(x){return !x.pago;}); // default: pendente
       itensG=irisExcluiPorNome(itensG, r.excluir);
       var rotuloG=alvo.dia!=null?irisFormatarAlvo(alvo):periodoTxt;
-      if(!itensG.length) return '💰 Não encontrei nada '+(r.status==='pago'?'pago':'pendente')+' '+rotuloG+'.';
+      if(!itensG.length) return '💰 Não encontrei nada '+(r.status==='pago'?'pago':r.status==='vencido'?'vencido':'pendente')+' '+rotuloG+'.';
       var porGrupo={};
       itensG.forEach(function(x){ porGrupo[x.grupo]=(porGrupo[x.grupo]||0)+x.val; });
       var linhasGrupo=Object.keys(porGrupo).map(function(g){return g+': '+fmtTxt(porGrupo[g]);});
       var linhasItens=itensG.map(function(x){return '• '+x.desc+' — '+fmtTxt(x.val)+' ('+x.grupo+')';});
       var totalGeral=itensG.reduce(function(s,x){return s+x.val;},0);
+      if(r.status==='vencido'){
+        var plural=itensG.length!==1;
+        return '⏰ Você tem '+itensG.length+' conta'+(plural?'s':'')+' vencida'+(plural?'s':'')+' '+rotuloG+' (já passou do vencimento e ainda não '+(plural?'foram pagas':'foi paga')+'), totalizando '+fmtTxt(totalGeral)+(r.excluir&&r.excluir.length?' (desconsiderando '+r.excluir.join(', ')+')':'')+':\n'+linhasItens.join('\n')+'\n\n'+linhasGrupo.join(' · ');
+  }
       return '💰 Você tem '+fmtTxt(totalGeral)+' '+(r.status==='pago'?'pago':'pra pagar')+' '+rotuloG+(r.excluir&&r.excluir.length?' (desconsiderando '+r.excluir.join(', ')+')':'')+':\n'+linhasItens.join('\n')+'\n\n'+linhasGrupo.join(' · ');
   }
     return 'Não consegui buscar essa informação agora.';
