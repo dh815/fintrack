@@ -1753,6 +1753,7 @@ function showApp(n){
   if(g('topAvatar')) g('topAvatar').textContent=n.charAt(0).toUpperCase();
   fdb.ref('accounts/'+S.user).once('value').then(function(snap){
     var acc=snap.val()||{};
+    S.foto=acc.foto||'';
     var isAdmin=(acc.role==='admin');
     var adminDiv=g('adminButtons');
     if(adminDiv) adminDiv.style.display=isAdmin?'block':'none';
@@ -2883,6 +2884,7 @@ function saveCreateAccess(){
 function rPerfil(){
   fdb.ref('accounts/'+S.user).once('value').then(function(snap){
     var acc=snap.val()||{};
+    S.foto=acc.foto||'';
     if(g('perfil-nome')) g('perfil-nome').textContent=acc.n||S.user;
     if(g('perfil-user')) g('perfil-user').textContent=S.user;
     if(g('p-nome')) g('p-nome').value=acc.n||'';
@@ -3122,7 +3124,8 @@ function irisRender(){
         +'<button class="btn btn-ghost btn-sm" onclick="irisCancelDraft('+i+')"><span class="mi" style="font-size:14px">close</span>Cancelar</button>'
         +'</div>';
     }
-    return '<div class="iris-row '+who+'"><div class="iris-avatar"><span class="mi">'+ico+'</span></div><div class="iris-msg '+who+'">'+esc(m.text)+acoes+'</div></div>';
+    var avHtml=(who==='user' && S.foto) ? ('<img src="'+esc(S.foto)+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">') : ('<span class="mi">'+ico+'</span>');
+    return '<div class="iris-row '+who+'"><div class="iris-avatar">'+avHtml+'</div><div class="iris-msg '+who+'">'+esc(m.text)+acoes+'</div></div>';
   }).join('');
   box.scrollTop=box.scrollHeight;
 }
@@ -3549,7 +3552,7 @@ window.addEventListener('load',function(){
     fdb.ref('accounts/'+s).once('value').then(function(snap){
       var acc=snap.val();
       if(acc){
-        S.accName=acc.n; S.isAdmin=(acc.role==='admin'); S.role=acc.role||'free';
+        S.accName=acc.n; S.isAdmin=(acc.role==='admin'); S.role=acc.role||'free'; S.foto=acc.foto||'';
         g('loginScreen').style.display='none';
         if(acc.firstAccess){ g('changePassScreen').style.display='flex'; updMonth(); return; }
         loadUD(function(data){
@@ -3964,6 +3967,7 @@ function uploadFoto(input){
     if(data.secure_url){
       // Salva URL no Firebase
       return fdb.ref('accounts/'+S.user+'/foto').set(data.secure_url).then(function(){
+        S.foto=data.secure_url;
         // Atualiza avatar na tela
         var av = g('perfil-avatar');
         if(av) av.innerHTML = '<img src="'+data.secure_url+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
