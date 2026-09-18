@@ -2478,8 +2478,8 @@ function rParc(){
     var borderCol=atrasada?'var(--red)':p.st==='quitado'?'var(--teal)':'var(--border)';
     return '<div class="mc-item" style="border-left:3px solid '+borderCol+'">'+
       '<div class="mc-top">'+
-        '<div><div class="mc-name">'+esc(p.name)+'</div>'+
-        '<div class="mc-sub"><span class="badge bg-yellow">'+esc(p.cat)+'</span><span class="badge '+(p.st==='ativo'?'bg-blue':p.st==='quitado'?'bg-teal':'bg-red')+'">'+p.st+'</span></div></div>'+
+        '<div style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" class="parc-chk" data-id="'+escq(p.id)+'" '+(parcSel.has(p.id)?'checked':'')+' onchange="toggleParcSel(\''+escq(p.id)+'\',this.checked)" style="margin-top:4px;flex-shrink:0"><div><div class="mc-name">'+esc(p.name)+'</div>'+
+        '<div class="mc-sub"><span class="badge bg-yellow">'+esc(p.cat)+'</span><span class="badge '+(p.st==='ativo'?'bg-blue':p.st==='quitado'?'bg-teal':'bg-red')+'">'+p.st+'</span></div></div></div>'+
         '<div style="text-align:right"><div class="mc-val" style="color:var(--yellow)">'+fmt(p.tot)+'</div>'+(valMes>0?'<div style="font-size:11px;color:var(--t3)">'+fmt(valMes)+'/mês</div>':'')+'</div>'+
       '</div>'+
       '<div class="mc-prog"><div class="mc-pf" style="width:'+pct+'%;background:var(--blue)"></div></div>'+
@@ -2530,6 +2530,7 @@ function rParc(){
 }
 function toggleParcSel(id,checked){
   if(checked) parcSel.add(id); else parcSel.delete(id);
+  document.querySelectorAll('.parc-chk[data-id="'+id+'"]').forEach(function(c){ c.checked=checked; });
   var chks=document.querySelectorAll('#tb-parc .parc-chk');
   var totalChk=chks.length, checkedCount=0;
   chks.forEach(function(c){ if(c.checked) checkedCount++; });
@@ -2546,6 +2547,7 @@ function toggleParcSelAll(checked){
     var id=c.getAttribute('data-id');
     c.checked=checked;
     if(checked) parcSel.add(id); else parcSel.delete(id);
+    document.querySelectorAll('#mc-parc .parc-chk[data-id="'+id+'"]').forEach(function(m){ m.checked=checked; });
   });
   updateParcSelInfo();
 }
