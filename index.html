@@ -2556,9 +2556,12 @@ function updateParcSelInfo(){
   if(!el) return;
   if(!parcSel.size){ el.style.display='none'; el.innerHTML=''; return; }
   var d=ud(); var soma=0;
-  if(d&&d.parc) d.parc.forEach(function(p){ if(parcSel.has(p.id)) soma+=parseFloat(p.tot||0); });
+  if(d&&d.parc) d.parc.forEach(function(p){
+    if(!parcSel.has(p.id)) return;
+    soma+=p.pars.filter(function(x){return !x.pg&&inM(x.date);}).reduce(function(a,x){return a+parseFloat(x.val||0);},0);
+  });
   el.style.display='';
-  el.innerHTML=parcSel.size+' selecionada(s) — Total selecionado: '+fmt(soma);
+  el.innerHTML=parcSel.size+' selecionada(s) — Total selecionado (mês atual): '+fmt(soma);
 }
 function pgParc(id){
   var d=ud();
