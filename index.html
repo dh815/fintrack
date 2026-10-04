@@ -3971,28 +3971,7 @@ function delGastoCredito(id){
     sud(d,function(){toast('Excluido.','ok');rCredito();});
   });
 }
-function abrirScannerCredito(){
-  var d=ud(); if(!d) return;
-  if(!d.cartoes||d.cartoes.length===0){toast('Crie um cartao primeiro!','err');openModalNovoCartao();return;}
-  S.etype='scanner_credito'; abrirScanner();
-}
 
-
-
-
-
-
-
-function editGastoCredito(id){
-  var d=ud(); var it=(d.gastos_credito||[]).find(function(x){return x.id===id;});
-}
-function delGastoCredito(id){
-  cf('Excluir gasto?','Nao pode ser desfeito.',function(){
-    var d=ud();
-    d.gastos_credito=(d.gastos_credito||[]).filter(function(x){return x.id!==id;});
-    sud(d,function(){toast('Excluido.','ok');rCredito();});
-  });
-}
 function abrirScannerCredito(){
   var d=ud(); if(!d) return;
   if(!d.cartoes||d.cartoes.length===0){toast('Crie um cartao primeiro!','err');openModalNovoCartao();return;}
