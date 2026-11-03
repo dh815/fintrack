@@ -525,6 +525,50 @@ body {
 .panel-title { font-size: 13px; font-weight: 700; color: var(--t1); letter-spacing: -.1px; }
 .panel-actions { display: flex; gap: 8px; align-items: center; }
 
+/* ===== GRÁFICOS DO DASHBOARD ===== */
+.dash-charts { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-bottom: 16px; align-items: stretch; }
+.dash-charts .panel { margin-bottom: 0; display: flex; flex-direction: column; min-width: 0; }
+.panel-sub { font-weight: 500; color: var(--t3); font-size: 12px; }
+.chart-body { padding: 18px 20px 20px; flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 16px; min-width: 0; }
+.chart-leg { display: flex; gap: 14px; font-size: 11px; color: var(--t2); }
+.chart-leg span { display: inline-flex; align-items: center; gap: 6px; }
+.chart-leg i { width: 8px; height: 8px; border-radius: 3px; display: inline-block; }
+.dch { display: block; max-width: none; }
+.dch-wrap { position: relative; width: 100%; }
+.dch-bar { touch-action: pan-y; cursor: crosshair; }
+.ch-tip { position: absolute; top: 2px; display: none; pointer-events: none; z-index: 3; background: #0B1623; border: 1px solid var(--border2); border-radius: 10px; padding: 9px 12px; font-size: 11px; color: var(--t2); line-height: 1.6; white-space: nowrap; box-shadow: 0 10px 28px rgba(0,0,0,.45); }
+.ch-tip .tip-h { font-weight: 700; color: var(--t1); margin-bottom: 2px; }
+.ch-tip .tip-r { display: flex; align-items: center; gap: 6px; }
+.ch-tip .tip-r i { width: 8px; height: 8px; border-radius: 3px; flex-shrink: 0; }
+.ch-tip .tip-r b { margin-left: auto; padding-left: 14px; color: var(--t1); font-weight: 700; }
+.ch-tip .tip-s { border-top: 1px solid var(--border); margin-top: 3px; padding-top: 3px; }
+.bar-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; border-top: 1px solid var(--border); padding-top: 14px; }
+.bs-item { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.bs-l { font-size: 10px; font-weight: 600; color: var(--t3); text-transform: uppercase; letter-spacing: .5px; }
+.bs-v { font-size: 14px; font-weight: 800; letter-spacing: -.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dn { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; justify-content: center; }
+.dn canvas { flex-shrink: 0; }
+.dn-leg { flex: 1 1 170px; min-width: 160px; display: flex; flex-direction: column; gap: 9px; }
+.lg-row { display: flex; flex-direction: column; gap: 5px; }
+.lg-top { display: grid; grid-template-columns: 8px minmax(0, 1fr) auto 34px; align-items: center; gap: 8px; font-size: 12px; }
+.lg-dot { width: 8px; height: 8px; border-radius: 3px; }
+.lg-n { color: var(--t2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-v { color: var(--t1); font-weight: 700; font-size: 12px; white-space: nowrap; }
+.lg-p { color: var(--t3); text-align: right; font-size: 11px; font-weight: 600; }
+.lg-bar { height: 3px; border-radius: 99px; background: rgba(255,255,255,.06); overflow: hidden; }
+.lg-bar i { display: block; height: 100%; border-radius: 99px; }
+.lg-empty { font-size: 12px; color: var(--t3); text-align: center; margin: 0; }
+@media (max-width: 1100px) {
+  .dash-charts { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .dash-charts .panel-bar { grid-column: 1 / -1; }
+}
+@media (max-width: 768px) {
+  .dash-charts { grid-template-columns: minmax(0, 1fr); gap: 12px; margin-bottom: 12px; }
+  .chart-body { padding: 14px 14px 16px; gap: 14px; }
+  .panel-sub { display: none; }
+  .bs-v { font-size: 13px; }
+}
+
 /* ===== BUTTONS ===== */
 .btn {
   display: inline-flex; align-items: center; gap: 5px;
@@ -1022,38 +1066,32 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
           <div class="metrics" id="d-metrics"></div>
           <div id="d-insights"></div>
 
-          <!-- CHART ROW 1: Carteira + Entradas x Saídas + Gastos por Categoria -->
-          <div class="chart-grid chart-grid-3">
-            <div class="panel" style="align-self:start">
+          <!-- GRÁFICOS: Entradas x Saídas + Gastos por Categoria + Carteira -->
+          <div class="dash-charts">
+            <div class="panel panel-bar">
               <div class="panel-head">
-                <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--blue)">candlestick_chart</span>Carteira de Investimentos</span>
+                <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--blue)">bar_chart</span>Entradas x Sa&#237;das <span class="panel-sub">&#183; &#250;ltimos 6 meses</span></span>
+                <span class="chart-leg"><span><i style="background:#16A34A"></i>Entradas</span><span><i style="background:#FF5E5E"></i>Sa&#237;das</span></span>
               </div>
-              <div class="chart-box-h" style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:16px;padding:16px;height:190px;box-sizing:border-box">
-                <div class="chart-wrap" style="width:100px;flex-shrink:0;margin-left:12px">
-                  <canvas id="ch-inv" width="100" height="100"></canvas>
-                </div>
-                <div class="chart-legend" style="padding:0;flex-shrink:0;width:180px;margin-right:4px" id="d-inv-legend"></div>
+              <div class="chart-body">
+                <div class="dch-wrap"><canvas id="ch-bar" class="dch dch-bar"></canvas><div class="ch-tip" id="ch-bar-tip"></div></div>
+                <div class="bar-stats" id="d-bar-stats"></div>
               </div>
             </div>
-            <div class="panel" style="align-self:start">
-              <div class="panel-head">
-                <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--blue)">bar_chart</span>Entradas x Sa&#237;das</span>
-              </div>
-              <div class="chart-box-h" style="display:flex;flex-direction:column;justify-content:center;padding:16px;height:190px;box-sizing:border-box">
-                <div class="chart-wrap">
-                  <canvas id="ch-bar" height="140"></canvas>
-                </div>
-              </div>
-            </div>
-            <div class="panel" style="align-self:start">
+            <div class="panel">
               <div class="panel-head">
                 <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--purple)">donut_large</span>Gastos por Categoria</span>
               </div>
-              <div style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:16px;padding:16px;height:290px;box-sizing:border-box">
-                <div class="chart-wrap" style="width:100px;flex-shrink:0;margin-left:12px">
-                  <canvas id="ch-donut" width="100" height="100"></canvas>
-                </div>
-                <div class="chart-legend" style="padding:0;flex-shrink:0;width:180px;margin-right:4px" id="d-donut-legend"></div>
+              <div class="chart-body">
+                <div class="dn"><canvas id="ch-donut" class="dch"></canvas><div class="dn-leg" id="d-donut-legend"></div></div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--blue)">candlestick_chart</span>Carteira de Investimentos</span>
+              </div>
+              <div class="chart-body">
+                <div class="dn"><canvas id="ch-inv" class="dch"></canvas><div class="dn-leg" id="d-inv-legend"></div></div>
               </div>
             </div>
           </div>
@@ -2218,192 +2256,172 @@ function getCtx(id){
 }
 
 
-function drawDonutChart(d){
-  var ctx=getCtx('ch-donut'); if(!ctx) return;
-  var canvas=g('ch-donut');
-  canvas.width=160; canvas.height=160;
-  ctx.clearRect(0,0,160,160);
-
-  var sai=d.sai.filter(function(s){return inM(s.date);});
-  var catT={};
-  sai.forEach(function(s){catT[s.cat]=(catT[s.cat]||0)+parseFloat(s.val||0);});
-  var items=Object.entries(catT).sort(function(a,b){return b[1]-a[1];}).slice(0,6);
+// ---- GRÁFICOS DO DASHBOARD (alta resolução, responsivos) ----
+function chSetup(id,w,h){
+  var c=g(id); if(!c) return null;
+  var dpr=Math.min(window.devicePixelRatio||1,3);
+  c.style.width=w+'px'; c.style.height=h+'px';
+  c.width=Math.round(w*dpr); c.height=Math.round(h*dpr);
+  var ctx=c.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return ctx;
+}
+function chTopN(entries,n){
+  entries=entries.filter(function(x){return x[1]>0;}).sort(function(a,b){return b[1]-a[1];});
+  if(entries.length<=n) return entries;
+  var rest=entries.slice(n-1).reduce(function(a,x){return a+x[1];},0);
+  return entries.slice(0,n-1).concat([['Outros',rest]]);
+}
+function chBRL(n){ return 'R$ '+parseFloat(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function chRingVal(n){
+  n=parseFloat(n||0);
+  if(n>=1000000) return 'R$ '+(n/1000000).toFixed(1).replace('.',',')+' mi';
+  if(n>=100000) return 'R$ '+Math.round(n/1000)+' mil';
+  return 'R$ '+Math.round(n).toLocaleString('pt-BR');
+}
+function chAxis(n){ if(n>=1000){ var k=n/1000; return (k%1?k.toFixed(1).replace('.',','):String(k))+'k'; } return String(Math.round(n)); }
+function chNiceTicks(max){
+  if(!(max>0)) return {top:1000,step:250,n:4};
+  var p=Math.pow(10,Math.floor(Math.log10(max))), mult=[1,2,2.5,5,10], step=p;
+  for(var i=0;i<mult.length;i++){ step=mult[i]*p; if(Math.ceil(max/step)<=4) break; }
+  var n=Math.ceil(max/step); return {top:step*n,step:step,n:n};
+}
+function chRing(id,size,items,cols,label,valTxt){
+  var ctx=chSetup(id,size,size); if(!ctx) return;
+  var cx=size/2, cy=size/2, lw=Math.round(size*0.16), r=size/2-lw/2-2;
+  ctx.lineWidth=lw; ctx.lineCap='butt';
+  ctx.strokeStyle='rgba(255,255,255,.07)'; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
   var total=items.reduce(function(a,x){return a+x[1];},0);
-
-  if(!items.length||total===0){
-    ctx.fillStyle='rgba(255,255,255,.1)';
-    ctx.beginPath(); ctx.arc(80,80,60,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(80,80,36,0,Math.PI*2); ctx.fillStyle='#0D1117'; ctx.fill();
-    ctx.fillStyle='rgba(255,255,255,.2)'; ctx.font='10px Inter'; ctx.textAlign='center';
-    ctx.fillText('Sem dados',80,84);
-    g('d-donut-legend').innerHTML='<p style="font-size:11px;color:var(--t3)">Sem saídas</p>';
-    return;
+  if(total>0){
+    var gap=items.length>1?0.035:0, st=-Math.PI/2;
+    items.forEach(function(it,i){
+      var sl=it[1]/total*Math.PI*2;
+      if(sl>gap){ ctx.strokeStyle=cols[i]; ctx.beginPath(); ctx.arc(cx,cy,r,st+gap/2,st+sl-gap/2); ctx.stroke(); }
+      st+=sl;
+    });
   }
-
-  var startAngle=-Math.PI/2;
-  items.forEach(function(item,i){
-    var slice=item[1]/total*Math.PI*2;
-    ctx.beginPath();
-    ctx.moveTo(80,80);
-    ctx.arc(80,80,72,startAngle,startAngle+slice);
-    ctx.closePath();
-    ctx.fillStyle=COLORS[i%COLORS.length];
-    ctx.fill();
-    startAngle+=slice;
-  });
-  // Donut hole
-  ctx.beginPath(); ctx.arc(80,80,40,0,Math.PI*2);
-  ctx.fillStyle='#0D1117'; ctx.fill();
-  // Center text
-  ctx.fillStyle='rgba(255,255,255,.8)'; ctx.font='bold 11px Inter'; ctx.textAlign='center';
-  ctx.fillText('Gastos',80,78);
-  ctx.font='10px Inter'; ctx.fillStyle='rgba(255,255,255,.4)';
-  ctx.fillText(items.length+' cats',80,92);
-
-  // Legend
-  g('d-donut-legend').innerHTML=items.map(function(item,i){
-    var pct=(item[1]/total*100).toFixed(0);
-    return '<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:8px;width:100%">'+
-      '<div style="width:8px;height:8px;border-radius:50%;background:'+COLORS[i%COLORS.length]+';flex-shrink:0;margin-top:4px"></div>'+
-      '<div style="flex:1;min-width:0">'+
-      '<div style="font-size:11px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(item[0])+'</div>'+
-      '<div style="font-size:11px;font-weight:700;color:var(--t1)">'+fmtTxt(item[1])+' <span style="color:var(--t3);font-weight:500">('+pct+'%)</span></div>'+
-      '</div></div>';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle='rgba(255,255,255,.45)'; ctx.font='500 11px Inter, sans-serif';
+  ctx.fillText(label,cx,cy-11);
+  ctx.fillStyle='#F0F4F8'; ctx.font='800 '+(valTxt.length>9?14:17)+'px Inter, sans-serif';
+  ctx.fillText(valTxt,cx,cy+9);
+}
+function chLegend(items,cols,total){
+  return items.map(function(it,i){
+    var pct=total>0?it[1]/total*100:0;
+    return '<div class="lg-row"><div class="lg-top"><i class="lg-dot" style="background:'+cols[i]+'"></i><span class="lg-n">'+esc(it[0])+'</span><b class="lg-v">'+chBRL(it[1])+'</b><span class="lg-p">'+pct.toFixed(0)+'%</span></div>'+
+      '<div class="lg-bar"><i style="width:'+pct.toFixed(1)+'%;background:'+cols[i]+'"></i></div></div>';
   }).join('');
 }
+function chColors(items,palette){
+  return items.map(function(it,i){ return it[0]==='Outros'?'#64748B':palette[i%palette.length]; });
+}
 
-function drawBarChart(d){
-  var ctx=getCtx('ch-bar'); if(!ctx) return;
-  var canvas=g('ch-bar');
-  var W=canvas.width, H=canvas.height=140; canvas.style.height='140px';
-  ctx.clearRect(0,0,W,H);
-
-  // 6 meses — entradas e saídas separadas (não o saldo líquido)
-  var months=[];
-  for(var i=5;i>=0;i--){
-    var m=S.month-i; var y=S.year;
-    while(m<0){m+=12;y--;}
-    months.push({m:m,y:y,label:MONTHS[m].slice(0,3),tE:0,tS:0});
-  }
-  d.ent.forEach(function(e){
-    var dd=new Date(e.date+'T12:00:00');
-    months.forEach(function(mo){if(dd.getMonth()===mo.m&&dd.getFullYear()===mo.y) mo.tE+=parseFloat(e.val||0);});
-  });
-  d.sai.forEach(function(s){
-    var dd=new Date(s.date+'T12:00:00');
-    months.forEach(function(mo){if(dd.getMonth()===mo.m&&dd.getFullYear()===mo.y) mo.tS+=parseFloat(s.val||0);});
-  });
-  var maxVal=Math.max.apply(null, months.map(function(mo){return Math.max(mo.tE,mo.tS);}));
-  if(maxVal===0) maxVal=1000;
-
-  var pad={t:38,r:16,b:32,l:60};
-  var cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
-  var n=months.length;
-  var groupW=cW/n;
-  var barW=groupW*0.26;
-  var gap=groupW*0.18;
-  var baseY=pad.t+cH;
-
-  // Grid
-  ctx.strokeStyle='rgba(255,255,255,.1)'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(pad.l,baseY); ctx.lineTo(pad.l+cW,baseY); ctx.stroke();
-  ctx.strokeStyle='rgba(255,255,255,.04)';
-  ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l+cW,pad.t); ctx.stroke();
-
-  // Y labels
-  ctx.fillStyle='rgba(255,255,255,.25)'; ctx.font='10px Inter'; ctx.textAlign='right';
-  ctx.fillText(fmtK(maxVal),pad.l-6,pad.t+4);
-  ctx.fillText('0',pad.l-6,baseY+4);
-
-  function roundBar(x,y,w,h,col){
-    if(h<=0) return;
-    var r2=Math.min(4,w/2,h);
-    ctx.beginPath();
-    ctx.moveTo(x+r2,y); ctx.lineTo(x+w-r2,y);
-    ctx.quadraticCurveTo(x+w,y,x+w,y+r2);
-    ctx.lineTo(x+w,y+h); ctx.lineTo(x,y+h);
-    ctx.lineTo(x,y+r2); ctx.quadraticCurveTo(x,y,x+r2,y);
-    ctx.closePath();
-    var grad2=ctx.createLinearGradient(0,y,0,y+h);
-    grad2.addColorStop(0,col[0]); grad2.addColorStop(1,col[1]);
-    ctx.fillStyle=grad2; ctx.fill();
-  }
-
-  // Bars
-  months.forEach(function(mo,i){
-    var gx=pad.l+i*groupW+(groupW-(barW*2+gap))/2;
-    var hE=mo.tE/maxVal*cH, hS=mo.tS/maxVal*cH;
-    roundBar(gx, baseY-hE, barW, hE, ['#16A34A','#0F7A37']);
-    roundBar(gx+barW+gap, baseY-hS, barW, hS, ['#FF7B7B','#FF5E5E']);
-    // Valores em cima de cada barra
-    if(mo.tE>0){
-      ctx.fillStyle='#16A34A'; ctx.font='bold 7px Inter'; ctx.textAlign='center';
-      ctx.fillText(fmtK(mo.tE), gx+barW/2, baseY-hE-6);
-    }
-    if(mo.tS>0){
-      ctx.fillStyle='#FF5E5E'; ctx.font='bold 7px Inter'; ctx.textAlign='center';
-      ctx.fillText(fmtK(mo.tS), gx+barW+gap+barW/2, baseY-hS-6);
-    }
-    // X label
-    ctx.fillStyle='rgba(255,255,255,.3)'; ctx.font='10px Inter'; ctx.textAlign='center';
-    ctx.fillText(mo.label,gx+barW+gap/2,H-8);
-  });
-
-  // Legend (mesmo padrão do gráfico de linha)
-  ctx.fillStyle='#16A34A'; ctx.fillRect(pad.l,8,18,3);
-  ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='10px Inter'; ctx.textAlign='left';
-  ctx.fillText('Entradas',pad.l+22,11);
-  ctx.fillStyle='#FF5E5E'; ctx.fillRect(pad.l+90,8,18,3);
-  ctx.fillStyle='rgba(255,255,255,.5)';
-  ctx.fillText('Saídas',pad.l+112,11);
+function drawDonutChart(d){
+  var catT={};
+  (d.sai||[]).filter(function(s){return inM(s.date);}).forEach(function(s){ var k=s.cat||'Outros'; catT[k]=(catT[k]||0)+parseFloat(s.val||0); });
+  var items=chTopN(Object.keys(catT).map(function(k){return [k,catT[k]];}),6);
+  var total=items.reduce(function(a,x){return a+x[1];},0);
+  var cols=chColors(items,COLORS);
+  chRing('ch-donut',window.innerWidth<=768?150:160,items,cols,total>0?'Total gasto':'Gastos',total>0?chRingVal(total):'Sem dados');
+  g('d-donut-legend').innerHTML=items.length?chLegend(items,cols,total):'<p class="lg-empty">Nenhuma saída registrada neste mês.</p>';
 }
 
 function drawInvChart(d){
-  var ctx=getCtx('ch-inv'); if(!ctx) return;
-  var canvas=g('ch-inv');
-  canvas.width=160; canvas.height=160;
-  ctx.clearRect(0,0,160,160);
-
-  // Group by type
   var invT={};
-  d.inv.forEach(function(i){invT[i.type]=(invT[i.type]||0)+parseFloat(i.val||0);});
-  var items=Object.entries(invT).sort(function(a,b){return b[1]-a[1];});
+  (d.inv||[]).forEach(function(i){ var k=i.type||'Outros'; invT[k]=(invT[k]||0)+parseFloat(i.val||0); });
+  var items=chTopN(Object.keys(invT).map(function(k){return [k,invT[k]];}),6);
   var total=items.reduce(function(a,x){return a+x[1];},0);
-
-  if(!items.length||total===0){
-    ctx.fillStyle='rgba(255,255,255,.1)';
-    ctx.beginPath(); ctx.arc(80,80,60,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(80,80,36,0,Math.PI*2); ctx.fillStyle='#0D1117'; ctx.fill();
-    ctx.fillStyle='rgba(255,255,255,.2)'; ctx.font='10px Inter'; ctx.textAlign='center';
-    ctx.fillText('Sem dados',80,84);
-    g('d-inv-legend').innerHTML='<p style="font-size:11px;color:var(--t3)">Nenhum investimento</p>';
-    return;
-  }
-
-  var invColors=['#4D9CFF','#A78BFA','#16A34A','#FBBF24','#F06292','#4DB6AC','#FF8A65','#80CBC4'];
-  var startAngle=-Math.PI/2;
-  items.forEach(function(item,i){
-    var slice=item[1]/total*Math.PI*2;
-    ctx.beginPath(); ctx.moveTo(80,80);
-    ctx.arc(80,80,72,startAngle,startAngle+slice);
-    ctx.closePath(); ctx.fillStyle=invColors[i%invColors.length]; ctx.fill();
-    startAngle+=slice;
-  });
-  ctx.beginPath(); ctx.arc(80,80,40,0,Math.PI*2);
-  ctx.fillStyle='#0D1117'; ctx.fill();
-  ctx.fillStyle='rgba(255,255,255,.8)'; ctx.font='bold 10px Inter'; ctx.textAlign='center';
-  ctx.fillText('Carteira',80,78);
-  ctx.font='10px Inter'; ctx.fillStyle='rgba(255,255,255,.4)';
-  ctx.fillText(fmtK(total),80,92);
-
-  g('d-inv-legend').innerHTML=items.map(function(item,i){
-    var pct=(item[1]/total*100).toFixed(0);
-    return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;width:100%">'+
-      '<div style="width:8px;height:8px;border-radius:50%;background:'+invColors[i%invColors.length]+';flex-shrink:0"></div>'+
-      '<span style="flex:1;font-size:11px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(item[0])+'</span>'+
-      '<span style="font-size:11px;font-weight:700;color:var(--t1)">'+pct+'%</span></div>';
-  }).join('');
+  var cols=chColors(items,['#4D9CFF','#A78BFA','#16A34A','#FBBF24','#F06292','#4DB6AC','#FF8A65','#80CBC4']);
+  chRing('ch-inv',window.innerWidth<=768?150:160,items,cols,total>0?'Patrimônio':'Carteira',total>0?chRingVal(total):'Sem dados');
+  g('d-inv-legend').innerHTML=items.length?chLegend(items,cols,total):'<p class="lg-empty">Nenhum investimento cadastrado.</p>';
 }
+
+function drawBarChart(d){
+  var c=g('ch-bar'); if(!c) return;
+  var W=Math.max(240,Math.floor(c.parentElement.clientWidth)), H=window.innerWidth<=768?210:250;
+  var months=[];
+  for(var i=5;i>=0;i--){ var m=S.month-i, y=S.year; while(m<0){m+=12;y--;} months.push({m:m,y:y,tE:0,tS:0}); }
+  function acc(arr,k){ (arr||[]).forEach(function(x){ var dd=new Date(x.date+'T12:00:00'); months.forEach(function(mo){ if(dd.getMonth()===mo.m&&dd.getFullYear()===mo.y) mo[k]+=parseFloat(x.val||0); }); }); }
+  acc(d.ent,'tE'); acc(d.sai,'tS');
+  var maxVal=Math.max.apply(null,months.map(function(mo){return Math.max(mo.tE,mo.tS);}));
+  var tk=chNiceTicks(maxVal);
+  var pad={t:12,r:8,b:26,l:W<380?36:42}, cW=W-pad.l-pad.r, cH=H-pad.t-pad.b, n=months.length, gW=cW/n;
+  var bW=Math.max(6,Math.min(20,gW*0.30)), bGap=Math.max(3,Math.min(5,gW*0.06));
+  var baseY=pad.t+cH, sel=n-1, tip=g('ch-bar-tip');
+
+  function rbar(ctx,x,y,w,h,c1,c2,alpha){
+    if(h<=0) return;
+    var r=Math.min(4,w/2,h);
+    ctx.globalAlpha=alpha;
+    ctx.beginPath(); ctx.moveTo(x,y+h); ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+    ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r); ctx.lineTo(x+w,y+h); ctx.closePath();
+    var gr=ctx.createLinearGradient(0,y,0,y+h); gr.addColorStop(0,c1); gr.addColorStop(1,c2);
+    ctx.fillStyle=gr; ctx.fill(); ctx.globalAlpha=1;
+  }
+  function render(hov){
+    var ctx=chSetup('ch-bar',W,H); if(!ctx) return;
+    [sel,hov].forEach(function(k,j){
+      if(k<0) return;
+      ctx.fillStyle=j===0?'rgba(255,255,255,.035)':'rgba(255,255,255,.06)';
+      ctx.beginPath();
+      if(ctx.roundRect) ctx.roundRect(pad.l+k*gW+2,pad.t-4,gW-4,cH+8,8); else ctx.rect(pad.l+k*gW+2,pad.t-4,gW-4,cH+8);
+      ctx.fill();
+    });
+    ctx.font='500 10px Inter, sans-serif'; ctx.textBaseline='middle';
+    for(var k=0;k<=tk.n;k++){
+      var yy=baseY-(k*tk.step/tk.top)*cH;
+      ctx.setLineDash(k===0?[]:[3,4]); ctx.lineWidth=1;
+      ctx.strokeStyle=k===0?'rgba(255,255,255,.14)':'rgba(255,255,255,.06)';
+      ctx.beginPath(); ctx.moveTo(pad.l,Math.round(yy)+.5); ctx.lineTo(pad.l+cW,Math.round(yy)+.5); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle='rgba(255,255,255,.35)'; ctx.textAlign='right';
+      ctx.fillText(k===0?'0':chAxis(k*tk.step),pad.l-8,yy);
+    }
+    months.forEach(function(mo,i){
+      var gx=pad.l+i*gW+(gW-(bW*2+bGap))/2, al=(i===sel||i===hov)?1:0.62;
+      rbar(ctx,gx,baseY-mo.tE/tk.top*cH,bW,mo.tE/tk.top*cH,'#22C55E','#15803D',al);
+      rbar(ctx,gx+bW+bGap,baseY-mo.tS/tk.top*cH,bW,mo.tS/tk.top*cH,'#FF7B7B','#E04848',al);
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle=(i===sel||i===hov)?'#F0F4F8':'rgba(255,255,255,.4)';
+      ctx.font=((i===sel||i===hov)?'700':'500')+' 10px Inter, sans-serif';
+      ctx.fillText(MONTHS[mo.m].slice(0,3),pad.l+i*gW+gW/2,H-10);
+    });
+  }
+  function showTip(i){
+    if(!tip) return;
+    if(i<0){ tip.style.display='none'; return; }
+    var mo=months[i], bal=mo.tE-mo.tS;
+    tip.innerHTML='<div class="tip-h">'+MONTHS[mo.m]+' '+mo.y+'</div>'+
+      '<div class="tip-r"><i style="background:#16A34A"></i>Entradas<b>'+chBRL(mo.tE)+'</b></div>'+
+      '<div class="tip-r"><i style="background:#FF5E5E"></i>Saídas<b>'+chBRL(mo.tS)+'</b></div>'+
+      '<div class="tip-r tip-s">Saldo<b style="color:'+(bal>=0?'#16A34A':'#FF5E5E')+'">'+(bal<0?'-':'')+chBRL(Math.abs(bal))+'</b></div>';
+    tip.style.display='block';
+    var left=pad.l+i*gW+gW/2-tip.offsetWidth/2;
+    tip.style.left=Math.max(0,Math.min(W-tip.offsetWidth,left))+'px';
+  }
+  function idxAt(cx){ var r=c.getBoundingClientRect(), x=cx-r.left-pad.l, i=Math.floor(x/gW); return (x<0||i<0||i>=n)?-1:i; }
+  c.onmousemove=function(e){ var i=idxAt(e.clientX); render(i); showTip(i); };
+  c.onmouseleave=function(){ render(-1); showTip(-1); };
+  c.ontouchstart=c.ontouchmove=function(e){ var t=e.touches[0]; if(!t) return; var i=idxAt(t.clientX); render(i); showTip(i); };
+  c.ontouchend=function(){ setTimeout(function(){ render(-1); showTip(-1); },2200); };
+  render(-1);
+
+  var act=months.filter(function(mo){return mo.tE>0||mo.tS>0;});
+  var sE=months.reduce(function(a,mo){return a+mo.tE;},0), sS=months.reduce(function(a,mo){return a+mo.tS;},0);
+  var avgE=act.length?sE/act.length:null, avgS=act.length?sS/act.length:null, bal6=sE-sS;
+  g('d-bar-stats').innerHTML=
+    '<div class="bs-item"><span class="bs-l">Média entradas</span><b class="bs-v" style="color:var(--teal)">'+(avgE==null?'—':chBRL(avgE))+'</b></div>'+
+    '<div class="bs-item"><span class="bs-l">Média saídas</span><b class="bs-v" style="color:var(--red)">'+(avgS==null?'—':chBRL(avgS))+'</b></div>'+
+    '<div class="bs-item"><span class="bs-l">Saldo 6 meses</span><b class="bs-v" style="color:'+(bal6>=0?'var(--teal)':'var(--red)')+'">'+(act.length?(bal6<0?'-':'')+chBRL(Math.abs(bal6)):'—')+'</b></div>';
+}
+var _chRzT;
+window.addEventListener('resize',function(){
+  clearTimeout(_chRzT);
+  _chRzT=setTimeout(function(){
+    var pg=g('page-dashboard'); if(!pg||!pg.classList.contains('active')||!g('ch-bar')) return;
+    var d=ud(); if(!d) return; drawDonutChart(d); drawBarChart(d); drawInvChart(d);
+  },180);
+});
 
 function fmtK(n){
   n=parseFloat(n||0);
