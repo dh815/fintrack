@@ -1102,7 +1102,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
           <div class="panel">
             <div class="panel-head">
               <span class="panel-title">Entradas</span>
-              <button class="btn btn-primary" onclick="openModal('entrada',null)">+ Nova entrada</button>
+              <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="abrirExtrato()" style="display:flex;align-items:center;gap:6px"><span class="mi" style="font-size:15px">upload_file</span>Importar extrato</button><button class="btn btn-primary" onclick="openModal('entrada',null)">+ Nova entrada</button></div>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--border)"><input id="ent-busca" oninput="rEnt()" placeholder="&#128269; Buscar..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><select id="ent-cat" onchange="rEnt()" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todas categorias</option></select><input id="ent-de" type="date" onchange="rEnt()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><input id="ent-ate" type="date" onchange="rEnt()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"></div>
             <div style="padding:4px 16px 6px;font-size:11px;color:var(--t3)" id="ent-info"></div>
@@ -1119,7 +1119,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
           <div class="panel">
             <div class="panel-head">
               <span class="panel-title">Sa&#237;das</span>
-              <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="abrirScanner()" style="display:flex;align-items:center;gap:6px"><span class="mi" style="font-size:15px">photo_camera</span>Escanear cupom</button><button class="btn btn-primary" onclick="openModal('saida',null)">+ Nova sa&#237;da</button></div>
+              <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="abrirExtrato()" style="display:flex;align-items:center;gap:6px"><span class="mi" style="font-size:15px">upload_file</span>Importar extrato</button><button class="btn btn-ghost" onclick="abrirScanner()" style="display:flex;align-items:center;gap:6px"><span class="mi" style="font-size:15px">photo_camera</span>Escanear cupom</button><button class="btn btn-primary" onclick="openModal('saida',null)">+ Nova sa&#237;da</button></div>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--border)"><input id="sai-busca" oninput="rSai()" placeholder="&#128269; Buscar..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><select id="sai-cat" onchange="rSai()" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todas categorias</option></select><input id="sai-de" type="date" onchange="rSai()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><input id="sai-ate" type="date" onchange="rSai()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"></div>
             <div style="padding:4px 16px 6px;font-size:11px;color:var(--t3)" id="sai-info"></div>
@@ -1452,6 +1452,22 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 </div>
 
 <!-- SCANNER CUPOM -->
+<div class="modal-wrap" id="extratoModal" style="display:none;align-items:center;justify-content:center">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-head"><span class="modal-title">Importar extrato</span><button class="modal-x" onclick="fecharExtrato()"><span class="mi" style="font-size:16px">close</span></button></div>
+    <div class="modal-body">
+      <div id="ext-up" style="border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer" onclick="document.getElementById('ext-input').click()" ondragover="event.preventDefault()" ondrop="extDrop(event)">
+        <span class="mi" style="font-size:48px;color:var(--t3);display:block;margin-bottom:12px">upload_file</span>
+        <div style="font-size:14px;font-weight:600;color:var(--t1);margin-bottom:6px">Selecione o extrato do banco</div>
+        <div style="font-size:12px;color:var(--t3)">Arquivo OFX ou CSV &middot; as movimenta&#231;&#245;es s&#227;o separadas em entradas e sa&#237;das e categorizadas automaticamente</div>
+        <input type="file" id="ext-input" accept=".ofx,.csv,.txt,.pdf" style="display:none" onchange="extLer(this.files[0])">
+      </div>
+      <div id="ext-err" style="display:none;margin-top:12px;color:var(--red);font-size:13px"></div>
+      <div id="ext-rev" style="display:none"><div id="ext-resumo" style="font-size:12px;color:var(--t2);margin-bottom:8px"></div><div id="ext-list" style="max-height:50vh;overflow:auto"></div></div>
+    </div>
+    <div class="modal-foot" id="ext-foot"></div>
+  </div>
+</div>
 <div class="modal-wrap" id="scannerModal" style="display:none;align-items:center;justify-content:center">
   <div class="modal" style="max-width:560px">
     <div class="modal-head"><span class="modal-title">&#128247; Escanear cupom</span><button class="modal-x" onclick="fecharScanner()"><span class="mi" style="font-size:16px">close</span></button></div>
@@ -3320,6 +3336,136 @@ function analisarBoletoComClaude(base64,mediaType){
   .catch(function(e){g('sb-loading').style.display='none';g('sb-error').textContent='Erro: '+e.message;g('sb-error').style.display='block';});
 }
 function salvarDoBoleto(){ var nome=g('sb-nome').value.trim(),valor=parseFloat(g('sb-valor').value),venc=g('sb-venc').value,nparc=parseInt(g('sb-parc').value)||1,vparc=parseFloat(g('sb-vparc').value)||0,cat=g('sb-cat').value; if(!nome||isNaN(valor)||!venc){toast('Preencha os campos.','err');return;} var d=ud(); if(!d) return; var vp=vparc>0?vparc:parseFloat((valor/nparc).toFixed(2)); var pars=[]; for(var i=0;i<nparc;i++){var dd=new Date(venc+'T12:00:00');dd.setMonth(dd.getMonth()+i);pars.push({seq:i+1,date:dd.toISOString().slice(0,10),val:vp,pg:false});} d.parc.push({id:uid(),name:nome,cat:cat,tot:valor,pars:pars,st:'ativo'}); sud(d,function(){fecharScannerBoleto();toast('Parcela cadastrada!','ok');if(S.page==='parcelas')rParc();if(S.page==='dashboard')rDash();}); }
+// ===== IMPORTAR EXTRATO BANCARIO =====
+var EXT={rows:[]};
+function extNorm(s){ return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(); }
+function extParseVal(s){
+  s=String(s||'').trim().replace(/[R$\s]/g,''); if(!s) return NaN;
+  var neg=/^\(.*\)$/.test(s)||/-/.test(s)||/D$/i.test(s); s=s.replace(/[()\-+CD]/gi,'');
+  if(s.indexOf(',')>-1) s=s.replace(/\./g,'').replace(',','.');
+  var v=parseFloat(s); if(isNaN(v)) return NaN; return neg?-v:v;
+}
+function extParseDate(s){
+  s=String(s||'').trim(); var m;
+  if((m=s.match(/^(\d{4})(\d{2})(\d{2})/))) return m[1]+'-'+m[2]+'-'+m[3];
+  if((m=s.match(/^(\d{4})-(\d{2})-(\d{2})/))) return m[1]+'-'+m[2]+'-'+m[3];
+  if((m=s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/))){ var y=m[3].length===2?'20'+m[3]:m[3]; return y+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[1]).slice(-2); }
+  return '';
+}
+function extParseOFX(txt){
+  var out=[], blocks=txt.split(/<STMTTRN>/i).slice(1);
+  blocks.forEach(function(b){
+    function tag(t){ var m=b.match(new RegExp('<'+t+'>([^<\\r\\n]*)','i')); return m?m[1].trim():''; }
+    var v=parseFloat(tag('TRNAMT').replace(',','.')); var dt=extParseDate(tag('DTPOSTED'));
+    var desc=(tag('MEMO')||tag('NAME')||'Movimentação').replace(/\s+/g,' ');
+    if(!isNaN(v)&&dt) out.push({date:dt,desc:desc,val:v,fid:tag('FITID')});
+  });
+  return out;
+}
+function extSplitLine(line,sep){
+  var r=[],cur='',q=false;
+  for(var i=0;i<line.length;i++){ var c=line[i];
+    if(c==='"'){ if(q&&line[i+1]==='"'){cur+='"';i++;} else q=!q; }
+    else if(c===sep&&!q){ r.push(cur); cur=''; } else cur+=c; }
+  r.push(cur); return r;
+}
+function extParseCSV(txt){
+  var lines=txt.replace(/^﻿/,'').split(/\r?\n/).filter(function(l){return l.trim();}); if(lines.length<2) return [];
+  var sc=(lines[0].match(/;/g)||[]).length, cc=(lines[0].match(/,/g)||[]).length, tc=(lines[0].match(/\t/g)||[]).length;
+  var sep=tc>sc&&tc>cc?'\t':(sc>=cc?';':',');
+  var hi=0; for(var k=0;k<Math.min(lines.length,15);k++){ var n=extNorm(lines[k]); if(/data/.test(n)&&/(valor|credito|debito|entrada|saida)/.test(n)){hi=k;break;} }
+  var hdr=extSplitLine(lines[hi],sep).map(extNorm);
+  function find(re){ for(var i=0;i<hdr.length;i++){ if(re.test(hdr[i])) return i; } return -1; }
+  var iD=find(/data/), iDesc=find(/descri|historico|lancamento|memo|estabelecimento|titulo/), iV=find(/^valor|valor \(|^montante/), iCr=find(/credito|entrada/), iDb=find(/debito|saida/), iT=find(/^tipo|natureza|d\/c/);
+  if(iD<0) iD=0; if(iDesc<0) iDesc=hdr.length>1?1:0; if(iV<0&&iCr<0&&iDb<0) iV=hdr.length-1;
+  var out=[];
+  for(var r=hi+1;r<lines.length;r++){
+    var c=extSplitLine(lines[r],sep); var dt=extParseDate(c[iD]); if(!dt) continue; var v=NaN;
+    if(iV>=0){ v=extParseVal(c[iV]); if(!isNaN(v)&&iT>=0&&/deb|saida|d$/.test(extNorm(c[iT]))&&v>0) v=-v; }
+    else { var cr=extParseVal(c[iCr]), db=extParseVal(c[iDb]); if(!isNaN(cr)&&cr!==0) v=Math.abs(cr); else if(!isNaN(db)&&db!==0) v=-Math.abs(db); }
+    if(isNaN(v)||v===0) continue;
+    out.push({date:dt,desc:String(c[iDesc]||'Movimentação').replace(/\s+/g,' ').trim(),val:v,fid:''});
+  }
+  return out;
+}
+var EXT_RULES=[
+  ['Alimentação',/ifood|rappi|restaur|lanchon|padaria|mercad|supermerc|atacad|assai|carrefour|extra |pao de acucar|açai|acai|pizza|burger|mcdonald|subway|sorvet|acougue|hortifruti|confeitar|cafe|bar /],
+  ['Transporte',/uber|99 ?pop|99app|cabify|posto|combust|shell|ipiranga|gasolina|estaciona|pedagio|sem parar|conectcar|metro|onibus|bilhete unico|ônibus/],
+  ['Moradia',/aluguel|condomin|energia|enel|cemig|cpfl|light|sabesp|copasa|agua|esgoto|gas |comgas|iptu|internet|vivo fibra|claro|net |tim |oi /],
+  ['Saúde',/farmac|drogaria|drogasil|raia|pacheco|hospital|clinica|laborat|unimed|amil|plano de saude|dentist|medic|consulta/],
+  ['Lazer',/cinema|ingresso|teatro|show|parque|viagem|hotel|airbnb|booking|decolar|steam|playstation|xbox|bar |clube/],
+  ['Educação',/escola|faculdade|curso|udemy|alura|livraria|mensalidade|universid|colegio/],
+  ['Vestuário',/renner|c&a|riachuelo|zara|marisa|shein|nike|adidas|roupa|calcad|moda/],
+  ['Assinaturas',/netflix|spotify|disney|hbo|max |prime video|amazon prime|youtube|apple\.com|google one|globoplay|deezer|assinatura|icloud|microsoft/]
+];
+var EXT_RULES_ENT=[
+  ['Salário',/salario|folha|pagamento de salario|proventos|vencimento|remuneracao/],
+  ['Freelance',/freela|honorario|servico prestado|prestacao de servico/],
+  ['Aluguel',/aluguel recebido|locacao/],
+  ['Investimento',/rendimento|resgate|dividendo|juros sobre|jcp|cdb|tesouro|rend pago/],
+  ['Bônus',/bonus|premio|13o|decimo terceiro|participacao nos lucros|plr/]
+];
+function extCategorize(desc,isEnt,cats){
+  var n=extNorm(desc), rules=isEnt?EXT_RULES_ENT:EXT_RULES, list=isEnt?cats.entrada:cats.saida;
+  for(var i=0;i<rules.length;i++){ if(rules[i][1].test(n)&&list.indexOf(rules[i][0])>-1) return rules[i][0]; }
+  return 'Outros';
+}
+function extIsDup(d,row){
+  var list=row.val>0?d.ent:d.sai, a=Math.abs(row.val);
+  return (list||[]).some(function(x){ return x.date===row.date&&Math.abs(parseFloat(x.val)-a)<0.005&&(x.fid&&row.fid?x.fid===row.fid:extNorm(x.desc).slice(0,5)===extNorm(row.desc).slice(0,5)||x.ori==='Extrato'); });
+}
+function abrirExtrato(){
+  if(!isPro()){showUpgrade('Importar extrato');return;}
+  g('extratoModal').style.display='flex'; g('ext-up').style.display='block'; g('ext-rev').style.display='none'; g('ext-err').style.display='none'; g('ext-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharExtrato()">Cancelar</button>';
+}
+function fecharExtrato(){ g('extratoModal').style.display='none'; var i=g('ext-input'); if(i) i.value=''; }
+function extDrop(e){ e.preventDefault(); if(e.dataTransfer.files[0]) extLer(e.dataTransfer.files[0]); }
+function extErro(m){ var e=g('ext-err'); e.textContent=m; e.style.display='block'; }
+function extLer(file){
+  if(!file) return; g('ext-err').style.display='none';
+  if(/\.pdf$/i.test(file.name)||file.type==='application/pdf'){ extErro('PDF ainda não é suportado. Exporte o extrato do seu banco em OFX ou CSV (disponível no internet banking).'); return; }
+  var rd=new FileReader();
+  rd.onload=function(ev){
+    var txt=ev.target.result, rows=/<STMTTRN>/i.test(txt)?extParseOFX(txt):extParseCSV(txt);
+    if(!rows.length){ extErro('Não encontrei movimentações neste arquivo. Use um extrato em OFX ou CSV.'); return; }
+    extRevisar(rows);
+  };
+  rd.onerror=function(){ extErro('Não foi possível ler o arquivo.'); };
+  rd.readAsText(file,'UTF-8');
+}
+function extRevisar(rows){
+  var d=ud(); if(!d) return; var seen={};
+  rows.sort(function(a,b){return a.date<b.date?1:-1;});
+  EXT.rows=rows.map(function(r){ var isEnt=r.val>0; return {date:r.date,desc:r.desc,val:Math.abs(r.val),fid:r.fid,tipo:isEnt?'ent':'sai',cat:extCategorize(r.desc,isEnt,d.cats),dup:extIsDup(d,r),sel:!extIsDup(d,r)}; });
+  g('ext-up').style.display='none'; g('ext-rev').style.display='block'; extRender();
+}
+function extRender(){
+  var d=ud(), h='';
+  EXT.rows.forEach(function(r,i){
+    var cats=r.tipo==='ent'?d.cats.entrada:d.cats.saida;
+    h+='<div style="display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);'+(r.dup?'opacity:.55':'')+'">'+
+      '<input type="checkbox" '+(r.sel?'checked':'')+' onchange="EXT.rows['+i+'].sel=this.checked;extResumo()">'+
+      '<div style="flex:1;min-width:0"><div style="font-size:13px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.desc)+'</div>'+
+      '<div style="font-size:11px;color:var(--t3)">'+fd(r.date)+(r.dup?' · possível duplicado':'')+'</div></div>'+
+      '<select onchange="extTipo('+i+',this.value)" style="background:var(--s2);color:var(--t1);border:1px solid var(--border);border-radius:6px;padding:4px;font-size:12px"><option value="ent"'+(r.tipo==='ent'?' selected':'')+'>Entrada</option><option value="sai"'+(r.tipo==='sai'?' selected':'')+'>Saída</option></select>'+
+      '<select onchange="EXT.rows['+i+'].cat=this.value" style="background:var(--s2);color:var(--t1);border:1px solid var(--border);border-radius:6px;padding:4px;font-size:12px;max-width:120px">'+cats.map(function(c){return '<option value="'+esc(c)+'"'+(c===r.cat?' selected':'')+'>'+esc(c)+'</option>';}).join('')+'</select>'+
+      '<div style="font-size:12px;font-weight:700;min-width:78px;text-align:right;color:'+(r.tipo==='ent'?'var(--teal)':'var(--red)')+'">'+(r.tipo==='ent'?'+':'-')+r.val.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div></div>';
+  });
+  g('ext-list').innerHTML=h; extResumo();
+}
+function extTipo(i,t){ var d=ud(),r=EXT.rows[i]; r.tipo=t; r.cat=extCategorize(r.desc,t==='ent',d.cats); extRender(); }
+function extResumo(){
+  var s=EXT.rows.filter(function(r){return r.sel;}), e=0, sa=0; s.forEach(function(r){ if(r.tipo==='ent') e+=r.val; else sa+=r.val; });
+  g('ext-resumo').innerHTML=s.length+' de '+EXT.rows.length+' selecionadas · Entradas '+fmtTxt(e)+' · Saídas '+fmtTxt(sa);
+  g('ext-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharExtrato()">Cancelar</button><button class="btn btn-primary" '+(s.length?'':'disabled ')+'onclick="extSalvar()">Importar '+s.length+'</button>';
+}
+function extSalvar(){
+  var d=ud(); if(!d) return; var ne=0,ns=0;
+  EXT.rows.forEach(function(r){ if(!r.sel) return;
+    var it={id:uid(),desc:r.desc,val:r.val,date:r.date,cat:r.cat,ori:'Extrato'}; if(r.fid) it.fid=r.fid;
+    if(r.tipo==='ent'){ d.ent.push(it); ne++; } else { d.sai.push(it); ns++; } });
+  sud(d,function(){ fecharExtrato(); toast(ne+' entradas e '+ns+' saídas importadas!','ok'); if(S.page==='entradas'&&typeof rEnt==='function')rEnt(); if(S.page==='saidas'&&typeof rSai==='function')rSai(); if(S.page==='dashboard')rDash(); });
+}
 window.addEventListener('resize',function(){updMonth();});
 
 // ===== ASSISTENTE BOLSO INTELIGENTE =====
