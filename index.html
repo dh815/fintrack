@@ -487,11 +487,11 @@ body {
 .kpi-badge.ok { background: var(--teal-dim); color: var(--teal); }
 .kpi-badge.warn { background: var(--yel-dim); color: var(--yellow); }
 .kpi-badge.bad { background: var(--red-dim); color: var(--red); }
-.kpi-badge.neu { background: rgba(255,255,255,.07); color: var(--t2); }
+.kpi-badge.neu { background: rgba(17,24,39,.07); color: var(--t2); }
 .kpi-val { font-size: 28px; font-weight: 800; letter-spacing: -0.8px; line-height: 1.05; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .kpi-val.sm { font-size: 20px; letter-spacing: -0.3px; }
 .kpi-val.ok { color: var(--teal); } .kpi-val.warn { color: var(--yellow); } .kpi-val.bad { color: var(--red); } .kpi-val.neu { color: var(--t1); } .kpi-val.blue { color: var(--blue); }
-.kpi-bar { height: 6px; border-radius: 99px; background: rgba(255,255,255,.07); overflow: hidden; }
+.kpi-bar { height: 6px; border-radius: 99px; background: rgba(17,24,39,.07); overflow: hidden; }
 .kpi-bar > i { display: block; height: 100%; border-radius: 99px; transition: width .5s ease; }
 .kpi-bar > i.ok { background: var(--teal); } .kpi-bar > i.warn { background: var(--yellow); } .kpi-bar > i.bad { background: var(--red); } .kpi-bar > i.blue { background: var(--blue); }
 .kpi-sub { font-size: 12px; color: var(--t3); line-height: 1.4; }
@@ -555,7 +555,7 @@ body {
 .lg-n { color: var(--t2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lg-v { color: var(--t1); font-weight: 700; font-size: 12px; white-space: nowrap; }
 .lg-p { color: var(--t3); text-align: right; font-size: 11px; font-weight: 600; }
-.lg-bar { height: 3px; border-radius: 99px; background: rgba(255,255,255,.06); overflow: hidden; }
+.lg-bar { height: 3px; border-radius: 99px; background: rgba(17,24,39,.06); overflow: hidden; }
 .lg-bar i { display: block; height: 100%; border-radius: 99px; }
 .lg-empty { font-size: 12px; color: var(--t3); text-align: center; margin: 0; }
 @media (max-width: 1100px) {
@@ -607,9 +607,9 @@ th {
   letter-spacing: .8px;
   padding: 10px 18px; text-align: left;
 }
-td { padding: 12px 18px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,.03); vertical-align: middle; }
+td { padding: 12px 18px; font-size: 13px; border-bottom: 1px solid rgba(17,24,39,.06); vertical-align: middle; }
 tbody tr:last-child td { border-bottom: none; }
-tbody tr:hover td { background: rgba(255,255,255,.015); }
+tbody tr:hover td { background: rgba(17,24,39,.03); }
 .empty {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: 52px 20px; color: var(--t3);
@@ -715,7 +715,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 .sum-row {
   display: flex; justify-content: space-between; align-items: center;
   padding: 11px 0;
-  border-bottom: 1px solid rgba(255,255,255,.04);
+  border-bottom: 1px solid rgba(17,24,39,.06);
   font-size: 13px;
 }
 .sum-row:last-child { border-bottom: none; }
@@ -916,6 +916,23 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
   .sb-collapse-btn:hover { color: #111827; }
   .sidebar.collapsed .sb-item { padding: 11px 0; }
 }
+
+/* ===== TEMA BRANCO (todas as telas) ===== */
+:root {
+  --bg: #FFFFFF; --s1: #FFFFFF; --s2: #F3F5F7; --s3: #E6EAEE;
+  --border: rgba(17,24,39,.10); --border2: rgba(17,24,39,.16);
+  --teal-dim: rgba(22,163,74,.10); --teal-glow: rgba(22,163,74,.22);
+  --red: #DC2626; --red-dim: rgba(220,38,38,.09);
+  --yellow: #B45309; --yel-dim: rgba(217,119,6,.12);
+  --blue: #2563EB; --blue-dim: rgba(37,99,235,.09);
+  --purple: #7C3AED; --pur-dim: rgba(124,58,237,.09);
+  --t1: #111827; --t2: #4B5563; --t3: #6B7280;
+}
+.btn-primary, .auth-btn, .iris-msg.user, .bn-fab .mi { color: #fff; }
+.btn-primary:hover, .auth-btn:hover { background: #15803D; }
+.panel, .kpi, .hero-saldo, .metric, .auth-card { box-shadow: 0 1px 8px rgba(17,24,39,.06); }
+.auth-card { box-shadow: 0 10px 40px rgba(17,24,39,.10); }
+.auth-logo-icon { box-shadow: 0 4px 16px rgba(17,24,39,.10); }
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -1065,15 +1082,6 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
         <button class="sb-item" data-p="perfil" onclick="nav('perfil')"><span class="sb-icon"><span class="mi">manage_accounts</span></span><span class="sb-label">Perfil</span></button>
         <button class="sb-item" data-p="categorias" onclick="nav('categorias')"><span class="sb-icon"><span class="mi">sell</span></span><span class="sb-label">Categorias</span></button>
       </nav>
-      <div class="sb-foot">
-        <div id="adminButtons" style="display:none">
-          <button class="sb-logout" style="color:var(--blue);margin-bottom:4px" onclick="exportarDados()"><span class="mi" style="font-size:16px">download</span><span class="sb-label">Exportar backup</span></button>
-          <button class="sb-logout" style="color:var(--yellow);margin-bottom:4px" onclick="importarDados()"><span class="mi" style="font-size:16px">upload</span><span class="sb-label">Importar backup</span></button>
-          <button class="sb-logout" id="btnCriarAcesso" style="color:var(--teal);margin-bottom:4px" onclick="openCreateAccess()"><span class="mi" style="font-size:16px">person_add</span><span class="sb-label">Criar acesso</span></button>
-        </div>
-        <a href="https://wa.me/5519989656364?text=Ol%C3%A1!%20Preciso%20de%20ajuda%20com%20o%20Bolso%20Inteligente." target="_blank" rel="noopener" class="sb-logout" style="color:var(--t2);text-decoration:none;margin-bottom:4px"><span class="mi" style="font-size:16px">support_agent</span><span class="sb-label">Suporte</span></a>
-        <button class="sb-logout" onclick="doLogout()"><span class="mi" style="font-size:16px">logout</span><span class="sb-label">Sair da conta</span></button>
-      </div>
     </aside>
 
     <!-- MAIN -->
@@ -1310,6 +1318,14 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
             <div style="padding:20px"><div class="field"><label>Senha atual</label><input type="password" id="p-atual" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;"></div><div class="field"><label>Nova senha</label><input type="password" id="p-nova" placeholder="M&#237;nimo 4 caracteres"></div><div class="field"><label>Confirmar</label><input type="password" id="p-conf" placeholder="Repita a senha"></div><div class="auth-error" id="p-err" style="margin-bottom:12px"></div><button class="btn btn-primary" style="width:100%" onclick="salvarSenha()">Salvar nova senha</button></div>
           </div>
 
+          <!-- Administração (somente admin) -->
+          <div class="panel" id="adminButtons" style="display:none;margin-top:16px">
+            <div class="panel-head"><span class="panel-title"><span class="mi" style="font-size:16px;vertical-align:middle;margin-right:6px;color:var(--teal)">admin_panel_settings</span>Administra&#231;&#227;o</span></div>
+            <div class="perfil-row" onclick="exportarDados()"><div class="perfil-row-icon"><span class="mi" style="color:var(--teal)">download</span></div><div class="perfil-row-label">Exportar backup</div></div>
+            <div class="perfil-row" onclick="importarDados()"><div class="perfil-row-icon"><span class="mi" style="color:var(--teal)">upload</span></div><div class="perfil-row-label">Importar backup</div></div>
+            <div class="perfil-row" id="btnCriarAcesso" onclick="openCreateAccess()" style="border-bottom:none"><div class="perfil-row-icon"><span class="mi" style="color:var(--teal)">person_add</span></div><div class="perfil-row-label">Criar acesso</div></div>
+          </div>
+
           <!-- Suporte -->
           <div class="panel" style="margin-top:16px">
             <div class="panel-head"><span class="panel-title"><span class="mi" style="font-size:16px;vertical-align:middle;margin-right:6px;color:var(--teal)">support_agent</span>Precisa de ajuda?</span></div>
@@ -1322,6 +1338,11 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
                 <span class="mi" style="font-size:16px">mail</span> Enviar e-mail
               </a>
             </div>
+          </div>
+
+          <!-- Sair da conta -->
+          <div class="panel" style="margin-top:16px">
+            <div class="perfil-row" onclick="doLogout()" style="border-bottom:none"><div class="perfil-row-icon"><span class="mi" style="color:var(--teal)">logout</span></div><div class="perfil-row-label">Sair da conta</div></div>
           </div>
 
           <!-- Zona de perigo -->
@@ -2348,7 +2369,7 @@ function chRing(id,size,items,cols,label,valTxt){
   var ctx=chSetup(id,size,size); if(!ctx) return;
   var cx=size/2, cy=size/2, lw=Math.round(size*0.16), r=size/2-lw/2-2;
   ctx.lineWidth=lw; ctx.lineCap='butt';
-  ctx.strokeStyle='rgba(255,255,255,.07)'; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+  ctx.strokeStyle='rgba(17,24,39,.08)'; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
   var total=items.reduce(function(a,x){return a+x[1];},0);
   if(total>0){
     var gap=items.length>1?0.035:0, st=-Math.PI/2;
@@ -2359,9 +2380,9 @@ function chRing(id,size,items,cols,label,valTxt){
     });
   }
   ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillStyle='rgba(255,255,255,.45)'; ctx.font='500 11px Inter, sans-serif';
+  ctx.fillStyle='rgba(17,24,39,.55)'; ctx.font='500 11px Inter, sans-serif';
   ctx.fillText(label,cx,cy-11);
-  ctx.fillStyle='#F0F4F8'; ctx.font='800 '+(valTxt.length>9?14:17)+'px Inter, sans-serif';
+  ctx.fillStyle='#111827'; ctx.font='800 '+(valTxt.length>9?14:17)+'px Inter, sans-serif';
   ctx.fillText(valTxt,cx,cy+9);
 }
 function chLegend(items,cols,total){
@@ -2421,7 +2442,7 @@ function drawBarChart(d){
     var ctx=chSetup('ch-bar',W,H); if(!ctx) return;
     [sel,hov].forEach(function(k,j){
       if(k<0) return;
-      ctx.fillStyle=j===0?'rgba(255,255,255,.035)':'rgba(255,255,255,.06)';
+      ctx.fillStyle=j===0?'rgba(17,24,39,.035)':'rgba(17,24,39,.06)';
       ctx.beginPath();
       if(ctx.roundRect) ctx.roundRect(pad.l+k*gW+2,pad.t-4,gW-4,cH+8,8); else ctx.rect(pad.l+k*gW+2,pad.t-4,gW-4,cH+8);
       ctx.fill();
@@ -2430,10 +2451,10 @@ function drawBarChart(d){
     for(var k=0;k<=tk.n;k++){
       var yy=baseY-(k*tk.step/tk.top)*cH;
       ctx.setLineDash(k===0?[]:[3,4]); ctx.lineWidth=1;
-      ctx.strokeStyle=k===0?'rgba(255,255,255,.14)':'rgba(255,255,255,.06)';
+      ctx.strokeStyle=k===0?'rgba(17,24,39,.16)':'rgba(17,24,39,.07)';
       ctx.beginPath(); ctx.moveTo(pad.l,Math.round(yy)+.5); ctx.lineTo(pad.l+cW,Math.round(yy)+.5); ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle='rgba(255,255,255,.35)'; ctx.textAlign='right';
+      ctx.fillStyle='rgba(17,24,39,.5)'; ctx.textAlign='right';
       ctx.fillText(k===0?'0':chAxis(k*tk.step),pad.l-8,yy);
     }
     months.forEach(function(mo,i){
@@ -2441,7 +2462,7 @@ function drawBarChart(d){
       rbar(ctx,gx,baseY-mo.tE/tk.top*cH,bW,mo.tE/tk.top*cH,'#22C55E','#15803D',al);
       rbar(ctx,gx+bW+bGap,baseY-mo.tS/tk.top*cH,bW,mo.tS/tk.top*cH,'#FF7B7B','#E04848',al);
       ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillStyle=(i===sel||i===hov)?'#F0F4F8':'rgba(255,255,255,.4)';
+      ctx.fillStyle=(i===sel||i===hov)?'#111827':'rgba(17,24,39,.5)';
       ctx.font=((i===sel||i===hov)?'700':'500')+' 10px Inter, sans-serif';
       ctx.fillText(MONTHS[mo.m].slice(0,3),pad.l+i*gW+gW/2,H-10);
     });
