@@ -1311,7 +1311,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
             <div class="panel-head">
               <span class="panel-title" id="cred-panel-title">Gastos no cartão</span>
               <div style="display:flex;gap:8px">
-                <button class="btn btn-ghost" onclick="abrirScannerCredito()" style="display:flex;align-items:center;gap:6px"><span class="mi" style="font-size:15px">photo_camera</span>Escanear cupom</button>
+                <button class="btn btn-ghost" onclick="abrirExtratoCredito()" style="display:flex;align-items:center;gap:6px"><span class="mi" style="font-size:15px">upload_file</span>Importar fatura</button><button class="btn btn-ghost" onclick="abrirScannerCredito()" style="display:flex;align-items:center;gap:6px"><span class="mi" style="font-size:15px">photo_camera</span>Escanear cupom</button>
                 <button class="btn btn-primary" onclick="openModalCredito(null)">+ Novo gasto</button>
               </div>
             </div>
@@ -1454,7 +1454,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
 <!-- SCANNER CUPOM -->
 <div class="modal-wrap" id="extratoModal" style="display:none;align-items:center;justify-content:center">
   <div class="modal" style="max-width:720px">
-    <div class="modal-head"><span class="modal-title">Importar extrato</span><button class="modal-x" onclick="fecharExtrato()"><span class="mi" style="font-size:16px">close</span></button></div>
+    <div class="modal-head"><span class="modal-title" id="ext-titulo">Importar extrato</span><button class="modal-x" onclick="fecharExtrato()"><span class="mi" style="font-size:16px">close</span></button></div>
     <div class="modal-body">
       <div id="ext-up" style="border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer" onclick="document.getElementById('ext-input').click()" ondragover="event.preventDefault()" ondrop="extDrop(event)">
         <span class="mi" style="font-size:48px;color:var(--t3);display:block;margin-bottom:12px">upload_file</span>
@@ -1463,7 +1463,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
         <input type="file" id="ext-input" accept=".ofx,.csv,.txt,.pdf" style="display:none" onchange="extLer(this.files[0])">
       </div>
       <div id="ext-err" style="display:none;margin-top:12px;color:var(--red);font-size:13px"></div>
-      <div id="ext-rev" style="display:none"><div id="ext-resumo" style="font-size:12px;color:var(--t2);margin-bottom:8px"></div><div id="ext-list" style="max-height:50vh;overflow:auto"></div></div>
+      <div id="ext-rev" style="display:none"><div id="ext-cartao-wrap" style="display:none;margin-bottom:10px"><div style="font-size:12px;color:var(--t2);margin-bottom:4px">De qual cartão é esta fatura?</div><select id="ext-cartao" onchange="EXT.cartao=this.value;extResumo()" style="width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit"></select></div><div id="ext-resumo" style="font-size:12px;color:var(--t2);margin-bottom:8px"></div><div id="ext-list" style="max-height:50vh;overflow:auto"></div></div>
     </div>
     <div class="modal-foot" id="ext-foot"></div>
   </div>
@@ -3337,7 +3337,8 @@ function analisarBoletoComClaude(base64,mediaType){
 }
 function salvarDoBoleto(){ var nome=g('sb-nome').value.trim(),valor=parseFloat(g('sb-valor').value),venc=g('sb-venc').value,nparc=parseInt(g('sb-parc').value)||1,vparc=parseFloat(g('sb-vparc').value)||0,cat=g('sb-cat').value; if(!nome||isNaN(valor)||!venc){toast('Preencha os campos.','err');return;} var d=ud(); if(!d) return; var vp=vparc>0?vparc:parseFloat((valor/nparc).toFixed(2)); var pars=[]; for(var i=0;i<nparc;i++){var dd=new Date(venc+'T12:00:00');dd.setMonth(dd.getMonth()+i);pars.push({seq:i+1,date:dd.toISOString().slice(0,10),val:vp,pg:false});} d.parc.push({id:uid(),name:nome,cat:cat,tot:valor,pars:pars,st:'ativo'}); sud(d,function(){fecharScannerBoleto();toast('Parcela cadastrada!','ok');if(S.page==='parcelas')rParc();if(S.page==='dashboard')rDash();}); }
 // ===== IMPORTAR EXTRATO BANCARIO =====
-var EXT={rows:[]};
+var EXT={rows:[],modo:'',cartao:''};
+var EXT_PAGRE=/pagamento (recebido|efetuado|da fatura|fatura)|pagto|pgto|estorno|credito de|desconto|saldo/;
 function extNorm(s){ return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(); }
 function extParseVal(s){
   s=String(s||'').trim().replace(/[R$\s]/g,''); if(!s) return NaN;
@@ -3410,12 +3411,23 @@ function extCategorize(desc,isEnt,cats){
   for(var i=0;i<rules.length;i++){ if(rules[i][1].test(n)&&list.indexOf(rules[i][0])>-1) return rules[i][0]; }
   return 'Outros';
 }
+function extIsDupCred(d,row){
+  var a=Math.abs(row.val);
+  return (d.gastos_credito||[]).some(function(x){ return x.date===row.date&&Math.abs(parseFloat(x.val)-a)<0.005&&extNorm(x.desc).slice(0,5)===extNorm(row.desc).slice(0,5); });
+}
 function extIsDup(d,row){
   var list=row.val>0?d.ent:d.sai, a=Math.abs(row.val);
   return (list||[]).some(function(x){ return x.date===row.date&&Math.abs(parseFloat(x.val)-a)<0.005&&(x.fid&&row.fid?x.fid===row.fid:extNorm(x.desc).slice(0,5)===extNorm(row.desc).slice(0,5)||x.ori==='Extrato'); });
 }
-function abrirExtrato(){
+function abrirExtratoCredito(){
+  var d=ud(); if(!d) return;
+  if(!d.cartoes||d.cartoes.length===0){toast('Crie um cartão primeiro!','err');openModalNovoCartao();return;}
+  abrirExtrato('credito');
+}
+function abrirExtrato(modo){
   if(!isPro()){showUpgrade('Importar extrato');return;}
+  EXT.modo=(modo==='credito')?'credito':''; EXT.cartao='';
+  g('ext-titulo').textContent=EXT.modo?'Importar fatura do cartão':'Importar extrato'; g('ext-cartao-wrap').style.display='none';
   g('extratoModal').style.display='flex'; g('ext-up').style.display='block'; g('ext-rev').style.display='none'; g('ext-err').style.display='none'; g('ext-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharExtrato()">Cancelar</button>';
 }
 function fecharExtrato(){ g('extratoModal').style.display='none'; var i=g('ext-input'); if(i) i.value=''; }
@@ -3491,7 +3503,13 @@ function extLer(file){
 function extRevisar(rows){
   var d=ud(); if(!d) return; var seen={};
   rows.sort(function(a,b){return a.date<b.date?1:-1;});
-  EXT.rows=rows.map(function(r){ var isEnt=r.val>0; return {date:r.date,desc:r.desc,val:Math.abs(r.val),fid:r.fid,tipo:isEnt?'ent':'sai',cat:extCategorize(r.desc,isEnt,d.cats),dup:extIsDup(d,r),sel:!extIsDup(d,r)}; });
+  if(EXT.modo==='credito'){
+    EXT.rows=rows.map(function(r){ var dup=extIsDupCred(d,r), pag=EXT_PAGRE.test(extNorm(r.desc)); return {date:r.date,desc:r.desc,val:Math.abs(r.val),fid:r.fid,tipo:'sai',cat:extCategorize(r.desc,false,d.cats),dup:dup,sel:!dup&&!pag}; });
+    var cs=g('ext-cartao'); cs.innerHTML='<option value="">Selecione o cartão...</option>'+d.cartoes.map(function(c){return '<option value="'+esc(c.id)+'">'+esc(c.nome||c.name||'Cartão')+'</option>';}).join('');
+    g('ext-cartao-wrap').style.display='block';
+  } else {
+    EXT.rows=rows.map(function(r){ var isEnt=r.val>0; return {date:r.date,desc:r.desc,val:Math.abs(r.val),fid:r.fid,tipo:isEnt?'ent':'sai',cat:extCategorize(r.desc,isEnt,d.cats),dup:extIsDup(d,r),sel:!extIsDup(d,r)}; });
+  }
   g('ext-up').style.display='none'; g('ext-rev').style.display='block'; extRender();
 }
 function extRender(){
@@ -3501,8 +3519,8 @@ function extRender(){
     h+='<div style="display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);'+(r.dup?'opacity:.55':'')+'">'+
       '<input type="checkbox" '+(r.sel?'checked':'')+' onchange="EXT.rows['+i+'].sel=this.checked;extResumo()">'+
       '<div style="flex:1;min-width:0"><div style="font-size:13px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.desc)+'</div>'+
-      '<div style="font-size:11px;color:var(--t3)">'+fd(r.date)+(r.dup?' · possível duplicado':'')+'</div></div>'+
-      '<select onchange="extTipo('+i+',this.value)" style="background:var(--s2);color:var(--t1);border:1px solid var(--border);border-radius:6px;padding:4px;font-size:12px"><option value="ent"'+(r.tipo==='ent'?' selected':'')+'>Entrada</option><option value="sai"'+(r.tipo==='sai'?' selected':'')+'>Saída</option></select>'+
+      '<div style="font-size:11px;color:var(--t3)">'+fd(r.date)+(r.dup?' · possível duplicado':(EXT.modo==='credito'&&!r.sel&&EXT_PAGRE.test(extNorm(r.desc))?' · pagamento/estorno (ignorado)':''))+'</div></div>'+
+      (EXT.modo==='credito'?'':'<select onchange="extTipo('+i+',this.value)" style="background:var(--s2);color:var(--t1);border:1px solid var(--border);border-radius:6px;padding:4px;font-size:12px"><option value="ent"'+(r.tipo==='ent'?' selected':'')+'>Entrada</option><option value="sai"'+(r.tipo==='sai'?' selected':'')+'>Saída</option></select>')+
       '<select onchange="EXT.rows['+i+'].cat=this.value" style="background:var(--s2);color:var(--t1);border:1px solid var(--border);border-radius:6px;padding:4px;font-size:12px;max-width:120px">'+cats.map(function(c){return '<option value="'+esc(c)+'"'+(c===r.cat?' selected':'')+'>'+esc(c)+'</option>';}).join('')+'</select>'+
       '<div style="font-size:12px;font-weight:700;min-width:78px;text-align:right;color:'+(r.tipo==='ent'?'var(--teal)':'var(--red)')+'">'+(r.tipo==='ent'?'+':'-')+r.val.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div></div>';
   });
@@ -3511,11 +3529,19 @@ function extRender(){
 function extTipo(i,t){ var d=ud(),r=EXT.rows[i]; r.tipo=t; r.cat=extCategorize(r.desc,t==='ent',d.cats); extRender(); }
 function extResumo(){
   var s=EXT.rows.filter(function(r){return r.sel;}), e=0, sa=0; s.forEach(function(r){ if(r.tipo==='ent') e+=r.val; else sa+=r.val; });
-  g('ext-resumo').innerHTML=s.length+' de '+EXT.rows.length+' selecionadas · Entradas '+fmtTxt(e)+' · Saídas '+fmtTxt(sa);
-  g('ext-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharExtrato()">Cancelar</button><button class="btn btn-primary" '+(s.length?'':'disabled ')+'onclick="extSalvar()">Importar '+s.length+'</button>';
+  var cred=EXT.modo==='credito', okBtn=s.length&&(!cred||EXT.cartao);
+  g('ext-resumo').innerHTML=s.length+' de '+EXT.rows.length+' selecionadas · '+(cred?'Total '+fmtTxt(sa):'Entradas '+fmtTxt(e)+' · Saídas '+fmtTxt(sa))+(cred&&!EXT.cartao?' · <b style="color:var(--yellow)">escolha o cartão</b>':'');
+  g('ext-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharExtrato()">Cancelar</button><button class="btn btn-primary" '+(okBtn?'':'disabled ')+'onclick="extSalvar()">Importar '+s.length+'</button>';
 }
 function extSalvar(){
   var d=ud(); if(!d) return; var ne=0,ns=0;
+  if(EXT.modo==='credito'){
+    if(!EXT.cartao){toast('Escolha o cartão.','err');return;}
+    if(!d.gastos_credito) d.gastos_credito=[];
+    EXT.rows.forEach(function(r){ if(!r.sel) return; d.gastos_credito.push({id:uid(),desc:r.desc,val:r.val,date:r.date,cat:r.cat,cartao_id:EXT.cartao,ori:'Extrato'}); ns++; });
+    sud(d,function(){ fecharExtrato(); toast(ns+' gastos lançados no cartão!','ok'); if(S.page==='credito')rCredito(); if(S.page==='dashboard')rDash(); });
+    return;
+  }
   EXT.rows.forEach(function(r){ if(!r.sel) return;
     var it={id:uid(),desc:r.desc,val:r.val,date:r.date,cat:r.cat,ori:'Extrato'}; if(r.fid) it.fid=r.fid;
     if(r.tipo==='ent'){ d.ent.push(it); ne++; } else { d.sai.push(it); ns++; } });
