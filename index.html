@@ -933,6 +933,11 @@ tbody tr:hover td { background: rgba(17,24,39,.03); }
 .panel, .kpi, .hero-saldo, .metric, .auth-card { box-shadow: 0 1px 8px rgba(17,24,39,.06); }
 .auth-card { box-shadow: 0 10px 40px rgba(17,24,39,.10); }
 .auth-logo-icon { box-shadow: 0 4px 16px rgba(17,24,39,.10); }
+
+/* Menu mobile: não repetir o que já está na barra inferior */
+@media(max-width:768px){
+  .sb-nav .sb-section:first-child, .sb-item[data-p="dashboard"], .sb-item[data-p="entradas"], .sb-item[data-p="saidas"] { display: none; }
+}
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -1088,7 +1093,7 @@ tbody tr:hover td { background: rgba(17,24,39,.03); }
     <main class="main">
       <div class="topbar">
         <div class="topbar-left">
-          <button class="menu-btn" onclick="toggleSb()"><span class="mi" style="font-size:22px">menu</span></button>
+          <button class="menu-btn" onclick="toggleSb()"><span class="mi" style="font-size:22px">grid_view</span></button>
           <div>
             <div class="page-title" id="pageTitle">Dashboard</div>
             <div id="pageSubtitle" style="display:none;font-size:12px;color:var(--t3);margin-top:2px"></div>
@@ -1414,10 +1419,10 @@ tbody tr:hover td { background: rgba(17,24,39,.03); }
   </div>
   <nav class="bottom-nav" id="bottomNav">
     <button class="bn-item" data-p="dashboard" onclick="nav('dashboard')"><span class="mi">dashboard</span><span>In&#237;cio</span></button>
-    <button class="bn-item" data-p="parcelas" onclick="nav('parcelas')"><span class="mi">receipt_long</span><span>Vari&#225;veis</span></button>
+    <button class="bn-item" data-p="entradas" onclick="nav('entradas')"><span class="mi">trending_up</span><span>Entradas</span></button>
     <button class="bn-fab" onclick="abrirIris()" id="irisNavBtn"><span class="mi">auto_awesome</span></button>
-    <button class="bn-item" data-p="investimentos" onclick="nav('investimentos')"><span class="mi">candlestick_chart</span><span>Invest.</span></button>
-    <button class="bn-item" data-p="menu" onclick="toggleSb()"><span class="mi">menu</span><span>Mais</span></button>
+    <button class="bn-item" data-p="saidas" onclick="nav('saidas')"><span class="mi">trending_down</span><span>Sa&#237;das</span></button>
+    <button class="bn-item" data-p="menu" onclick="toggleSb()"><span class="mi">grid_view</span><span>Mais</span></button>
   </nav>
   <div id="fabMenu" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:96">
     <div id="fabOverlay" onclick="toggleFabMenu()" style="position:fixed;inset:0;background:rgba(0,0,0,.5)"></div>
