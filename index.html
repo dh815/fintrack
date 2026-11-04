@@ -896,6 +896,26 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
   #adminButtons .sb-logout { color: #4B5563 !important; }
   .sb-logout:hover { background: #FEE2E2; color: #DC2626; }
 }
+
+/* ===== MENU DESKTOP EM CARDS (fundo branco, ícones verdes) ===== */
+@media(min-width:769px){
+  .sidebar { background: #fff; border-right: 1px solid #E5E7EB; }
+  .sb-brand { color: #111827; } .sb-brand span { color: #16A34A; }
+  .sb-section { color: #6B7280; }
+  .sb-nav { padding: 6px 12px; }
+  .sb-item { padding: 11px 12px; margin-bottom: 8px; border-radius: 14px; background: #fff; border: 1px solid #E5E7EB; box-shadow: 0 1px 6px rgba(17,24,39,.06); color: #1F2937; font-weight: 600; }
+  .sb-item:hover { background: #F0FDF4; color: #14532D; border-color: #BBF7D0; }
+  .sb-item.active { background: #ECFDF3; border-color: #16A34A; color: #14532D; }
+  .sb-item.active::before { display: none; }
+  .sb-item .sb-icon .mi { font-size: 20px; color: #16A34A; }
+  .sb-foot { border-top: 1px solid #E5E7EB; }
+  .sb-foot .sb-logout { color: #4B5563; }
+  #adminButtons .sb-logout { color: #4B5563 !important; }
+  .sb-logout:hover { background: #FEE2E2; color: #DC2626; }
+  .sb-collapse-btn { color: #6B7280; }
+  .sb-collapse-btn:hover { color: #111827; }
+  .sidebar.collapsed .sb-item { padding: 11px 0; }
+}
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
