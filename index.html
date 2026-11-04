@@ -874,6 +874,28 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
   #cred-panel-title { font-size: 13px; }
 }
 
+
+/* ===== MENU MOBILE EM CARDS (fundo branco, ícones verdes) ===== */
+.sb-close { display: none; }
+@media(max-width:768px){
+  .sidebar, .sidebar.collapsed { width: 100%; background: #fff; border-right: none; }
+  .sb-head, .sidebar.collapsed .sb-head { padding: 18px 20px 6px; border-bottom: none; }
+  .sb-brand { color: #111827; } .sb-brand span { color: #16A34A; }
+  .sb-close { display: flex; margin-left: auto; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; border: 1px solid #E5E7EB; background: #fff; color: #374151; cursor: pointer; }
+  .sb-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 4px 20px 16px; align-content: start; }
+  .sb-section, .sidebar.collapsed .sb-section { grid-column: 1 / -1; display: block; color: #6B7280; font-size: 11px; padding: 12px 2px 0; }
+  .sb-item, .sidebar.collapsed .sb-item { flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 18px; min-height: 112px; padding: 16px; margin: 0; border-radius: 20px; background: #fff; border: 1px solid #E5E7EB; box-shadow: 0 2px 10px rgba(17,24,39,.07); color: #1F2937; font-size: 15px; font-weight: 600; }
+  .sb-item:hover { background: #fff; color: #1F2937; }
+  .sb-item.active { background: #ECFDF3; border-color: #16A34A; color: #14532D; }
+  .sb-item.active::before { display: none; }
+  .sb-item .sb-icon { width: auto; height: auto; }
+  .sb-item .sb-icon .mi { font-size: 30px; color: #16A34A; }
+  .sb-item .sb-label, .sidebar.collapsed .sb-item .sb-label { display: block; text-align: left; line-height: 1.2; }
+  .sb-foot { background: #fff; border-top: 1px solid #E5E7EB; padding: 10px 20px calc(10px + env(safe-area-inset-bottom, 0px)); }
+  .sb-foot .sb-logout { color: #4B5563; padding: 4px 10px; font-size: 12px; }
+  #adminButtons .sb-logout { color: #4B5563 !important; }
+  .sb-logout:hover { background: #FEE2E2; color: #DC2626; }
+}
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -999,6 +1021,7 @@ tbody tr:hover td { background: rgba(255,255,255,.015); }
       <div class="sb-head">
         <div class="sb-logo"><svg viewBox="0 0 100 100" width="66%" height="66%" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="40" width="80" height="52" rx="12" fill="#14532D"/><rect x="10" y="40" width="80" height="14" rx="7" fill="#0F3D22"/><rect x="10" y="40" width="80" height="52" rx="12" fill="none" stroke="#FBBF24" stroke-width="2.5" stroke-dasharray="5 4"/><circle cx="72" cy="66" r="5.5" fill="#FBBF24"/><path d="M38 46 L60 20" stroke="#22C55E" stroke-width="7.5" stroke-linecap="round"/><path d="M60 20 L60 35 M60 20 L45 20" stroke="#22C55E" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="33" cy="26" r="18" fill="#FBBF24" stroke="#FFFFFF" stroke-width="3"/><text x="33" y="34" font-size="20" font-weight="800" fill="#14532D" text-anchor="middle" font-family="Arial,sans-serif">$</text></svg></div>
         <div><div class="sb-brand">Bolso <span>Inteligente</span></div></div>
+        <button class="sb-close" onclick="closeSb()" aria-label="Fechar menu"><span class="mi" style="font-size:22px">close</span></button>
       </div>
       <div class="sb-user" style="display:none">
         <div class="sb-avatar" id="sbAvatar">?</div>
