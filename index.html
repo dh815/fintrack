@@ -3556,6 +3556,7 @@ function analisarBoletoComClaude(base64,mediaType){
 function salvarDoBoleto(){ var nome=g('sb-nome').value.trim(),valor=parseFloat(g('sb-valor').value),venc=g('sb-venc').value,nparc=parseInt(g('sb-parc').value)||1,vparc=parseFloat(g('sb-vparc').value)||0,cat=g('sb-cat').value; if(!nome||isNaN(valor)||!venc){toast('Preencha os campos.','err');return;} var d=ud(); if(!d) return; var vp=vparc>0?vparc:parseFloat((valor/nparc).toFixed(2)); var pars=[]; for(var i=0;i<nparc;i++){var dd=new Date(venc+'T12:00:00');dd.setMonth(dd.getMonth()+i);pars.push({seq:i+1,date:dd.toISOString().slice(0,10),val:vp,pg:false});} d.parc.push({id:uid(),name:nome,cat:cat,tot:valor,pars:pars,st:'ativo'}); sud(d,function(){fecharScannerBoleto();toast('Parcela cadastrada!','ok');if(S.page==='parcelas')rParc();if(S.page==='dashboard')rDash();}); }
 // ===== IMPORTAR EXTRATO BANCARIO =====
 var EXT={rows:[],modo:'',cartao:''};
+var EXT_INTRE=/aplicacao cofrinho|resgate cofrinho|fatura paga|pagamento de fatura|aplicacao automatica|resgate automatico/;
 var EXT_PAGRE=/pagamento (recebido|efetuado|da fatura|fatura)|pagto|pgto|estorno|credito de|desconto|saldo/;
 function extNorm(s){ return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(); }
 function extParseVal(s){
@@ -3667,6 +3668,9 @@ function extParsePdfLinhas(lines){
   var txt=lines.join(' '), am=txt.match(/\b(20\d{2})\b/), ano=am?parseInt(am[1],10):new Date().getFullYear();
   var cur='', out=[], reV=/([-−–]\s?)?(R\$\s?)?(\d{1,3}(?:\.\d{3})*,\d{2})(?!\d)(\s?[CD]\b|-)?/g;
   var posRe=/recebid|deposit|credito em conta|credito|estorno|rendimento|salario|resgate|reembolso|devolu/, negRe=/enviad|pagamento|compra|debito|saque|tarifa|pix enviado|transferencia enviada|boleto/;
+  // Extrato "com sinal": se alguma linha traz valor com "-", entao valor sem sinal e ENTRADA (nao adivinhar pela descricao)
+  var comSinal=false;
+  lines.forEach(function(l){ if(/saldo|total de|limite|resumo/.test(extNorm(l))) return; var mm; reV.lastIndex=0; while((mm=reV.exec(l))){ if(/^[-−–]/.test(mm[0].trim())){ comSinal=true; break; } } });
   lines.forEach(function(l){
     var dt=extDataLinha(l,ano); if(dt) cur=dt.d;
     var n=extNorm(l); if(!cur||/saldo|total de|limite|resumo/.test(n)) return;
@@ -3676,7 +3680,7 @@ function extParsePdfLinhas(lines){
     var v=Math.abs(f.v); if(!v) return;
     var desc=l.replace(dt?dt.t:'','').replace(reV,' ').replace(/\s+/g,' ').replace(/^[\s\-–−|·]+|[\s\-–−|·]+$/g,'').trim();
     if(desc.length<2) return;
-    var sign=neg?-1:(/\sC$/.test(raw)?1:(posRe.test(extNorm(desc))&&!negRe.test(extNorm(desc))?1:-1));
+    var sign=neg?-1:(/\sC$/.test(raw)?1:(comSinal?1:posRe.test(extNorm(desc))&&!negRe.test(extNorm(desc))?1:-1));
     out.push({date:cur,desc:desc,val:sign*v,fid:''});
   });
   return out;
@@ -3732,7 +3736,7 @@ function extRevisar(rows){
     var cs=g('ext-cartao'); cs.innerHTML='<option value="">Selecione o cartão...</option>'+d.cartoes.map(function(c){return '<option value="'+esc(c.id)+'">'+esc(c.nome||c.name||'Cartão')+'</option>';}).join('');
     g('ext-cartao-wrap').style.display='block';
   } else {
-    EXT.rows=rows.map(function(r){ var isEnt=r.val>0; return {date:r.date,desc:r.desc,val:Math.abs(r.val),fid:r.fid,tipo:isEnt?'ent':'sai',cat:extCategorize(r.desc,isEnt,d.cats),dup:extIsDup(d,r),sel:!extIsDup(d,r)}; });
+    EXT.rows=rows.map(function(r){ var isEnt=r.val>0; var dup=extIsDup(d,r), interno=EXT_INTRE.test(extNorm(r.desc)); return {date:r.date,desc:r.desc,val:Math.abs(r.val),fid:r.fid,tipo:isEnt?'ent':'sai',cat:extCategorize(r.desc,isEnt,d.cats),dup:dup,interno:interno,sel:!dup&&!interno}; });
   }
   g('ext-up').style.display='none'; g('ext-rev').style.display='block'; extRender();
 }
@@ -3743,7 +3747,7 @@ function extRender(){
     h+='<div style="display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);'+(r.dup?'opacity:.55':'')+'">'+
       '<input type="checkbox" '+(r.sel?'checked':'')+' onchange="EXT.rows['+i+'].sel=this.checked;extResumo()">'+
       '<div style="flex:1;min-width:0"><div style="font-size:13px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.desc)+'</div>'+
-      '<div style="font-size:11px;color:var(--t3)">'+fd(r.date)+(r.dup?' · possível duplicado':(EXT.modo==='credito'&&!r.sel&&EXT_PAGRE.test(extNorm(r.desc))?' · pagamento/estorno (ignorado)':''))+'</div></div>'+
+      '<div style="font-size:11px;color:var(--t3)">'+fd(r.date)+(r.dup?' · possível duplicado':(EXT.modo==='credito'&&!r.sel&&EXT_PAGRE.test(extNorm(r.desc))?' · pagamento/estorno (ignorado)':(r.interno&&!r.sel?' · movimentação interna/fatura (desmarcado)':'')))+'</div></div>'+
       (EXT.modo==='credito'?'':'<select onchange="extTipo('+i+',this.value)" style="background:var(--s2);color:var(--t1);border:1px solid var(--border);border-radius:6px;padding:4px;font-size:12px"><option value="ent"'+(r.tipo==='ent'?' selected':'')+'>Entrada</option><option value="sai"'+(r.tipo==='sai'?' selected':'')+'>Saída</option></select>')+
       '<select onchange="EXT.rows['+i+'].cat=this.value" style="background:var(--s2);color:var(--t1);border:1px solid var(--border);border-radius:6px;padding:4px;font-size:12px;max-width:120px">'+cats.map(function(c){return '<option value="'+esc(c)+'"'+(c===r.cat?' selected':'')+'>'+esc(c)+'</option>';}).join('')+'</select>'+
       '<div style="font-size:12px;font-weight:700;min-width:78px;text-align:right;color:'+(r.tipo==='ent'?'var(--teal)':'var(--red)')+'">'+(r.tipo==='ent'?'+':'-')+r.val.toLocaleString('pt-BR',{minimumFractionDigits:2})+'</div></div>';
