@@ -991,6 +991,13 @@ tbody tr:hover td { background: rgba(17,24,39,.03); }
 .fclearall { align-items: center; gap: 5px; height: 30px; padding: 0 12px; border: 1px solid var(--border2); border-radius: 99px; background: #fff; color: var(--t2); font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; }
 .fclearall:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); } .fclearall .mi { font-size: 15px; }
 @media(max-width:768px){ .fbar { padding: 12px 14px; } .fgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.selbar{display:none;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 16px;border-bottom:1px solid var(--border);background:var(--s2)}
+.selbar .ftoggle{font-size:13px}
+.selbar .selcount{font-size:12px;color:var(--t3);font-weight:600}
+.selbar .btn-del{margin-left:auto;height:34px;padding:0 14px;display:inline-flex;align-items:center;gap:6px;font-weight:600}
+.selbar .btn-del[disabled]{opacity:.4;cursor:not-allowed}
+.selcb{width:18px;height:18px;accent-color:var(--teal);cursor:pointer;flex-shrink:0;margin:0}
+td.selc{width:34px;padding-right:0}
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -1214,10 +1221,11 @@ tbody tr:hover td { background: rgba(17,24,39,.03); }
 <div class="fgrid"><div class="ffield"><label>Categoria</label><select id="ent-cat" onchange="rEnt()"><option value="">Todas categorias</option></select></div><div class="ffield"><label>De</label><input id="ent-de" type="date" onchange="rEnt()"></div><div class="ffield"><label>Até</label><input id="ent-ate" type="date" onchange="rEnt()"></div></div>
 <div class="frow"><label class="ftoggle"><input type="checkbox" id="ent-todos" onchange="rEnt()"><span>Todos os meses</span></label><button type="button" class="fclearall" onclick="fbarClear('ent','rEnt')" style="display:none"><span class="mi">filter_alt_off</span>Limpar filtros</button></div>
 </div>
+            <div class="selbar" id="ent-selbar"><label class="ftoggle"><input type="checkbox" class="selcb" id="ent-selall" onchange="selAll('ent',this.checked)"><span>Selecionar tudo</span></label><span class="selcount" id="ent-selcount"></span><button type="button" class="btn btn-del" id="ent-seldel" onclick="selDel('ent')" disabled><span class="mi" style="font-size:16px">delete</span>Excluir selecionados</button></div>
             <div style="padding:4px 16px 6px;font-size:11px;color:var(--t3)" id="ent-info"></div>
             <div class="mobile-cards" id="mc-ent"></div>
             <div class="table-wrap">
-              <table><thead><tr><th>Data</th><th>Descri&#231;&#227;o</th><th>Categoria</th><th>Valor</th><th>A&#231;&#245;es</th></tr></thead>
+              <table><thead><tr><th style="width:34px"></th><th>Data</th><th>Descri&#231;&#227;o</th><th>Categoria</th><th>Valor</th><th>A&#231;&#245;es</th></tr></thead>
               <tbody id="tb-ent"></tbody></table>
             </div>
           </div>
@@ -1234,10 +1242,11 @@ tbody tr:hover td { background: rgba(17,24,39,.03); }
 <div class="fgrid"><div class="ffield"><label>Categoria</label><select id="sai-cat" onchange="rSai()"><option value="">Todas categorias</option></select></div><div class="ffield"><label>De</label><input id="sai-de" type="date" onchange="rSai()"></div><div class="ffield"><label>Até</label><input id="sai-ate" type="date" onchange="rSai()"></div></div>
 <div class="frow"><label class="ftoggle"><input type="checkbox" id="sai-todos" onchange="rSai()"><span>Todos os meses</span></label><button type="button" class="fclearall" onclick="fbarClear('sai','rSai')" style="display:none"><span class="mi">filter_alt_off</span>Limpar filtros</button></div>
 </div>
+            <div class="selbar" id="sai-selbar"><label class="ftoggle"><input type="checkbox" class="selcb" id="sai-selall" onchange="selAll('sai',this.checked)"><span>Selecionar tudo</span></label><span class="selcount" id="sai-selcount"></span><button type="button" class="btn btn-del" id="sai-seldel" onclick="selDel('sai')" disabled><span class="mi" style="font-size:16px">delete</span>Excluir selecionados</button></div>
             <div style="padding:4px 16px 6px;font-size:11px;color:var(--t3)" id="sai-info"></div>
             <div class="mobile-cards" id="mc-sai"></div>
             <div class="table-wrap">
-              <table><thead><tr><th>Data</th><th>Descri&#231;&#227;o</th><th>Categoria</th><th>Valor</th><th>Origem</th><th>A&#231;&#245;es</th></tr></thead>
+              <table><thead><tr><th style="width:34px"></th><th>Data</th><th>Descri&#231;&#227;o</th><th>Categoria</th><th>Valor</th><th>Origem</th><th>A&#231;&#245;es</th></tr></thead>
               <tbody id="tb-sai"></tbody></table>
             </div>
           </div>
@@ -2607,6 +2616,32 @@ function fbarClear(p,fn){
 }
 function fbarClearSearch(p,fn){ var s=g(p+'-busca'); if(s){ s.value=''; s.focus(); } window[fn](); }
 
+// ===== SELECAO EM MASSA (Entradas/Saidas) =====
+var SEL={ent:{},sai:{}}, SELVIS={ent:[],sai:[]};
+function selPrune(t,items){
+  SELVIS[t]=items.map(function(x){return x.id;});
+  var keep={}; SELVIS[t].forEach(function(id){ if(SEL[t][id]) keep[id]=1; }); SEL[t]=keep;
+}
+function selSync(t){
+  var n=Object.keys(SEL[t]).length, tot=SELVIS[t].length;
+  var bar=g(t+'-selbar'); if(bar) bar.style.display=tot?'flex':'none';
+  var all=g(t+'-selall'); if(all){ all.checked=tot>0&&n===tot; all.indeterminate=n>0&&n<tot; }
+  var c=g(t+'-selcount'); if(c) c.textContent=n?(n+' selecionado(s) de '+tot):(tot+' registro(s)');
+  var b=g(t+'-seldel'); if(b) b.disabled=!n;
+  document.querySelectorAll('input[data-sel="'+t+'"]').forEach(function(cb){ cb.checked=!!SEL[t][cb.value]; });
+}
+function selToggle(t,id,on){ if(on) SEL[t][id]=1; else delete SEL[t][id]; selSync(t); }
+function selAll(t,on){ SEL[t]={}; if(on) SELVIS[t].forEach(function(id){ SEL[t][id]=1; }); selSync(t); }
+function selDel(t){
+  var ids=Object.keys(SEL[t]), n=ids.length; if(!n) return;
+  cf('Excluir '+n+' registro(s)?','Esta ação não pode ser desfeita.',function(){
+    var d=ud(); var set={}; ids.forEach(function(id){ set[id]=1; });
+    d[t]=(d[t]||[]).filter(function(x){ return !set[x.id]; });
+    SEL[t]={};
+    sud(d,function(){ toast(n+' registro(s) excluído(s).','ok'); render(S.page); });
+  });
+}
+
 // ENTRADAS
 function rEnt(){
   var d=ud(); if(!d||!d.ent) return;
@@ -2634,6 +2669,7 @@ function rEnt(){
     if(ate && e.date>ate) return false;
     return true;
   }).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  selPrune('ent',items);
   var totalVal=items.reduce(function(a,e){return a+parseFloat(e.val||0);},0);
   if(g('ent-info')) g('ent-info').innerHTML=items.length+' registro(s) — Total: '+fmt(totalVal)+' · '+(escopoMes?MONTHS[S.month]+'/'+S.year:'todo o período');
   // Mobile cards
@@ -2641,8 +2677,8 @@ function rEnt(){
   if(mc) mc.innerHTML=items.length?items.map(function(e){
     return '<div class="mc-item">'+
       '<div class="mc-top">'+
-        '<div><div class="mc-name">'+esc(e.desc)+'</div>'+
-        '<div class="mc-sub"><span>'+fd(e.date)+'</span><span class="badge bg-teal">'+esc(e.cat)+'</span></div></div>'+
+        '<div style="display:flex;gap:12px;align-items:flex-start;min-width:0">'+'<input type="checkbox" class="selcb" data-sel="ent" value="'+esc(e.id)+'"'+(SEL.ent[e.id]?' checked':'')+' onchange="selToggle(\'ent\',this.value,this.checked)">'+'<div style="min-width:0"><div class="mc-name">'+esc(e.desc)+'</div>'+
+        '<div class="mc-sub"><span>'+fd(e.date)+'</span><span class="badge bg-teal">'+esc(e.cat)+'</span></div></div></div>'+
         '<div class="mc-val" style="color:var(--teal)">+'+fmt(e.val)+'</div>'+
       '</div>'+
       '<div class="mc-bot">'+
@@ -2653,6 +2689,7 @@ function rEnt(){
   // Tabela desktop
   g('tb-ent').innerHTML=items.length?items.map(function(e){
     return '<tr>'+
+      '<td class="selc">'+'<input type="checkbox" class="selcb" data-sel="ent" value="'+esc(e.id)+'"'+(SEL.ent[e.id]?' checked':'')+' onchange="selToggle(\'ent\',this.value,this.checked)">'+'</td>'+
       '<td style="color:var(--t2);font-size:12px">'+fd(e.date)+'</td>'+
       '<td style="font-weight:500">'+esc(e.desc)+'</td>'+
       '<td><span class="badge bg-teal">'+esc(e.cat)+'</span></td>'+
@@ -2661,7 +2698,8 @@ function rEnt(){
       '<button class="btn btn-edit btn-sm" onclick="editIt(\'ent\',\''+escq(e.id)+'\')">Editar</button>'+
       '<button class="btn btn-del btn-sm" onclick="delIt(\'ent\',\''+escq(e.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
-  }).join(''):emptr(5,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">trending_up</span>Nenhuma entrada neste mês');
+  }).join(''):emptr(6,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">trending_up</span>Nenhuma entrada neste mês');
+  selSync('ent');
 }
 
 // SAIDAS
@@ -2691,6 +2729,7 @@ function rSai(){
     if(ate && s.date>ate) return false;
     return true;
   }).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
+  selPrune('sai',items);
   var totalVal=items.reduce(function(a,s){return a+parseFloat(s.val||0);},0);
   if(g('sai-info')) g('sai-info').innerHTML=items.length+' registro(s) — Total: '+fmt(totalVal)+' · '+(escopoMes?MONTHS[S.month]+'/'+S.year:'todo o período');
   // Mobile cards
@@ -2698,8 +2737,8 @@ function rSai(){
   if(mc) mc.innerHTML=items.length?items.map(function(s){
     return '<div class="mc-item">'+
       '<div class="mc-top">'+
-        '<div><div class="mc-name">'+esc(s.desc)+'</div>'+
-        '<div class="mc-sub"><span>'+fd(s.date)+'</span><span class="badge bg-red">'+esc(s.cat)+'</span>'+(s.ori?'<span class="badge bg-muted">'+esc(s.ori)+'</span>':'')+'</div></div>'+
+        '<div style="display:flex;gap:12px;align-items:flex-start;min-width:0">'+'<input type="checkbox" class="selcb" data-sel="sai" value="'+esc(s.id)+'"'+(SEL.sai[s.id]?' checked':'')+' onchange="selToggle(\'sai\',this.value,this.checked)">'+'<div style="min-width:0"><div class="mc-name">'+esc(s.desc)+'</div>'+
+        '<div class="mc-sub"><span>'+fd(s.date)+'</span><span class="badge bg-red">'+esc(s.cat)+'</span>'+(s.ori?'<span class="badge bg-muted">'+esc(s.ori)+'</span>':'')+'</div></div></div>'+
         '<div class="mc-val" style="color:var(--red)">-'+fmt(s.val)+'</div>'+
       '</div>'+
       '<div class="mc-bot">'+
@@ -2710,6 +2749,7 @@ function rSai(){
   // Tabela desktop
   g('tb-sai').innerHTML=items.length?items.map(function(s){
     return '<tr>'+
+      '<td class="selc">'+'<input type="checkbox" class="selcb" data-sel="sai" value="'+esc(s.id)+'"'+(SEL.sai[s.id]?' checked':'')+' onchange="selToggle(\'sai\',this.value,this.checked)">'+'</td>'+
       '<td style="color:var(--t2);font-size:12px">'+fd(s.date)+'</td>'+
       '<td style="font-weight:500">'+esc(s.desc)+'</td>'+
       '<td><span class="badge bg-red">'+esc(s.cat)+'</span></td>'+
@@ -2719,7 +2759,8 @@ function rSai(){
       '<button class="btn btn-edit btn-sm" onclick="editIt(\'sai\',\''+escq(s.id)+'\')">Editar</button>'+
       '<button class="btn btn-del btn-sm" onclick="delIt(\'sai\',\''+escq(s.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></td></tr>';
-  }).join(''):emptr(6,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">trending_down</span>Nenhuma saída neste mês');
+  }).join(''):emptr(7,'<span class="mi" style="font-size:36px;opacity:.3;display:block;margin-bottom:10px">trending_down</span>Nenhuma saída neste mês');
+  selSync('sai');
 }
 // SALDO
 function rSal(){
