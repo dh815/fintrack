@@ -3628,7 +3628,7 @@ function abrirExtrato(modo){
 }
 function fecharExtrato(){ g('extratoModal').style.display='none'; var i=g('ext-input'); if(i) i.value=''; }
 function extDrop(e){ e.preventDefault(); if(e.dataTransfer.files[0]) extLer(e.dataTransfer.files[0]); }
-function extErro(m){ var e=g('ext-err'); e.style.color='var(--red)'; e.textContent=m; e.style.display='block'; }
+function extErro(m){ var inp=g('ext-input'); if(inp) inp.value=''; var e=g('ext-err'); e.style.color='var(--red)'; e.textContent=m; e.style.display='block'; }
 var EXT_MESES={jan:1,fev:2,mar:3,abr:4,mai:5,jun:6,jul:7,ago:8,set:9,out:10,nov:11,dez:12};
 function extLinhasPdf(items){
   var rows={}; items.forEach(function(it){ if(!it.str||!it.str.trim()) return; var y=Math.round(it.transform[5]/3); (rows[y]=rows[y]||[]).push({x:it.transform[4],s:it.str}); });
@@ -3698,6 +3698,12 @@ function extLer(file){
 }
 function extRevisar(rows){
   var d=ud(); if(!d) return; var seen={};
+  EXT.fora=0;
+  if(EXT.modo!=='credito'){
+    // Extrato bancario: traz somente o mes selecionado (dia 1 ate o ultimo dia)
+    var total=rows.length; rows=rows.filter(function(r){ return inM(r.date); }); EXT.fora=total-rows.length;
+    if(!rows.length){ extErro('Este extrato não tem movimentações de '+MONTHS[S.month]+'/'+S.year+' ('+total+' de outros meses foram ignoradas). Troque o mês no topo do app e tente de novo.'); return; }
+  }
   rows.sort(function(a,b){return a.date<b.date?1:-1;});
   if(EXT.modo==='credito'){
     EXT.rows=rows.map(function(r){ var dup=extIsDupCred(d,r), pag=EXT_PAGRE.test(extNorm(r.desc)); return {date:r.date,desc:r.desc,val:Math.abs(r.val),fid:r.fid,tipo:'sai',cat:extCategorize(r.desc,false,d.cats),dup:dup,sel:!dup&&!pag}; });
@@ -3726,7 +3732,7 @@ function extTipo(i,t){ var d=ud(),r=EXT.rows[i]; r.tipo=t; r.cat=extCategorize(r
 function extResumo(){
   var s=EXT.rows.filter(function(r){return r.sel;}), e=0, sa=0; s.forEach(function(r){ if(r.tipo==='ent') e+=r.val; else sa+=r.val; });
   var cred=EXT.modo==='credito', okBtn=s.length&&(!cred||EXT.cartao);
-  g('ext-resumo').innerHTML=s.length+' de '+EXT.rows.length+' selecionadas · '+(cred?'Total '+fmtTxt(sa):'Entradas '+fmtTxt(e)+' · Saídas '+fmtTxt(sa))+(cred&&!EXT.cartao?' · <b style="color:var(--yellow)">escolha o cartão</b>':'');
+  g('ext-resumo').innerHTML=(EXT.fora?'<div style="font-size:11px;color:var(--t3);margin-bottom:4px">Só '+MONTHS[S.month]+'/'+S.year+' (dia 1 ao último dia) · '+EXT.fora+' de outros meses ignorada(s)</div>':'')+s.length+' de '+EXT.rows.length+' selecionadas · '+(cred?'Total '+fmtTxt(sa):'Entradas '+fmtTxt(e)+' · Saídas '+fmtTxt(sa))+(cred&&!EXT.cartao?' · <b style="color:var(--yellow)">escolha o cartão</b>':'');
   g('ext-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharExtrato()">Cancelar</button><button class="btn btn-primary" '+(okBtn?'':'disabled ')+'onclick="extSalvar()">Importar '+s.length+'</button>';
 }
 function extSalvar(){
