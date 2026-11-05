@@ -938,6 +938,30 @@ tbody tr:hover td { background: rgba(17,24,39,.03); }
 @media(max-width:768px){
   .sb-nav .sb-section:first-child, .sb-item[data-p="dashboard"], .sb-item[data-p="entradas"], .sb-item[data-p="saidas"] { display: none; }
 }
+
+/* ===== FILTROS MODERNOS ===== */
+.fbar { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.fsearch { position: relative; }
+.fsearch > .mi { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 20px; color: var(--t3); pointer-events: none; }
+.fsearch input { width: 100%; height: 44px; padding: 0 42px 0 42px; background: var(--s2); border: 1px solid var(--border); border-radius: 12px; color: var(--t1); font-size: 14px; font-family: inherit; outline: none; transition: border-color .15s, box-shadow .15s, background .15s; }
+.fsearch input:focus { background: #fff; border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-dim); }
+.fclear { display: none; position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border: none; border-radius: 50%; background: transparent; color: var(--t3); cursor: pointer; align-items: center; justify-content: center; }
+.fclear:hover { background: var(--s3); color: var(--t1); } .fclear .mi { font-size: 18px; }
+.fgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.ffield { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.ffield label { font-size: 10px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; color: var(--t3); padding-left: 2px; }
+.ffield select, .ffield input[type=date] { width: 100%; height: 42px; padding: 0 34px 0 12px; background-color: #fff; border: 1px solid var(--border2); border-radius: 10px; color: var(--t1); font-size: 13.5px; font-family: inherit; outline: none; -webkit-appearance: none; appearance: none; transition: border-color .15s, box-shadow .15s, background-color .15s; }
+.ffield select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; text-overflow: ellipsis; }
+.ffield input[type=date] { padding-right: 10px; min-width: 0; }
+.ffield select:focus, .ffield input[type=date]:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-dim); }
+.ffield.on select, .ffield.on input[type=date] { border-color: var(--teal); background-color: #F0FDF4; color: #14532D; font-weight: 600; }
+.ffield.on label { color: var(--teal); }
+.frow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ftoggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12.5px; font-weight: 600; color: var(--t2); user-select: none; }
+.ftoggle input { width: 16px; height: 16px; accent-color: var(--teal); cursor: pointer; }
+.fclearall { align-items: center; gap: 5px; height: 30px; padding: 0 12px; border: 1px solid var(--border2); border-radius: 99px; background: #fff; color: var(--t2); font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; }
+.fclearall:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); } .fclearall .mi { font-size: 15px; }
+@media(max-width:768px){ .fbar { padding: 12px 14px; } .fgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -1156,7 +1180,11 @@ tbody tr:hover td { background: rgba(17,24,39,.03); }
               <span class="panel-title">Entradas</span>
               <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="abrirExtrato()" style="display:flex;align-items:center;gap:6px"><span class="mi" style="font-size:15px">upload_file</span>Importar extrato</button><button class="btn btn-primary" onclick="openModal('entrada',null)">+ Nova entrada</button></div>
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--border)"><input id="ent-busca" oninput="rEnt()" placeholder="&#128269; Buscar..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><select id="ent-cat" onchange="rEnt()" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todas categorias</option></select><input id="ent-de" type="date" onchange="rEnt()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><input id="ent-ate" type="date" onchange="rEnt()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"></div>
+            <div class="fbar" id="ent-fbar">
+<div class="fsearch"><span class="mi">search</span><input id="ent-busca" oninput="rEnt()" placeholder="Buscar por descrição ou categoria..." autocomplete="off"><button type="button" class="fclear" onclick="fbarClearSearch('ent','rEnt')" aria-label="Limpar busca"><span class="mi">close</span></button></div>
+<div class="fgrid"><div class="ffield"><label>Categoria</label><select id="ent-cat" onchange="rEnt()"><option value="">Todas categorias</option></select></div><div class="ffield"><label>De</label><input id="ent-de" type="date" onchange="rEnt()"></div><div class="ffield"><label>Até</label><input id="ent-ate" type="date" onchange="rEnt()"></div></div>
+<div class="frow"><label class="ftoggle"><input type="checkbox" id="ent-todos" onchange="rEnt()"><span>Todos os meses</span></label><button type="button" class="fclearall" onclick="fbarClear('ent','rEnt')" style="display:none"><span class="mi">filter_alt_off</span>Limpar filtros</button></div>
+</div>
             <div style="padding:4px 16px 6px;font-size:11px;color:var(--t3)" id="ent-info"></div>
             <div class="mobile-cards" id="mc-ent"></div>
             <div class="table-wrap">
@@ -1173,7 +1201,11 @@ tbody tr:hover td { background: rgba(17,24,39,.03); }
               <span class="panel-title">Sa&#237;das</span>
               <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="abrirExtrato()" style="display:flex;align-items:center;gap:6px"><span class="mi" style="font-size:15px">upload_file</span>Importar extrato</button><button class="btn btn-ghost" onclick="abrirScanner()" style="display:flex;align-items:center;gap:6px"><span class="mi" style="font-size:15px">photo_camera</span>Escanear cupom</button><button class="btn btn-primary" onclick="openModal('saida',null)">+ Nova sa&#237;da</button></div>
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--border)"><input id="sai-busca" oninput="rSai()" placeholder="&#128269; Buscar..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><select id="sai-cat" onchange="rSai()" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todas categorias</option></select><input id="sai-de" type="date" onchange="rSai()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><input id="sai-ate" type="date" onchange="rSai()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"></div>
+            <div class="fbar" id="sai-fbar">
+<div class="fsearch"><span class="mi">search</span><input id="sai-busca" oninput="rSai()" placeholder="Buscar por descrição ou categoria..." autocomplete="off"><button type="button" class="fclear" onclick="fbarClearSearch('sai','rSai')" aria-label="Limpar busca"><span class="mi">close</span></button></div>
+<div class="fgrid"><div class="ffield"><label>Categoria</label><select id="sai-cat" onchange="rSai()"><option value="">Todas categorias</option></select></div><div class="ffield"><label>De</label><input id="sai-de" type="date" onchange="rSai()"></div><div class="ffield"><label>Até</label><input id="sai-ate" type="date" onchange="rSai()"></div></div>
+<div class="frow"><label class="ftoggle"><input type="checkbox" id="sai-todos" onchange="rSai()"><span>Todos os meses</span></label><button type="button" class="fclearall" onclick="fbarClear('sai','rSai')" style="display:none"><span class="mi">filter_alt_off</span>Limpar filtros</button></div>
+</div>
             <div style="padding:4px 16px 6px;font-size:11px;color:var(--t3)" id="sai-info"></div>
             <div class="mobile-cards" id="mc-sai"></div>
             <div class="table-wrap">
@@ -1203,7 +1235,11 @@ tbody tr:hover td { background: rgba(17,24,39,.03); }
               <span class="panel-title">Gastos Vari&#225;veis</span>
               <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="abrirScannerBoleto()" style="display:flex;align-items:center;gap:6px"><span class="mi" style="font-size:15px">document_scanner</span>Escanear boleto</button><button class="btn btn-primary" onclick="openModal('parcela',null)">+ Nova conta</button></div>
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--border)"><input id="parc-busca" oninput="rParc()" placeholder="&#128269; Buscar..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><select id="parc-cat" onchange="rParc()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todas categorias</option></select><select id="parc-venc" onchange="rParc()" style="flex:1;min-width:140px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todos vencimentos</option><option value="mes">Vence este m&#234;s</option><option value="prox">Pr&#243;ximos 30 dias</option><option value="atrasado">Atrasados</option></select><select id="parc-status" onchange="rParc()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todos status</option><option value="ativo">Ativos</option><option value="quitado">Quitados (arquivadas)</option><option value="cancelado">Cancelados</option></select><select id="parc-dia" onchange="rParc()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todos os dias</option></select></div>
+            <div class="fbar" id="parc-fbar">
+<div class="fsearch"><span class="mi">search</span><input id="parc-busca" oninput="rParc()" placeholder="Buscar por nome ou categoria..." autocomplete="off"><button type="button" class="fclear" onclick="fbarClearSearch('parc','rParc')" aria-label="Limpar busca"><span class="mi">close</span></button></div>
+<div class="fgrid"><div class="ffield"><label>Categoria</label><select id="parc-cat" onchange="rParc()"><option value="">Todas categorias</option></select></div><div class="ffield"><label>Vencimento</label><select id="parc-venc" onchange="rParc()"><option value="">Todos</option><option value="mes">Vence este m&#234;s</option><option value="sem">Pr&#243;ximos 7 dias</option><option value="prox">Pr&#243;ximos 30 dias</option><option value="atrasado">Atrasados</option></select></div><div class="ffield"><label>Status</label><select id="parc-status" onchange="rParc()"><option value="">Todos</option><option value="ativo">Ativos</option><option value="quitado">Quitados (arquivadas)</option><option value="cancelado">Cancelados</option></select></div><div class="ffield"><label>Dia do vencimento</label><select id="parc-dia" onchange="rParc()"><option value="">Todos</option></select></div></div>
+<div class="frow"><span></span><button type="button" class="fclearall" onclick="fbarClear('parc','rParc')" style="display:none"><span class="mi">filter_alt_off</span>Limpar filtros</button></div>
+</div>
             <div style="padding:4px 16px 6px;font-size:11px;color:var(--t3)" id="parc-info"></div>
             <div id="parc-sel-total" style="display:none;padding:0 16px 6px;font-size:12px;font-weight:700;color:var(--yellow)"></div>
             <div class="mobile-cards" id="mc-parc"></div>
@@ -1381,10 +1417,11 @@ tbody tr:hover td { background: rgba(17,24,39,.03); }
               </div>
             </div>
             <div id="cred-fatura-bar" style="display:flex;align-items:center;gap:20px;padding:12px 20px;background:rgba(167,139,250,.05);border-bottom:1px solid var(--border);flex-wrap:wrap;"></div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--border)">
-              <input id="cred-busca" oninput="rCredito()" placeholder="&#128269; Buscar descrição..." style="flex:2;min-width:150px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none">
-              <select id="cred-cat" onchange="rCredito()" style="flex:1;min-width:130px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none"><option value="">Todas categorias</option></select>
-            </div>
+            <div class="fbar" id="cred-fbar">
+<div class="fsearch"><span class="mi">search</span><input id="cred-busca" oninput="rCredito()" placeholder="Buscar por descrição ou categoria..." autocomplete="off"><button type="button" class="fclear" onclick="fbarClearSearch('cred','rCredito')" aria-label="Limpar busca"><span class="mi">close</span></button></div>
+<div class="fgrid"><div class="ffield"><label>Categoria</label><select id="cred-cat" onchange="rCredito()"><option value="">Todas categorias</option></select></div></div>
+<div class="frow"><span></span><button type="button" class="fclearall" onclick="fbarClear('cred','rCredito')" style="display:none"><span class="mi">filter_alt_off</span>Limpar filtros</button></div>
+</div>
             <div style="padding:4px 16px 5px;font-size:11px;color:var(--t3)" id="cred-info"></div>
             <div class="mobile-cards" id="mc-cred"></div>
             <div class="table-wrap">
@@ -2525,9 +2562,27 @@ function sum(arr){ return (arr||[]).reduce(function(a,x){return a+parseFloat(x.v
 function empt(msg){ return '<div class="empty"><div class="empty-icon"><span class="mi" style="font-size:40px;opacity:.3">inbox</span></div><p>'+msg+'</p></div>'; }
 function emptr(cols,msg){ return '<tr><td colspan="'+cols+'">'+empt(msg)+'</td></tr>'; }
 
+// ===== FILTROS (barra moderna) =====
+function fbMatch(txt,q){ return extNorm(txt).indexOf(extNorm(q))>-1; }
+function fbarSync(p){
+  var f=g(p+'-fbar'); if(!f) return; var any=false;
+  f.querySelectorAll('select,input[type=date]').forEach(function(el){ var on=!!el.value; var w=el.closest('.ffield'); if(w) w.classList.toggle('on',on); if(on) any=true; });
+  var s=g(p+'-busca'); if(s){ var has=!!s.value; var c=f.querySelector('.fclear'); if(c) c.style.display=has?'flex':'none'; if(has) any=true; }
+  var a=g(p+'-todos'); if(a&&a.checked) any=true;
+  var b=f.querySelector('.fclearall'); if(b){ b.style.display=any?'inline-flex':'none'; var row=b.parentNode; if(row&&!row.querySelector('.ftoggle')) row.style.display=any?'flex':'none'; }
+}
+function fbarClear(p,fn){
+  var f=g(p+'-fbar'); if(!f) return;
+  f.querySelectorAll('select,input[type=date]').forEach(function(el){ el.value=''; });
+  var s=g(p+'-busca'); if(s) s.value=''; var a=g(p+'-todos'); if(a) a.checked=false;
+  window[fn]();
+}
+function fbarClearSearch(p,fn){ var s=g(p+'-busca'); if(s){ s.value=''; s.focus(); } window[fn](); }
+
 // ENTRADAS
 function rEnt(){
   var d=ud(); if(!d||!d.ent) return;
+  fbarSync('ent');
   // Atualiza categorias no select
   var catSel=g('ent-cat');
   if(catSel){
@@ -2536,21 +2591,23 @@ function rEnt(){
     catSel.innerHTML='<option value="">Todas categorias</option>'+cats.sort().map(function(ct){ return '<option value="'+esc(ct)+'"'+(cur===ct?' selected':'')+'>'+esc(ct)+'</option>'; }).join('');
     catSel.value=cur;
   }
-  var busca=g('ent-busca')?g('ent-busca').value.toLowerCase().trim():'';
+  var busca=g('ent-busca')?g('ent-busca').value.trim():'';
   var filtCat=g('ent-cat')?g('ent-cat').value:'';
   var de=g('ent-de')?g('ent-de').value:'';
   var ate=g('ent-ate')?g('ent-ate').value:'';
-  var temFiltro=busca||filtCat||de||ate;
+  if(de&&ate&&de>ate){ var _t=de; de=ate; ate=_t; }
+  var todosMeses=!!(g('ent-todos')&&g('ent-todos').checked);
+  var escopoMes=!(de||ate||todosMeses);
   var items=d.ent.filter(function(e){
-    if(!temFiltro && !inM(e.date)) return false;
-    if(busca && e.desc.toLowerCase().indexOf(busca)<0) return false;
+    if(escopoMes && !inM(e.date)) return false;
+    if(busca && !(fbMatch(e.desc,busca)||fbMatch(e.cat,busca))) return false;
     if(filtCat && e.cat!==filtCat) return false;
     if(de && e.date<de) return false;
     if(ate && e.date>ate) return false;
     return true;
   }).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
   var totalVal=items.reduce(function(a,e){return a+parseFloat(e.val||0);},0);
-  if(g('ent-info')) g('ent-info').innerHTML=items.length+' registro(s) — Total: '+fmt(totalVal);
+  if(g('ent-info')) g('ent-info').innerHTML=items.length+' registro(s) — Total: '+fmt(totalVal)+' · '+(escopoMes?MONTHS[S.month]+'/'+S.year:'todo o período');
   // Mobile cards
   var mc=g('mc-ent');
   if(mc) mc.innerHTML=items.length?items.map(function(e){
@@ -2582,6 +2639,7 @@ function rEnt(){
 // SAIDAS
 function rSai(){
   var d=ud(); if(!d||!d.sai) return;
+  fbarSync('sai');
   // Atualiza categorias no select
   var catSel=g('sai-cat');
   if(catSel){
@@ -2590,21 +2648,23 @@ function rSai(){
     catSel.innerHTML='<option value="">Todas categorias</option>'+cats.sort().map(function(ct){ return '<option value="'+esc(ct)+'"'+(cur===ct?' selected':'')+'>'+esc(ct)+'</option>'; }).join('');
     catSel.value=cur;
   }
-  var busca=g('sai-busca')?g('sai-busca').value.toLowerCase().trim():'';
+  var busca=g('sai-busca')?g('sai-busca').value.trim():'';
   var filtCat=g('sai-cat')?g('sai-cat').value:'';
   var de=g('sai-de')?g('sai-de').value:'';
   var ate=g('sai-ate')?g('sai-ate').value:'';
-  var temFiltro=busca||filtCat||de||ate;
+  if(de&&ate&&de>ate){ var _t=de; de=ate; ate=_t; }
+  var todosMeses=!!(g('sai-todos')&&g('sai-todos').checked);
+  var escopoMes=!(de||ate||todosMeses);
   var items=d.sai.filter(function(s){
-    if(!temFiltro && !inM(s.date)) return false;
-    if(busca && s.desc.toLowerCase().indexOf(busca)<0) return false;
+    if(escopoMes && !inM(s.date)) return false;
+    if(busca && !(fbMatch(s.desc,busca)||fbMatch(s.cat,busca))) return false;
     if(filtCat && s.cat!==filtCat) return false;
     if(de && s.date<de) return false;
     if(ate && s.date>ate) return false;
     return true;
   }).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
   var totalVal=items.reduce(function(a,s){return a+parseFloat(s.val||0);},0);
-  if(g('sai-info')) g('sai-info').innerHTML=items.length+' registro(s) — Total: '+fmt(totalVal);
+  if(g('sai-info')) g('sai-info').innerHTML=items.length+' registro(s) — Total: '+fmt(totalVal)+' · '+(escopoMes?MONTHS[S.month]+'/'+S.year:'todo o período');
   // Mobile cards
   var mc=g('mc-sai');
   if(mc) mc.innerHTML=items.length?items.map(function(s){
@@ -2664,6 +2724,7 @@ function rSal(){
 var parcSel=new Set();
 function rParc(){
   var d=ud(); if(!d||!d.parc) return;
+  fbarSync('parc');
   // Atualiza categorias no select
   var catSel=g('parc-cat');
   if(catSel){
@@ -2672,7 +2733,7 @@ function rParc(){
     catSel.innerHTML='<option value="">Todas categorias</option>'+cats.sort().map(function(ct){ return '<option value="'+esc(ct)+'"'+(cur===ct?' selected':'')+'>'+esc(ct)+'</option>'; }).join('');
     catSel.value=cur;
   }
-  var busca=g('parc-busca')?g('parc-busca').value.toLowerCase().trim():'';
+  var busca=g('parc-busca')?g('parc-busca').value.trim():'';
   var filtCat=g('parc-cat')?g('parc-cat').value:'';
   var filtVenc=g('parc-venc')?g('parc-venc').value:'';
   var filtStatus=g('parc-status')?g('parc-status').value:'';
@@ -2687,13 +2748,13 @@ function rParc(){
     });
     var dias=Object.keys(diasSet).map(Number).sort(function(a,b){return a-b;});
     var curDia=diaSel.value;
-    diaSel.innerHTML='<option value="">Todos os dias</option>'+dias.map(function(dd){ return '<option value="'+dd+'"'+(curDia==String(dd)?' selected':'')+'>Dia '+String(dd).padStart(2,'0')+'</option>'; }).join('');
+    diaSel.innerHTML='<option value="">Todos</option>'+dias.map(function(dd){ return '<option value="'+dd+'"'+(curDia==String(dd)?' selected':'')+'>Dia '+String(dd).padStart(2,'0')+'</option>'; }).join('');
     diaSel.value=curDia;
   }
   var hoje=new Date(); hoje.setHours(0,0,0,0);
   var em30=new Date(hoje); em30.setDate(em30.getDate()+30);
   var lista=d.parc.filter(function(p){
-    if(busca && p.name.toLowerCase().indexOf(busca)<0) return false;
+    if(busca && !(fbMatch(p.name,busca)||fbMatch(p.cat,busca))) return false;
     if(filtCat && p.cat!==filtCat) return false;
     if(filtStatus && p.st!==filtStatus) return false;
     if(!filtStatus && p.st==='quitado') return false; // quitadas ficam arquivadas por padrão, só aparecem filtrando por "Quitados"
@@ -2704,9 +2765,10 @@ function rParc(){
     }
     if(filtVenc){
       var prox=p.pars.find(function(x){return !x.pg;});
-      if(!prox) return filtVenc==='quitado';
+      if(p.st!=='ativo'||!prox) return false;
       var dv=new Date(prox.date+'T12:00:00'); dv.setHours(0,0,0,0);
       if(filtVenc==='mes' && (dv.getMonth()!==hoje.getMonth()||dv.getFullYear()!==hoje.getFullYear())) return false;
+      if(filtVenc==='sem'){ var em7=new Date(hoje); em7.setDate(em7.getDate()+7); if(dv<hoje||dv>em7) return false; }
       if(filtVenc==='prox' && (dv<hoje||dv>em30)) return false;
       if(filtVenc==='atrasado' && dv>=hoje) return false;
     }
@@ -4192,6 +4254,7 @@ function assinarPro(){
 
 // ===== CRÉDITO À VISTA =====
 function rCredito(){
+  fbarSync('cred');
   if(isFree()){
     var el=document.getElementById('page-credito');
     if(el){ el.innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:16px">💳</div><div style="font-size:18px;font-weight:700;color:var(--t1);margin-bottom:8px">Cartão de Crédito</div><p style="color:var(--t2);margin-bottom:24px">Controle a fatura de cada cartão.<br>Disponível no plano Pro.</p><button class="btn btn-primary" onclick="showUpgrade(this.dataset.msg)" data-msg="Cartão de Crédito é exclusivo do Pro"><span class="mi" style="font-size:15px;vertical-align:middle">star</span> Ver plano Pro</button></div>'; }
@@ -4268,10 +4331,10 @@ function rCredito(){
   }
 
   // Filtros
-  var busca=g('cred-busca')?g('cred-busca').value.toLowerCase().trim():'';
+  var busca=g('cred-busca')?g('cred-busca').value.trim():'';
   var filtCat=g('cred-cat')?g('cred-cat').value:'';
   var items=gastosMes.filter(function(g2){
-    if(busca&&g2.desc.toLowerCase().indexOf(busca)<0) return false;
+    if(busca&&!(fbMatch(g2.desc,busca)||fbMatch(g2.cat,busca))) return false;
     if(filtCat&&g2.cat!==filtCat) return false;
     return true;
   }).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
