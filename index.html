@@ -1283,7 +1283,8 @@ td.selc{width:34px;padding-right:0}
             </div>
             <div class="fbar" id="parc-fbar">
 <div class="fsearch"><span class="mi">search</span><input id="parc-busca" oninput="rParc()" placeholder="Buscar por nome ou categoria..." autocomplete="off"><button type="button" class="fclear" onclick="fbarClearSearch('parc','rParc')" aria-label="Limpar busca"><span class="mi">close</span></button></div>
-<div class="fgrid"><div class="ffield"><label>Categoria</label><select id="parc-cat" onchange="rParc()"><option value="">Todas categorias</option></select></div><div class="ffield"><label>Vencimento</label><select id="parc-venc" onchange="rParc()"><option value="">Todos</option><option value="mes">Vence este m&#234;s</option><option value="sem">Pr&#243;ximos 7 dias</option><option value="prox">Pr&#243;ximos 30 dias</option><option value="atrasado">Atrasados</option></select></div><div class="ffield"><label>Status</label><select id="parc-status" onchange="rParc()"><option value="">Todos</option><option value="ativo">Ativos</option><option value="quitado">Quitados (arquivadas)</option><option value="cancelado">Cancelados</option></select></div><div class="ffield"><label>Dia do vencimento</label><select id="parc-dia" onchange="rParc()"><option value="">Todos</option></select></div></div>
+<div class="fgrid"><div class="ffield"><label>Categoria</label><select id="parc-cat" onchange="rParc()"><option value="">Todas categorias</option></select></div><div class="ffield"><label>Vencimento</label><select id="parc-venc" onchange="rParc()"><option value="">Todos</option><option value="mes">Vence este m&#234;s</option><option value="sem">Pr&#243;ximos 7 dias</option><option value="prox">Pr&#243;ximos 30 dias</option><option value="atrasado">Atrasados</option></select></div><div class="ffield"><label>Status</label><select id="parc-status" onchange="rParc()"><option value="">Todos</option><option value="ativo">Ativos</option><option value="quitado">Quitados (arquivadas)</option><option value="cancelado">Cancelados</option></select></div><div class="ffield"><label>Dia do vencimento</label><select id="parc-dia" onchange="fdmAdd('parc','rParc',this.value)"><option value="">Todos</option></select></div><div class="ffield"><label>Datas de vencimento</label><input id="parc-datas" type="date" onchange="fdAdd('parc','rParc')" title="Escolha uma data para adicionar; repita para várias datas"></div></div>
+<div class="fchips" id="parc-chips"></div>
 <div class="frow"><span></span><button type="button" class="fclearall" onclick="fbarClear('parc','rParc')" style="display:none"><span class="mi">filter_alt_off</span>Limpar filtros</button></div>
 </div>
             <div style="padding:4px 16px 6px;font-size:11px;color:var(--t3)" id="parc-info"></div>
@@ -2610,18 +2611,23 @@ function emptr(cols,msg){ return '<tr><td colspan="'+cols+'">'+empt(msg)+'</td><
 
 // ===== FILTROS (barra moderna) =====
 function fbMatch(txt,q){ return extNorm(txt).indexOf(extNorm(q))>-1; }
-var FD={ent:[],sai:[]};
-function fdAdd(p,fn){ var el=g(p+'-dia'); if(!el) return; var v=el.value; el.value=''; if(v&&FD[p].indexOf(v)<0){ FD[p].push(v); FD[p].sort(); } window[fn](); }
+var FD={ent:[],sai:[],parc:[]}, FDM={parc:[]}, FDI={ent:'ent-dia',sai:'sai-dia',parc:'parc-datas'};
+function fdmAdd(p,fn,v){ var el=g(p+'-dia'); if(el) el.value=''; v=parseInt(v,10); if(v&&FDM[p].indexOf(v)<0){ FDM[p].push(v); FDM[p].sort(function(a,b){return a-b;}); } window[fn](); }
+function fdmRem(p,v,fn){ FDM[p]=FDM[p].filter(function(x){return x!==v;}); window[fn](); }
+function fdAdd(p,fn){ var el=g(FDI[p]); if(!el) return; var v=el.value; el.value=''; if(v&&FD[p].indexOf(v)<0){ FD[p].push(v); FD[p].sort(); } window[fn](); }
 function fdRem(p,v,fn){ FD[p]=FD[p].filter(function(x){return x!==v;}); window[fn](); }
 function fdRender(p){
-  var c=g(p+'-chips'); if(!c) return; var fn=p==='ent'?'rEnt':'rSai';
-  if(!FD[p].length){ c.style.display='none'; c.innerHTML=''; return; }
+  var c=g(p+'-chips'); if(!c) return; var fn=p==='ent'?'rEnt':(p==='sai'?'rSai':'rParc'), dm=FDM[p]||[];
+  if(!FD[p].length&&!dm.length){ c.style.display='none'; c.innerHTML=''; return; }
   c.style.display='flex';
-  c.innerHTML='<span class="fchips-lbl">Dias:</span>'+FD[p].map(function(v){ return '<span class="fchip">'+fd(v)+'<button type="button" aria-label="Remover dia" onclick="fdRem(\''+p+'\',\''+v+'\',\''+fn+'\')">&times;</button></span>'; }).join('');
+  var h='<span class="fchips-lbl">'+(p==='parc'?'Vencimentos:':'Dias:')+'</span>';
+  h+=dm.map(function(v){ return '<span class="fchip">Dia '+String(v).padStart(2,'0')+'<button type="button" aria-label="Remover dia" onclick="fdmRem(\''+p+'\','+v+',\''+fn+'\')">&times;</button></span>'; }).join('');
+  h+=FD[p].map(function(v){ return '<span class="fchip">'+fd(v)+'<button type="button" aria-label="Remover dia" onclick="fdRem(\''+p+'\',\''+v+'\',\''+fn+'\')">&times;</button></span>'; }).join('');
+  c.innerHTML=h;
 }
 function fbarSync(p){
   var f=g(p+'-fbar'); if(!f) return; var any=false;
-  if(FD[p]){ fdRender(p); if(FD[p].length) any=true; }
+  if(FD[p]){ fdRender(p); if(FD[p].length||(FDM[p]&&FDM[p].length)) any=true; }
   f.querySelectorAll('select,input[type=date]').forEach(function(el){ var on=!!el.value; var w=el.closest('.ffield'); if(w) w.classList.toggle('on',on); if(on) any=true; });
   var s=g(p+'-busca'); if(s){ var has=!!s.value; var c=f.querySelector('.fclear'); if(c) c.style.display=has?'flex':'none'; if(has) any=true; }
   var a=g(p+'-todos'); if(a&&a.checked) any=true;
@@ -2629,7 +2635,7 @@ function fbarSync(p){
 }
 function fbarClear(p,fn){
   var f=g(p+'-fbar'); if(!f) return;
-  if(FD[p]) FD[p]=[];
+  if(FD[p]) FD[p]=[]; if(FDM[p]) FDM[p]=[];
   f.querySelectorAll('select,input[type=date]').forEach(function(el){ el.value=''; });
   var s=g(p+'-busca'); if(s) s.value=''; var a=g(p+'-todos'); if(a) a.checked=false;
   window[fn]();
@@ -2851,10 +2857,11 @@ function rParc(){
     if(filtCat && p.cat!==filtCat) return false;
     if(filtStatus && p.st!==filtStatus) return false;
     if(!filtStatus && p.st==='quitado') return false; // quitadas ficam arquivadas por padrão, só aparecem filtrando por "Quitados"
-    if(filtDia){
+    if(FDM.parc.length||FD.parc.length){
       var proxD=p.pars.find(function(x){return !x.pg;});
-      if(!proxD) return false;
-      if(new Date(proxD.date+'T12:00:00').getDate()!==parseInt(filtDia,10)) return false;
+      var m1=FDM.parc.length&&proxD&&FDM.parc.indexOf(new Date(proxD.date+'T12:00:00').getDate())>-1;
+      var m2=FD.parc.length&&p.pars.some(function(x){return !x.pg&&FD.parc.indexOf(x.date)>-1;});
+      if(!(m1||m2)) return false;
     }
     if(filtVenc){
       var prox=p.pars.find(function(x){return !x.pg;});
