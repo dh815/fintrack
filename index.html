@@ -1023,6 +1023,9 @@ td.selc{width:34px;padding-right:0}
 .venc-total{margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 14px;border-radius:12px;background:#F0FDF4;border:1px solid var(--teal)}
 .venc-total span{font-size:12px;font-weight:700;color:#14532D;text-transform:uppercase;letter-spacing:.5px}
 .venc-total b{font-size:20px;font-weight:800;color:#14532D}
+.venc-x{border:none;background:transparent;color:var(--t3);font-size:16px;line-height:1;cursor:pointer;margin-left:6px;padding:0 4px}
+.venc-add{display:flex;gap:8px;align-items:center;margin-top:8px;border-top:1px solid var(--border);padding-top:10px}
+.venc-add input{flex:1;min-width:0;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:16px;background:var(--s1);color:var(--t1)}
 @media(max-width:768px){.venc-grid{grid-template-columns:1fr}.venc{padding:14px}}
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -2355,8 +2358,25 @@ function kpiCard(icon,label,badge,valCls,valTxt,barPct,barCls,sub,small){
     '<div class="kpi-sub">'+sub+'</div>'+
   '</div>';
 }
+function vencDias(d){
+  var l=(d.vencDias||[]).map(function(x){return parseInt(x,10);}).filter(function(x){return x>=1&&x<=31;});
+  l=l.filter(function(x,i){return l.indexOf(x)===i;}).sort(function(a,b){return a-b;});
+  return l.length?l:(d.vencSet?[]:[5,10]);
+}
+function vencTxt(l){ if(!l.length) return '—'; if(l.length===1) return String(l[0]); return l.slice(0,-1).join(', ')+' e '+l[l.length-1]; }
+function vencAdd(){
+  var d=ud(), v=parseInt((g('venc-dia')||{}).value,10);
+  if(!(v>=1&&v<=31)){ toast('Informe um dia de 1 a 31.','err'); return; }
+  var l=vencDias(d); if(l.indexOf(v)<0) l.push(v);
+  d.vencDias=l.sort(function(a,b){return a-b;}); d.vencSet=true;
+  sud(d,function(){ rDash(); });
+}
+function vencRem(dia){
+  var d=ud(); d.vencDias=vencDias(d).filter(function(x){return x!==dia;}); d.vencSet=true;
+  sud(d,function(){ rDash(); });
+}
 function dashVencHtml(d){
-  var DIAS=[5,10];
+  var DIAS=vencDias(d);
   var pm=S.month-1, py=S.year; if(pm<0){pm=11;py--;}
   // Cartao de credito: fatura do mes anterior (por cartao)
   var gc=(d.gastos_credito||[]).filter(function(x){ var dd=new Date(x.date+'T12:00:00'); return dd.getMonth()===pm&&dd.getFullYear()===py; });
@@ -2382,14 +2402,15 @@ function dashVencHtml(d){
       var v=parseFloat(x.val||0); porDia[dia].v+=v; porDia[dia].n++; totVar+=v; if(!x.pg) abertoVar+=v;
     });
   });
-  var h='<div class="venc"><div class="venc-head"><span class="venc-title"><span class="mi">event_upcoming</span>Vencimentos dos dias 5 e 10</span><span class="venc-sub">'+MONTHS[S.month]+' '+S.year+'</span></div><div class="venc-grid">';
+  var h='<div class="venc"><div class="venc-head"><span class="venc-title"><span class="mi">event_upcoming</span>Vencimentos '+(DIAS.length===1?'do dia ':'dos dias ')+vencTxt(DIAS)+'</span><span class="venc-sub">'+MONTHS[S.month]+' '+S.year+'</span></div><div class="venc-grid">';
   h+='<div class="venc-box"><div class="venc-lbl"><span class="mi">credit_card</span>Cartão de crédito · '+MONTHS[pm]+'</div><div class="venc-val">'+fmtTxt(totCart)+'</div>';
   h+=porCartao.length?porCartao.map(function(c){ return '<div class="venc-row"><span>'+esc(c.nome)+'<span class="venc-tag '+(c.paga?'ok':'pend')+'">'+(c.paga?'Paga':'Em aberto')+'</span></span><b>'+fmtTxt(c.v)+'</b></div>'; }).join(''):'<div class="venc-row"><span>Nenhum gasto no cartão em '+MONTHS[pm]+'.</span></div>';
   h+='</div>';
   h+='<div class="venc-box"><div class="venc-lbl"><span class="mi">receipt_long</span>Contas variáveis · '+MONTHS[S.month]+'</div><div class="venc-val">'+fmtTxt(totVar)+'</div>';
-  h+=DIAS.map(function(dia){ var o=porDia[dia]; return '<div class="venc-row"><span>Dia '+String(dia).padStart(2,'0')+' · '+o.n+' conta'+(o.n===1?'':'s')+'</span><b>'+fmtTxt(o.v)+'</b></div>'; }).join('');
+  h+=DIAS.map(function(dia){ var o=porDia[dia]; return '<div class="venc-row"><span>Dia '+String(dia).padStart(2,'0')+' · '+o.n+' conta'+(o.n===1?'':'s')+'<button class="venc-x" title="Remover dia" onclick="vencRem('+dia+')">×</button></span><b>'+fmtTxt(o.v)+'</b></div>'; }).join('');
+  h+='<div class="venc-add"><input id="venc-dia" type="number" min="1" max="31" inputmode="numeric" placeholder="Dia (1-31)" onkeydown="if(event.key===\'Enter\')vencAdd()"><button class="btn btn-ghost btn-sm" onclick="vencAdd()">+ Adicionar dia</button></div>';
   h+='</div></div>';
-  h+='<div class="venc-total"><span>Total em aberto nos dias 5 e 10</span><b>'+fmtTxt(abertoCart+abertoVar)+'</b></div></div>';
+  h+='<div class="venc-total"><span>Total em aberto '+(DIAS.length===1?'no dia ':'nos dias ')+vencTxt(DIAS)+'</span><b>'+fmtTxt(abertoCart+abertoVar)+'</b></div></div>';
   return h;
 }
 function dashKpisHtml(d,o){
