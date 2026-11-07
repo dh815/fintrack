@@ -1010,7 +1010,7 @@ td.selc{width:34px;padding-right:0}
 .venc-title{font-size:13px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;display:flex;align-items:center;gap:6px}
 .venc-title .mi{font-size:18px;color:var(--teal)}
 .venc-sub{font-size:11px;color:var(--t3)}
-.venc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.venc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
 .venc-box{border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:var(--s2);min-width:0}
 .venc-lbl{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;display:flex;align-items:center;gap:6px}
 .venc-lbl .mi{font-size:16px}
@@ -1024,6 +1024,7 @@ td.selc{width:34px;padding-right:0}
 .venc-total span{font-size:12px;font-weight:700;color:#14532D;text-transform:uppercase;letter-spacing:.5px}
 .venc-total b{font-size:20px;font-weight:800;color:#14532D}
 .venc-x{border:none;background:transparent;color:var(--t3);font-size:16px;line-height:1;cursor:pointer;margin-left:6px;padding:0 4px}
+.venc-dia{margin-left:6px;font-size:11px;color:var(--t3)}
 .venc-chips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 8px}
 .venc-chip{border:1px solid var(--border);background:var(--s1);color:var(--t2);border-radius:99px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
 .venc-chip.on{background:var(--teal-dim);color:var(--teal);border-color:var(--teal)}
@@ -2429,6 +2430,13 @@ function dashVencHtml(d){
       var v=parseFloat(x.val||0); porDia[dia].v+=v; porDia[dia].n++; totVar+=v; if(!x.pg) abertoVar+=v;
     });
   });
+  // Gastos fixos do mes selecionado cujo dia de vencimento esta entre os dias escolhidos
+  var fixos=(d.gastosFixos||[]).filter(function(gf){ return DIAS.indexOf(parseInt(gf.dia,10)||1)>=0; }).sort(function(a,b){ return (parseInt(a.dia,10)||1)-(parseInt(b.dia,10)||1); });
+  var totFix=0, abertoFix=0;
+  var linhasFix=fixos.map(function(gf){
+    var v=parseFloat(gf.val||0), paga=gfPagoNoMes(d,gf); totFix+=v; if(!paga) abertoFix+=v;
+    return '<div class="venc-row"><span>'+esc(gf.desc)+'<span class="venc-tag '+(paga?'ok':'pend')+'">'+(paga?'Pago':'Em aberto')+'</span><span class="venc-dia">dia '+String(parseInt(gf.dia,10)||1).padStart(2,'0')+'</span></span><b>'+fmtTxt(v)+'</b></div>';
+  }).join('');
   var h='<div class="venc"><div class="venc-head"><span class="venc-title"><span class="mi">event_upcoming</span>Vencimentos '+(DIAS.length===1?'do dia ':'dos dias ')+vencTxt(DIAS)+'</span><span class="venc-sub">'+MONTHS[S.month]+' '+S.year+'</span></div><div class="venc-grid">';
   h+='<div class="venc-box"><div class="venc-lbl"><span class="mi">credit_card</span>Cartão de crédito · '+MONTHS[pm]+'</div><div class="venc-val">'+fmtTxt(totCart)+'</div>';
   if(opcoes.length>1){ h+='<div class="venc-chips"><button class="venc-chip'+(!d.vencCartSet?' on':'')+'" onclick="vencCartTodos()">Todos</button>'+opcoes.map(function(o){ return '<button class="venc-chip'+(d.vencCartSet&&CSEL.indexOf(o.id)>=0?' on':'')+'" onclick="vencCartTog(\''+escq(o.id)+'\')">'+esc(o.nome)+'</button>'; }).join('')+'</div>'; }
@@ -2437,8 +2445,11 @@ function dashVencHtml(d){
   h+='<div class="venc-box"><div class="venc-lbl"><span class="mi">receipt_long</span>Contas variáveis · '+MONTHS[S.month]+'</div><div class="venc-val">'+fmtTxt(totVar)+'</div>';
   h+=DIAS.map(function(dia){ var o=porDia[dia]; return '<div class="venc-row"><span>Dia '+String(dia).padStart(2,'0')+' · '+o.n+' conta'+(o.n===1?'':'s')+'<button class="venc-x" title="Remover dia" onclick="vencRem('+dia+')">×</button></span><b>'+fmtTxt(o.v)+'</b></div>'; }).join('');
   h+='<div class="venc-add"><input id="venc-dia" type="number" min="1" max="31" inputmode="numeric" placeholder="Dia (1-31)" onkeydown="if(event.key===\'Enter\')vencAdd()"><button class="btn btn-ghost btn-sm" onclick="vencAdd()">+ Adicionar dia</button></div>';
+  h+='</div>';
+  h+='<div class="venc-box"><div class="venc-lbl"><span class="mi">event_repeat</span>Gastos fixos · '+MONTHS[S.month]+'</div><div class="venc-val">'+fmtTxt(totFix)+'</div>';
+  h+=linhasFix||'<div class="venc-row"><span>Nenhum gasto fixo '+(DIAS.length===1?'no dia ':'nos dias ')+vencTxt(DIAS)+'.</span></div>';
   h+='</div></div>';
-  h+='<div class="venc-total"><span>Total em aberto '+(DIAS.length===1?'no dia ':'nos dias ')+vencTxt(DIAS)+'</span><b>'+fmtTxt(abertoCart+abertoVar)+'</b></div></div>';
+  h+='<div class="venc-total"><span>Total em aberto '+(DIAS.length===1?'no dia ':'nos dias ')+vencTxt(DIAS)+'</span><b>'+fmtTxt(abertoCart+abertoVar+abertoFix)+'</b></div></div>';
   return h;
 }
 function dashKpisHtml(d,o){
