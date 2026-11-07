@@ -1024,6 +1024,9 @@ td.selc{width:34px;padding-right:0}
 .venc-total span{font-size:12px;font-weight:700;color:#14532D;text-transform:uppercase;letter-spacing:.5px}
 .venc-total b{font-size:20px;font-weight:800;color:#14532D}
 .venc-x{border:none;background:transparent;color:var(--t3);font-size:16px;line-height:1;cursor:pointer;margin-left:6px;padding:0 4px}
+.venc-chips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 8px}
+.venc-chip{border:1px solid var(--border);background:var(--s1);color:var(--t2);border-radius:99px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.venc-chip.on{background:var(--teal-dim);color:var(--teal);border-color:var(--teal)}
 .venc-add{display:flex;gap:8px;align-items:center;margin-top:8px;border-top:1px solid var(--border);padding-top:10px}
 .venc-add input{flex:1;min-width:0;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:16px;background:var(--s1);color:var(--t1)}
 @media(max-width:768px){.venc-grid{grid-template-columns:1fr}.venc{padding:14px}}
@@ -2377,21 +2380,40 @@ function vencRem(dia){
   var d=ud(); d.vencDias=vencDias(d).filter(function(x){return x!==dia;}); d.vencSet=true;
   sud(d,function(){ rDash(); });
 }
+function vencCartIds(d){
+  var all=(d.cartoes||[]).map(function(c){return c.id;}); all.push('outros');
+  if(!d.vencCartSet) return all;
+  var sel=d.vencCartoes||[];
+  return all.filter(function(x){return sel.indexOf(x)>=0;});
+}
+function vencCartTog(id){
+  var d=ud(), all=(d.cartoes||[]).map(function(c){return c.id;}); all.push('outros');
+  var sel=vencCartIds(d), i=sel.indexOf(id);
+  if(i>=0) sel.splice(i,1); else sel.push(id);
+  d.vencCartoes=sel; d.vencCartSet=true;
+  sud(d,function(){ rDash(); });
+}
+function vencCartTodos(){
+  var d=ud(); d.vencCartoes=[]; d.vencCartSet=false;
+  sud(d,function(){ rDash(); });
+}
 function dashVencHtml(d){
   var DIAS=vencDias(d);
+  var CSEL=vencCartIds(d);
   var pm=S.month-1, py=S.year; if(pm<0){pm=11;py--;}
   // Cartao de credito: fatura do mes anterior (por cartao)
   var gc=(d.gastos_credito||[]).filter(function(x){ var dd=new Date(x.date+'T12:00:00'); return dd.getMonth()===pm&&dd.getFullYear()===py; });
-  var cartoes=d.cartoes||[], porCartao=[], totCart=0, abertoCart=0, ids={};
+  var cartoes=d.cartoes||[], porCartao=[], totCart=0, abertoCart=0, ids={}, opcoes=[];
   cartoes.forEach(function(c){
     var v=gc.filter(function(x){return x.cartao_id===c.id;}).reduce(function(a,x){return a+parseFloat(x.val||0);},0);
     ids[c.id]=1;
-    if(v<=0) return;
+    opcoes.push({id:c.id,nome:c.nome||'Cartão'});
+    if(v<=0||CSEL.indexOf(c.id)<0) return;
     var paga=((d.faturas||{})['fat_'+py+'_'+pm+'_'+c.id]==='paga');
     porCartao.push({nome:c.nome||'Cartão',v:v,paga:paga}); totCart+=v; if(!paga) abertoCart+=v;
   });
   var sem=gc.filter(function(x){return !ids[x.cartao_id];}).reduce(function(a,x){return a+parseFloat(x.val||0);},0);
-  if(sem>0){ porCartao.push({nome:'Outros',v:sem,paga:false}); totCart+=sem; abertoCart+=sem; }
+  if(sem>0){ opcoes.push({id:'outros',nome:'Outros'}); if(CSEL.indexOf('outros')>=0){ porCartao.push({nome:'Outros',v:sem,paga:false}); totCart+=sem; abertoCart+=sem; } }
   // Contas variaveis do mes selecionado com vencimento nos dias 5 e 10
   var porDia={}, totVar=0, abertoVar=0;
   DIAS.forEach(function(dia){ porDia[dia]={v:0,n:0}; });
@@ -2406,7 +2428,8 @@ function dashVencHtml(d){
   });
   var h='<div class="venc"><div class="venc-head"><span class="venc-title"><span class="mi">event_upcoming</span>Vencimentos '+(DIAS.length===1?'do dia ':'dos dias ')+vencTxt(DIAS)+'</span><span class="venc-sub">'+MONTHS[S.month]+' '+S.year+'</span></div><div class="venc-grid">';
   h+='<div class="venc-box"><div class="venc-lbl"><span class="mi">credit_card</span>Cartão de crédito · '+MONTHS[pm]+'</div><div class="venc-val">'+fmtTxt(totCart)+'</div>';
-  h+=porCartao.length?porCartao.map(function(c){ return '<div class="venc-row"><span>'+esc(c.nome)+'<span class="venc-tag '+(c.paga?'ok':'pend')+'">'+(c.paga?'Paga':'Em aberto')+'</span></span><b>'+fmtTxt(c.v)+'</b></div>'; }).join(''):'<div class="venc-row"><span>Nenhum gasto no cartão em '+MONTHS[pm]+'.</span></div>';
+  if(opcoes.length>1){ h+='<div class="venc-chips"><button class="venc-chip'+(!d.vencCartSet?' on':'')+'" onclick="vencCartTodos()">Todos</button>'+opcoes.map(function(o){ return '<button class="venc-chip'+(d.vencCartSet&&CSEL.indexOf(o.id)>=0?' on':'')+'" onclick="vencCartTog(\''+escq(o.id)+'\')">'+esc(o.nome)+'</button>'; }).join('')+'</div>'; }
+  h+=porCartao.length?porCartao.map(function(c){ return '<div class="venc-row"><span>'+esc(c.nome)+'<span class="venc-tag '+(c.paga?'ok':'pend')+'">'+(c.paga?'Paga':'Em aberto')+'</span></span><b>'+fmtTxt(c.v)+'</b></div>'; }).join(''):'<div class="venc-row"><span>'+(CSEL.length?'Nenhum gasto no cartão em '+MONTHS[pm]+'.':'Nenhum cartão selecionado.')+'</span></div>';
   h+='</div>';
   h+='<div class="venc-box"><div class="venc-lbl"><span class="mi">receipt_long</span>Contas variáveis · '+MONTHS[S.month]+'</div><div class="venc-val">'+fmtTxt(totVar)+'</div>';
   h+=DIAS.map(function(dia){ var o=porDia[dia]; return '<div class="venc-row"><span>Dia '+String(dia).padStart(2,'0')+' · '+o.n+' conta'+(o.n===1?'':'s')+'<button class="venc-x" title="Remover dia" onclick="vencRem('+dia+')">×</button></span><b>'+fmtTxt(o.v)+'</b></div>'; }).join('');
