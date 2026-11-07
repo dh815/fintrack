@@ -3870,6 +3870,7 @@ function extCategorize(desc,isEnt,cats){
 }
 function extIsDupCred(d,row){
   var a=Math.abs(row.val);
+  if(row.fid&&(d.gastos_credito||[]).some(function(x){return x.fid===row.fid;})) return true;
   return (d.gastos_credito||[]).some(function(x){ return x.date===row.date&&Math.abs(parseFloat(x.val)-a)<0.005&&extNorm(x.desc).slice(0,5)===extNorm(row.desc).slice(0,5); });
 }
 function extIsDup(d,row){
@@ -3885,7 +3886,7 @@ function abrirExtrato(modo){
   if(!isPro()){showUpgrade('Importar extrato');return;}
   EXT.modo=(modo==='credito')?'credito':''; EXT.cartao='';
   g('ext-titulo').textContent=EXT.modo?'Importar fatura do cartão':'Importar extrato'; g('ext-cartao-wrap').style.display='none';
-  g('extratoModal').style.display='flex'; g('ext-up').style.display='block'; g('ext-banco').style.display=(S.isAdmin&&!EXT.modo)?'block':'none'; g('ext-rev').style.display='none'; g('ext-err').style.display='none'; g('ext-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharExtrato()">Cancelar</button>';
+  g('extratoModal').style.display='flex'; g('ext-up').style.display='block'; g('ext-banco').style.display=S.isAdmin?'block':'none'; g('ext-rev').style.display='none'; g('ext-err').style.display='none'; g('ext-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharExtrato()">Cancelar</button>';
 }
 function fecharExtrato(){ g('extratoModal').style.display='none'; var i=g('ext-input'); if(i) i.value=''; }
 function extDrop(e){ e.preventDefault(); if(e.dataTransfer.files[0]) extLer(e.dataTransfer.files[0]); }
@@ -3970,7 +3971,7 @@ function extRevisar(rows){
   }
   rows.sort(function(a,b){return a.date<b.date?1:-1;});
   if(EXT.modo==='credito'){
-    EXT.rows=rows.map(function(r){ var dup=extIsDupCred(d,r), pag=EXT_PAGRE.test(extNorm(r.desc)); return {date:r.date,desc:r.desc,val:Math.abs(r.val),fid:r.fid,tipo:'sai',cat:extCategorize(r.desc,false,d.cats),dup:dup,sel:!dup&&!pag}; });
+    EXT.rows=rows.map(function(r){ var dup=extIsDupCred(d,r), pag=EXT_PAGRE.test(extNorm(r.desc))||(!!r.fid&&r.val>0); return {date:r.date,desc:r.desc,val:Math.abs(r.val),fid:r.fid,tipo:'sai',cat:extCategorize(r.desc,false,d.cats),dup:dup,sel:!dup&&!pag}; });
     var cs=g('ext-cartao'); cs.innerHTML='<option value="">Selecione o cartão...</option>'+d.cartoes.map(function(c){return '<option value="'+esc(c.id)+'">'+esc(c.nome||c.name||'Cartão')+'</option>';}).join('');
     g('ext-cartao-wrap').style.display='block';
   } else {
@@ -3988,12 +3989,12 @@ function extBuscarBanco(){
   function iso(x){ return x.getFullYear()+'-'+p2(x.getMonth()+1)+'-'+p2(x.getDate()); }
   function volta(){ b.disabled=false; b.innerHTML='<span class="mi" style="font-size:16px">account_balance</span> Buscar direto do banco'; }
   u.getIdToken().then(function(tk){
-    return fetch(SERVER+'/bancos/movimentacoes',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tk},body:JSON.stringify({de:iso(ini),ate:iso(fim)})});
+    return fetch(SERVER+'/bancos/movimentacoes',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tk},body:JSON.stringify({de:iso(ini),ate:iso(fim),tipo:EXT.modo?'cartao':'conta'})});
   }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); }).then(function(x){
     volta();
     if(!x.ok){ extErro(x.j.error||'Não foi possível buscar agora.'); return; }
     var rows=(x.j.movimentacoes||[]).filter(function(m){return m.date;});
-    if(!rows.length){ extErro('O banco não trouxe movimentações de '+MONTHS[S.month]+'/'+S.year+'.'+(x.j.contas===0?' Nenhuma conta encontrada: confira a conexão no Meu Pluggy (a autorização dura 1 ano).':'')); return; }
+    if(!rows.length){ extErro('O banco não trouxe movimentações de '+MONTHS[S.month]+'/'+S.year+'.'+(x.j.contas===0?(EXT.modo?' Nenhum cartão de crédito encontrado na conexão: confira se o cartão está autorizado no Meu Pluggy.':' Nenhuma conta encontrada: confira a conexão no Meu Pluggy (a autorização dura 1 ano).'):'')); return; }
     extRevisar(rows);
   }).catch(function(){ volta(); extErro('Falha de conexão com o servidor. Tente de novo.'); });
 }
@@ -4023,7 +4024,7 @@ function extSalvar(){
   if(EXT.modo==='credito'){
     if(!EXT.cartao){toast('Escolha o cartão.','err');return;}
     if(!d.gastos_credito) d.gastos_credito=[];
-    EXT.rows.forEach(function(r){ if(!r.sel) return; d.gastos_credito.push({id:uid(),desc:r.desc,val:r.val,date:r.date,cat:r.cat,cartao_id:EXT.cartao,ori:'Extrato'}); ns++; });
+    EXT.rows.forEach(function(r){ if(!r.sel) return; var gc={id:uid(),desc:r.desc,val:r.val,date:r.date,cat:r.cat,cartao_id:EXT.cartao,ori:'Extrato'}; if(r.fid) gc.fid=r.fid; d.gastos_credito.push(gc); ns++; });
     sud(d,function(){ fecharExtrato(); toast(ns+' gastos lançados no cartão!','ok'); if(S.page==='credito')rCredito(); if(S.page==='dashboard')rDash(); });
     return;
   }
