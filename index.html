@@ -1351,7 +1351,10 @@ td.selc{width:34px;padding-right:0}
           <div class="panel">
             <div class="panel-head">
               <span class="panel-title">Carteira</span>
-              <button class="btn btn-primary" onclick="openModal('investimento',null)">+ Novo investimento</button>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+                <button class="btn btn-ghost" id="inv-banco-btn" style="display:none" onclick="invBancoSync(true)"><span class="mi" style="font-size:16px">account_balance</span> Atualizar do banco</button>
+                <button class="btn btn-primary" onclick="openModal('investimento',null)">+ Novo investimento</button>
+              </div>
             </div>
             <div style="padding:12px 20px" id="i-list"></div>
           </div>
@@ -3233,6 +3236,46 @@ function rInv(){
       '</div></div></div>';
   }).join(''):empt('Nenhum investimento cadastrado');
   try{ invAutoRender(d); }catch(e3){ console.error(e3); }
+  var bb=g('inv-banco-btn'); if(bb) bb.style.display=S.isAdmin?'inline-flex':'none';
+  if(S.isAdmin&&!window.__invSyncing&&(Date.now()-(window.__invSyncTry||0))>600000&&(Date.now()-(d.invSyncAt||0))>21600000){ invBancoSync(false); }
+}
+function invBancoSync(manual){
+  var SERVER='https://fintrack-server-production-9d87.up.railway.app';
+  var u=null; try{ u=fauth.currentUser; }catch(e){}
+  if(!u){ if(manual) toast('Faça login de novo para buscar do banco.','err'); return; }
+  if(window.__invSyncing) return;
+  window.__invSyncing=true; window.__invSyncTry=Date.now();
+  var b=g('inv-banco-btn'); if(b&&manual){ b.disabled=true; b.textContent='Buscando no banco...'; }
+  function volta(){ window.__invSyncing=false; var bt=g('inv-banco-btn'); if(bt){ bt.disabled=false; bt.innerHTML='<span class="mi" style="font-size:16px">account_balance</span> Atualizar do banco'; } }
+  u.getIdToken().then(function(tk){
+    return fetch(SERVER+'/bancos/investimentos',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tk}});
+  }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); }).then(function(x){
+    if(!x.ok){ volta(); if(manual) toast(x.j.error||'Não foi possível buscar agora.','err'); return; }
+    var d=ud(); if(!d.inv) d.inv=[];
+    var lista=x.j.investimentos||[], novos=0, atual=0, zer=0;
+    var hoje=new Date(); var hojeIso=hoje.getFullYear()+'-'+p2(hoje.getMonth()+1)+'-'+p2(hoje.getDate());
+    lista.forEach(function(p){
+      var ex=d.inv.find(function(i){return i.fid===p.fid;});
+      var val=Math.round((parseFloat(p.val)||0)*100)/100, yld=Math.round((parseFloat(p.yld)||0)*100)/100;
+      if(ex){
+        if(p.ativo){ if(parseFloat(ex.val)!==val||parseFloat(ex.yld||0)!==yld){ ex.val=val; ex.yld=yld; atual++; } }
+        else if(parseFloat(ex.val||0)!==0){ ex.val=0; zer++; }
+      } else if(p.ativo&&val>0){
+        var tp=(d.cats&&d.cats.investimento||[]).indexOf(p.type)>=0?p.type:'Outros';
+        d.inv.push({id:uid(),name:p.name,type:tp,inst:p.inst||'',val:val,yld:yld,date:p.date||hojeIso,obs:'Importado do banco',fid:p.fid,ori:'Banco'});
+        novos++;
+      }
+    });
+    d.invSyncAt=Date.now();
+    sud(d,function(){
+      volta();
+      if(manual){
+        if(!lista.length) toast('O banco não trouxe investimentos. Confira a conexão no Meu Pluggy.','err');
+        else toast(novos+' novo(s), '+atual+' atualizado(s)'+(zer?', '+zer+' encerrado(s)':'')+'.','ok');
+      }
+      if(S.page==='investimentos') rInv();
+    });
+  }).catch(function(){ volta(); if(manual) toast('Falha de conexão com o servidor. Tente de novo.','err'); });
 }
 
 // ===== GUARDAR DINHEIRO (manual + automático) =====
