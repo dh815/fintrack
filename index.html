@@ -1005,6 +1005,25 @@ td.selc{width:34px;padding-right:0}
 .fchip button{border:none;background:transparent;color:inherit;width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:15px;line-height:1;padding:0}
 .fchip button:hover{background:rgba(22,163,74,.18)}
 .fchips .fchips-lbl{font-size:11px;color:var(--t3);font-weight:600}
+.venc{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:22px}
+.venc-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:12px}
+.venc-title{font-size:13px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.8px;display:flex;align-items:center;gap:6px}
+.venc-title .mi{font-size:18px;color:var(--teal)}
+.venc-sub{font-size:11px;color:var(--t3)}
+.venc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.venc-box{border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:var(--s2);min-width:0}
+.venc-lbl{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;display:flex;align-items:center;gap:6px}
+.venc-lbl .mi{font-size:16px}
+.venc-val{font-size:24px;font-weight:800;letter-spacing:-.5px;margin:4px 0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.venc-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;padding:6px 0;border-top:1px solid var(--border);min-width:0}
+.venc-row span:first-child{color:var(--t2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.venc-row b{font-weight:700;white-space:nowrap}
+.venc-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;margin-left:6px}
+.venc-tag.ok{background:var(--teal-dim);color:var(--teal)} .venc-tag.pend{background:var(--yel-dim);color:var(--yellow)}
+.venc-total{margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 14px;border-radius:12px;background:#F0FDF4;border:1px solid var(--teal)}
+.venc-total span{font-size:12px;font-weight:700;color:#14532D;text-transform:uppercase;letter-spacing:.5px}
+.venc-total b{font-size:20px;font-weight:800;color:#14532D}
+@media(max-width:768px){.venc-grid{grid-template-columns:1fr}.venc{padding:14px}}
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -1182,6 +1201,7 @@ td.selc{width:34px;padding-right:0}
           <div class="hero-saldo" id="d-hero"></div>
           <div class="kpi-head"><span class="kpi-head-title">Indicadores do m&#234;s</span><span class="kpi-head-sub" id="d-kpi-period"></span></div>
           <div class="kpi-grid" id="d-kpis"></div>
+          <div id="d-venc"></div>
           <div class="metrics" id="d-metrics"></div>
           <div id="d-insights"></div>
 
@@ -1328,6 +1348,20 @@ td.selc{width:34px;padding-right:0}
               <button class="btn btn-primary" onclick="openModal('investimento',null)">+ Novo investimento</button>
             </div>
             <div style="padding:12px 20px" id="i-list"></div>
+          </div>
+          <div class="panel" style="margin-top:16px">
+            <div class="panel-head">
+              <span class="panel-title">Guardar automaticamente</span>
+              <button class="btn btn-primary" onclick="openInvAuto()">+ Nova regra</button>
+            </div>
+            <div style="padding:12px 20px" id="i-auto"></div>
+          </div>
+          <div class="panel" style="margin-top:16px">
+            <div class="panel-head">
+              <span class="panel-title">Guardado no mês</span>
+              <button class="btn btn-ghost" onclick="openAporte()">+ Guardar agora</button>
+            </div>
+            <div style="padding:12px 20px" id="i-aportes"></div>
           </div>
         </div>
 
@@ -1781,10 +1815,13 @@ function loadUD(cb){
       if(!data.cartoes) data.cartoes=[];
       if(!data.gastos_credito) data.gastos_credito=[];
       if(!data.gastosFixos) data.gastosFixos=[];
+      if(!data.aportes) data.aportes=[];
+      if(!data.invAuto) data.invAuto=[];
       if(!data.cats) data.cats={entrada:['Salário','Freelance','Outros'],saida:['Alimentação','Transporte','Moradia','Saúde','Lazer','Educação','Vestuário','Assinaturas','Outros'],investimento:['Renda Fixa','Renda Variável','Outros']};
       _cache = data;
+      try{ if(invAutoRun(_cache)) getUserRef().set(_cache); }catch(eA){ console.error(eA); }
     } else {
-      _cache = {ent:[],sai:[],parc:[],plans:[],inv:[],cartoes:[],gastos_credito:[],gastosFixos:[],cats:{
+      _cache = {ent:[],sai:[],parc:[],plans:[],inv:[],cartoes:[],gastos_credito:[],gastosFixos:[],aportes:[],invAuto:[],cats:{
         entrada:['Salário','Freelance','Aluguel','Investimento','Bônus','Outros'],
         saida:['Alimentação','Transporte','Moradia','Saúde','Lazer','Educação','Vestuário','Parcela','Assinaturas','Outros'],
         investimento:['Renda Fixa','Renda Variável','FIIs','Ações','Criptomoedas','Poupança','Tesouro Direto','Outros']
@@ -2234,7 +2271,7 @@ function rDash(){
   var d=ud(); if(!d) return;
   var ent=d.ent.filter(function(e){return inM(e.date);});
   var sai=d.sai.filter(function(s){return inM(s.date);});
-  var tE=sum(ent), tS=sum(sai), sal=tE-tS;
+  var tE=sum(ent), tS=sum(sai), tA=apTotalMes(d,S.month,S.year), sal=tE-tS-tA;
   var invT=sum(d.inv), pAb=d.parc.filter(function(p){return p.st==='ativo';}).length;
   var gfTotal=(d.gastosFixos||[]).reduce(function(a,x){return a+parseFloat(x.val||0);},0);
   var cartTotal=totalFaturaMes(d,null);
@@ -2255,7 +2292,7 @@ function rDash(){
   var pm=S.month-1, py=S.year; if(pm<0){pm=11;py--;}
   var entPrev=d.ent.filter(function(e){var dd=new Date(e.date+'T12:00:00');return dd.getMonth()===pm&&dd.getFullYear()===py;});
   var saiPrev=d.sai.filter(function(s){var dd=new Date(s.date+'T12:00:00');return dd.getMonth()===pm&&dd.getFullYear()===py;});
-  var salPrev=sum(entPrev)-sum(saiPrev);
+  var salPrev=sum(entPrev)-sum(saiPrev)-apTotalMes(d,pm,py);
   var diff=sal-salPrev;
   var up=diff>=0;
   var deltaTxt;
@@ -2274,7 +2311,8 @@ function rDash(){
     '<div class="hero-mobile-header" id="hero-mobile-header">'+esc(S.accName||S.user||'')+' · '+MONTHS[S.month]+' '+S.year+'</div>'+
     '<div class="hero-saldo-label">Saldo do mês</div>'+
     '<div class="hero-saldo-val" style="color:'+(sal>=0?'var(--teal)':'var(--red)')+'">'+fmtHero(sal)+'</div>'+
-    deltaHtml;
+    deltaHtml+
+    (tA>0?'<div class="hero-saldo-sub">Guardado no mês: '+fmtTxt(tA)+' (já descontado)</div>':'');
 
   // METRICS
   g('d-metrics').innerHTML=
@@ -2290,6 +2328,7 @@ function rDash(){
   try{
     g('d-kpis').innerHTML=dashKpisHtml(d,{tE:tE,tS:tS,sal:sal,entPrev:entPrev,saiPrev:saiPrev,gfTotal:gfTotal,cartTotal:cartTotal,invT:invT});
     g('d-kpi-period').textContent=MONTHS[S.month]+' '+S.year;
+    try{ g('d-venc').innerHTML=dashVencHtml(d); }catch(e2){ console.error(e2); }
   }catch(e){ g('d-kpis').innerHTML=''; }
 
   // draw charts after DOM update
@@ -2316,6 +2355,43 @@ function kpiCard(icon,label,badge,valCls,valTxt,barPct,barCls,sub,small){
     (barPct==null?'':'<div class="kpi-bar"><i class="'+barCls+'" style="width:'+Math.max(0,Math.min(100,barPct)).toFixed(1)+'%"></i></div>')+
     '<div class="kpi-sub">'+sub+'</div>'+
   '</div>';
+}
+function dashVencHtml(d){
+  var DIAS=[5,10];
+  var pm=S.month-1, py=S.year; if(pm<0){pm=11;py--;}
+  // Cartao de credito: fatura do mes anterior (por cartao)
+  var gc=(d.gastos_credito||[]).filter(function(x){ var dd=new Date(x.date+'T12:00:00'); return dd.getMonth()===pm&&dd.getFullYear()===py; });
+  var cartoes=d.cartoes||[], porCartao=[], totCart=0, abertoCart=0, ids={};
+  cartoes.forEach(function(c){
+    var v=gc.filter(function(x){return x.cartao_id===c.id;}).reduce(function(a,x){return a+parseFloat(x.val||0);},0);
+    ids[c.id]=1;
+    if(v<=0) return;
+    var paga=((d.faturas||{})['fat_'+py+'_'+pm+'_'+c.id]==='paga');
+    porCartao.push({nome:c.nome||'Cartão',v:v,paga:paga}); totCart+=v; if(!paga) abertoCart+=v;
+  });
+  var sem=gc.filter(function(x){return !ids[x.cartao_id];}).reduce(function(a,x){return a+parseFloat(x.val||0);},0);
+  if(sem>0){ porCartao.push({nome:'Outros',v:sem,paga:false}); totCart+=sem; abertoCart+=sem; }
+  // Contas variaveis do mes selecionado com vencimento nos dias 5 e 10
+  var porDia={}, totVar=0, abertoVar=0;
+  DIAS.forEach(function(dia){ porDia[dia]={v:0,n:0}; });
+  (d.parc||[]).forEach(function(pc){
+    if(pc.st!=='ativo') return;
+    (pc.pars||[]).forEach(function(x){
+      if(!inM(x.date)) return;
+      var dia=new Date(x.date+'T12:00:00').getDate();
+      if(DIAS.indexOf(dia)<0) return;
+      var v=parseFloat(x.val||0); porDia[dia].v+=v; porDia[dia].n++; totVar+=v; if(!x.pg) abertoVar+=v;
+    });
+  });
+  var h='<div class="venc"><div class="venc-head"><span class="venc-title"><span class="mi">event_upcoming</span>Vencimentos dos dias 5 e 10</span><span class="venc-sub">'+MONTHS[S.month]+' '+S.year+'</span></div><div class="venc-grid">';
+  h+='<div class="venc-box"><div class="venc-lbl"><span class="mi">credit_card</span>Cartão de crédito · '+MONTHS[pm]+'</div><div class="venc-val">'+fmtTxt(totCart)+'</div>';
+  h+=porCartao.length?porCartao.map(function(c){ return '<div class="venc-row"><span>'+esc(c.nome)+'<span class="venc-tag '+(c.paga?'ok':'pend')+'">'+(c.paga?'Paga':'Em aberto')+'</span></span><b>'+fmtTxt(c.v)+'</b></div>'; }).join(''):'<div class="venc-row"><span>Nenhum gasto no cartão em '+MONTHS[pm]+'.</span></div>';
+  h+='</div>';
+  h+='<div class="venc-box"><div class="venc-lbl"><span class="mi">receipt_long</span>Contas variáveis · '+MONTHS[S.month]+'</div><div class="venc-val">'+fmtTxt(totVar)+'</div>';
+  h+=DIAS.map(function(dia){ var o=porDia[dia]; return '<div class="venc-row"><span>Dia '+String(dia).padStart(2,'0')+' · '+o.n+' conta'+(o.n===1?'':'s')+'</span><b>'+fmtTxt(o.v)+'</b></div>'; }).join('');
+  h+='</div></div>';
+  h+='<div class="venc-total"><span>Total em aberto nos dias 5 e 10</span><b>'+fmtTxt(abertoCart+abertoVar)+'</b></div></div>';
+  return h;
 }
 function dashKpisHtml(d,o){
   var tE=o.tE, tS=o.tS, sal=o.sal;
@@ -3106,10 +3182,139 @@ function rInv(){
       '<div style="display:flex;justify-content:space-between;align-items:center">'+
       '<span style="font-size:11px;color:var(--t3)">Aporte: '+fd(i.date)+'</span>'+
       '<div style="display:flex;gap:6px">'+
+      '<button class="btn btn-primary btn-sm" onclick="openAporte(\''+escq(i.id)+'\')">Guardar</button>'+
       '<button class="btn btn-edit btn-sm" onclick="editIt(\'inv\',\''+escq(i.id)+'\')">Editar</button>'+
       '<button class="btn btn-del btn-sm" onclick="delIt(\'inv\',\''+escq(i.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
       '</div></div></div>';
   }).join(''):empt('Nenhum investimento cadastrado');
+  try{ invAutoRender(d); }catch(e3){ console.error(e3); }
+}
+
+// ===== GUARDAR DINHEIRO (manual + automático) =====
+function p2(n){ return (n<10?'0':'')+n; }
+function apAtivos(d){ return (d.aportes||[]).filter(function(a){return !a.est;}); }
+function apTotalMes(d,m,y){
+  return apAtivos(d).reduce(function(t,a){
+    var dd=new Date(a.date+'T12:00:00');
+    return (dd.getMonth()===m&&dd.getFullYear()===y)?t+parseFloat(a.val||0):t;
+  },0);
+}
+function invAutoRun(d){
+  if(!d||!(d.invAuto||[]).length) return false;
+  if(!d.aportes) d.aportes=[];
+  var ch=false, n=new Date(), hoje=n.getFullYear()+'-'+p2(n.getMonth()+1)+'-'+p2(n.getDate());
+  d.invAuto.forEach(function(r){
+    if(!r.ativo) return;
+    var inv=(d.inv||[]).find(function(x){return x.id===r.inv_id;}); if(!inv) return;
+    var ini=r.ini||hoje, c=new Date(ini+'T12:00:00'), y=c.getFullYear(), m=c.getMonth(), guard=0;
+    while((y<n.getFullYear()||(y===n.getFullYear()&&m<=n.getMonth()))&&guard++<120){
+      var last=new Date(y,m+1,0).getDate();
+      (r.dias||[]).forEach(function(dd){
+        var dia=Math.min(parseInt(dd,10)||1,last), ds=y+'-'+p2(m+1)+'-'+p2(dia);
+        if(ds<ini||ds>hoje) return;
+        var id='auto_'+r.id+'_'+ds;
+        if(d.aportes.some(function(a){return a.id===id;})) return;
+        var v=parseFloat(r.val||0); if(!(v>0)) return;
+        d.aportes.push({id:id,inv_id:inv.id,name:inv.name,val:v,date:ds,auto:true,rule:r.id});
+        inv.val=Math.round((parseFloat(inv.val||0)+v)*100)/100; ch=true;
+      });
+      m++; if(m>11){m=0;y++;}
+    }
+  });
+  return ch;
+}
+function invAutoRender(d){
+  var inv=d.inv||[];
+  var nome=function(id){ var x=inv.find(function(i){return i.id===id;}); return x?x.name:'(investimento excluído)'; };
+  g('i-auto').innerHTML=(d.invAuto||[]).length?d.invAuto.map(function(r){
+    var dias=(r.dias||[]).map(function(x){return 'dia '+x;}).join(', ');
+    return '<div class="inv-card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap'+(r.ativo?'':';opacity:.55')+'">'+
+      '<div style="min-width:0"><div style="font-size:14px;font-weight:700">'+fmt(r.val)+' → '+esc(nome(r.inv_id))+'</div>'+
+      '<div style="font-size:11px;color:var(--t3);margin-top:3px">Todo '+esc(dias)+(r.ativo?'':' · pausada')+'</div></div>'+
+      '<div style="display:flex;gap:6px">'+
+      '<button class="btn btn-edit btn-sm" onclick="invAutoToggle(\''+escq(r.id)+'\')">'+(r.ativo?'Pausar':'Ativar')+'</button>'+
+      '<button class="btn btn-del btn-sm" onclick="invAutoDel(\''+escq(r.id)+'\')"><span class="mi" style="font-size:13px">delete</span></button>'+
+      '</div></div>';
+  }).join(''):empt('Nenhuma regra. Crie uma para guardar dinheiro sozinho nos dias que você escolher.');
+  var lista=apAtivos(d).filter(function(a){return inM(a.date);}).sort(function(a,b){return a.date<b.date?1:-1;});
+  var tot=lista.reduce(function(t,a){return t+parseFloat(a.val||0);},0);
+  g('i-aportes').innerHTML=lista.length?
+    '<div style="font-size:12px;color:var(--t3);margin-bottom:8px">Total guardado em '+MONTHS[S.month]+': <b style="color:var(--teal)">'+fmt(tot)+'</b> (já descontado do saldo do mês)</div>'+
+    lista.map(function(a){
+      return '<div class="inv-card" style="display:flex;justify-content:space-between;align-items:center;gap:10px">'+
+        '<div style="min-width:0"><div style="font-size:14px;font-weight:700">'+esc(a.name||nome(a.inv_id))+'</div>'+
+        '<div style="font-size:11px;color:var(--t3);margin-top:3px">'+fd(a.date)+' · '+(a.auto?'automático':'manual')+'</div></div>'+
+        '<div style="display:flex;align-items:center;gap:8px"><b style="color:var(--teal)">'+fmt(a.val)+'</b>'+
+        '<button class="btn btn-del btn-sm" title="Desfazer" onclick="apDesfazer(\''+escq(a.id)+'\')"><span class="mi" style="font-size:13px">undo</span></button></div></div>';
+    }).join(''):empt('Nada guardado neste mês');
+}
+function invOpts(d,sel){
+  return (d.inv||[]).map(function(i){return '<option value="'+esc(i.id)+'"'+(sel===i.id?' selected':'')+'>'+esc(i.name)+(i.inst?' · '+esc(i.inst):'')+'</option>';}).join('');
+}
+function abrirModalSimples(type,title,body,okTxt){
+  S.etype=type; S.eid=null;
+  g('mTitle').textContent=title; g('mBody').innerHTML=body;
+  g('mFoot').innerHTML='<button class="btn btn-ghost" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="saveModal()">'+okTxt+'</button>';
+  g('mainModal').classList.add('open');
+  var first=g('mBody').querySelector('input,select'); if(first) setTimeout(function(){first.focus();},100);
+}
+function openAporte(invId){
+  var d=ud(); if(!(d.inv||[]).length){ toast('Cadastre um investimento primeiro.','err'); return; }
+  var today=new Date().toISOString().slice(0,10);
+  abrirModalSimples('aporte','Guardar dinheiro',
+    fld('Onde guardar *','<select id="ap-inv">'+invOpts(d,invId)+'</select>')+
+    '<div class="field-row">'+fld('Valor (R$) *','<input id="ap-val" type="number" step="0.01" placeholder="0,00">')+
+    fld('Data *','<input id="ap-dt" type="date" value="'+today+'">')+'</div>'+
+    '<div style="font-size:12px;color:var(--t3)">O valor soma no investimento e é descontado do saldo do mês no Dashboard.</div>','Guardar');
+}
+function openInvAuto(){
+  var d=ud(); if(!(d.inv||[]).length){ toast('Cadastre um investimento primeiro.','err'); return; }
+  abrirModalSimples('invauto','Guardar automaticamente',
+    fld('Onde guardar *','<select id="au-inv">'+invOpts(d)+'</select>')+
+    fld('Valor a cada dia (R$) *','<input id="au-val" type="number" step="0.01" placeholder="0,00">')+
+    fld('Dias do mês *','<input id="au-dias" placeholder="Ex: 5, 20">')+
+    '<div style="font-size:12px;color:var(--t3)">Nos dias escolhidos o valor é guardado sozinho quando você abre o app (dia 31 em mês curto vira o último dia). Começa a valer a partir de hoje.</div>','Criar regra');
+}
+function saveAporte(){
+  var d=ud(), iid=fv('ap-inv'), v=parseFloat(fv('ap-val')), dt=fv('ap-dt');
+  var inv=(d.inv||[]).find(function(x){return x.id===iid;});
+  if(!inv||!(v>0)||!dt){ toast('Preencha os campos obrigatórios.','err'); return; }
+  if(!d.aportes) d.aportes=[];
+  d.aportes.push({id:uid(),inv_id:inv.id,name:inv.name,val:v,date:dt,auto:false});
+  inv.val=Math.round((parseFloat(inv.val||0)+v)*100)/100;
+  sud(d,function(){ closeModal(); toast('Guardado! Saldo do mês atualizado.','ok'); render(S.page); });
+}
+function saveInvAuto(){
+  var d=ud(), iid=fv('au-inv'), v=parseFloat(fv('au-val'));
+  var dias=(fv('au-dias')||'').split(/[^0-9]+/).map(function(x){return parseInt(x,10);}).filter(function(x){return x>=1&&x<=31;});
+  dias=dias.filter(function(x,i){return dias.indexOf(x)===i;}).sort(function(a,b){return a-b;});
+  if(!(d.inv||[]).some(function(x){return x.id===iid;})||!(v>0)||!dias.length){ toast('Informe valor e ao menos um dia (1 a 31).','err'); return; }
+  var n=new Date(), ini=n.getFullYear()+'-'+p2(n.getMonth()+1)+'-'+p2(n.getDate());
+  if(!d.invAuto) d.invAuto=[];
+  d.invAuto.push({id:uid(),inv_id:iid,val:v,dias:dias,ativo:true,ini:ini});
+  invAutoRun(d);
+  sud(d,function(){ closeModal(); toast('Regra criada!','ok'); render(S.page); });
+}
+function invAutoToggle(id){
+  var d=ud(), r=(d.invAuto||[]).find(function(x){return x.id===id;}); if(!r) return;
+  r.ativo=!r.ativo;
+  if(r.ativo){ var n=new Date(); r.ini=n.getFullYear()+'-'+p2(n.getMonth()+1)+'-'+p2(n.getDate()); invAutoRun(d); }
+  sud(d,function(){ render(S.page); });
+}
+function invAutoDel(id){
+  cf('Excluir regra?','Os valores já guardados continuam. Só param os próximos.',function(){
+    var d=ud(); d.invAuto=(d.invAuto||[]).filter(function(x){return x.id!==id;});
+    sud(d,function(){ toast('Regra excluída.','ok'); render(S.page); });
+  });
+}
+function apDesfazer(id){
+  cf('Desfazer este valor guardado?','O valor sai do investimento e volta para o saldo do mês.',function(){
+    var d=ud(), a=(d.aportes||[]).find(function(x){return x.id===id;}); if(!a) return;
+    var inv=(d.inv||[]).find(function(x){return x.id===a.inv_id;});
+    if(inv) inv.val=Math.max(0,Math.round((parseFloat(inv.val||0)-parseFloat(a.val||0))*100)/100);
+    if(a.auto) a.est=true; else d.aportes=d.aportes.filter(function(x){return x.id!==id;});
+    sud(d,function(){ toast('Desfeito.','ok'); render(S.page); });
+  });
 }
 
 // CATEGORIAS
@@ -3205,6 +3410,8 @@ function closeModal(){ g('mainModal').classList.remove('open'); S.eid=null; S.et
 
 function saveModal(){
   var type=S.etype, d=ud(), isE=!!S.eid;
+  if(type==='aporte') return saveAporte();
+  if(type==='invauto') return saveInvAuto();
   if(type==='entrada'||type==='saida'||type==='ent'||type==='sai'){
     var desc=(fv('fd')||'').trim(), val=parseFloat(fv('fv')), date=fv('fdt'), cat=fv('fc');
     if(!desc||isNaN(val)||!date){toast('Preencha os campos obrigatórios.','err');return;}
