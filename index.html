@@ -1353,7 +1353,7 @@ td.selc{width:34px;padding-right:0}
             <div class="panel-head">
               <span class="panel-title">Carteira</span>
               <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-                <button class="btn btn-ghost" id="inv-banco-btn" style="display:none" onclick="invBancoSync(true)"><span class="mi" style="font-size:16px">account_balance</span> Atualizar do banco</button>
+                <button class="btn btn-ghost" id="inv-banco-btn" style="display:none" onclick="invBancoSync()"><span class="mi" style="font-size:16px">account_balance</span> Atualizar do banco</button>
                 <button class="btn btn-primary" onclick="openModal('investimento',null)">+ Novo investimento</button>
               </div>
             </div>
@@ -3248,45 +3248,82 @@ function rInv(){
   }).join(''):empt('Nenhum investimento cadastrado');
   try{ invAutoRender(d); }catch(e3){ console.error(e3); }
   var bb=g('inv-banco-btn'); if(bb) bb.style.display=S.isAdmin?'inline-flex':'none';
-  if(S.isAdmin&&!window.__invSyncing&&(Date.now()-(window.__invSyncTry||0))>600000&&(Date.now()-(d.invSyncAt||0))>21600000){ invBancoSync(false); }
 }
-function invBancoSync(manual){
+var INVB={items:[],ok:0};
+function invBancoSync(){
   var SERVER='https://fintrack-server-production-9d87.up.railway.app';
   var u=null; try{ u=fauth.currentUser; }catch(e){}
-  if(!u){ if(manual) toast('Faça login de novo para buscar do banco.','err'); return; }
+  if(!u){ toast('Faça login de novo para buscar do banco.','err'); return; }
   if(window.__invSyncing) return;
-  window.__invSyncing=true; window.__invSyncTry=Date.now();
-  var b=g('inv-banco-btn'); if(b&&manual){ b.disabled=true; b.textContent='Buscando no banco...'; }
+  window.__invSyncing=true;
+  var b=g('inv-banco-btn'); if(b){ b.disabled=true; b.textContent='Buscando no banco...'; }
   function volta(){ window.__invSyncing=false; var bt=g('inv-banco-btn'); if(bt){ bt.disabled=false; bt.innerHTML='<span class="mi" style="font-size:16px">account_balance</span> Atualizar do banco'; } }
   u.getIdToken().then(function(tk){
     return fetch(SERVER+'/bancos/investimentos',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tk}});
   }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); }).then(function(x){
-    if(!x.ok){ volta(); if(manual) toast(x.j.error||'Não foi possível buscar agora.','err'); return; }
-    var d=ud(); if(!d.inv) d.inv=[];
-    var lista=x.j.investimentos||[], novos=0, atual=0, zer=0;
-    var hoje=new Date(); var hojeIso=hoje.getFullYear()+'-'+p2(hoje.getMonth()+1)+'-'+p2(hoje.getDate());
-    lista.forEach(function(p){
-      var ex=d.inv.find(function(i){return i.fid===p.fid;});
-      var val=Math.round((parseFloat(p.val)||0)*100)/100, yld=Math.round((parseFloat(p.yld)||0)*100)/100;
-      if(ex){
-        if(p.ativo){ if(parseFloat(ex.val)!==val||parseFloat(ex.yld||0)!==yld){ ex.val=val; ex.yld=yld; atual++; } }
-        else if(parseFloat(ex.val||0)!==0){ ex.val=0; zer++; }
-      } else if(p.ativo&&val>0){
-        var tp=(d.cats&&d.cats.investimento||[]).indexOf(p.type)>=0?p.type:'Outros';
-        d.inv.push({id:uid(),name:p.name,type:tp,inst:p.inst||'',val:val,yld:yld,date:p.date||hojeIso,obs:'Importado do banco',fid:p.fid,ori:'Banco'});
-        novos++;
-      }
+    volta();
+    if(!x.ok){ toast(x.j.error||'Não foi possível buscar agora.','err'); return; }
+    invBancoRevisar(x.j.investimentos||[]);
+  }).catch(function(){ volta(); toast('Falha de conexão com o servidor. Tente de novo.','err'); });
+}
+function invBancoRevisar(lista){
+  var d=ud(); if(!d.inv) d.inv=[];
+  var itens=[], iguais=0;
+  lista.forEach(function(p){
+    var ex=d.inv.find(function(i){return i.fid===p.fid;});
+    var val=Math.round((parseFloat(p.val)||0)*100)/100, yld=Math.round((parseFloat(p.yld)||0)*100)/100;
+    var tp=(d.cats&&d.cats.investimento||[]).indexOf(p.type)>=0?p.type:'Outros';
+    var it={p:p,val:val,yld:yld,tipo:tp,inst:p.inst||'Outros',ex:ex?ex.id:null,old:ex?parseFloat(ex.val||0):0,st:'',sel:true};
+    if(ex){
+      if(p.ativo){ if(parseFloat(ex.val)!==val||parseFloat(ex.yld||0)!==yld) it.st='atualizar'; else { iguais++; return; } }
+      else if(parseFloat(ex.val||0)!==0) it.st='encerrar'; else return;
+    } else if(p.ativo&&val>0) it.st='novo'; else return;
+    itens.push(it);
+  });
+  INVB={items:itens,iguais:iguais,total:lista.length};
+  if(!itens.length){ toast(lista.length?('Tudo em dia: '+iguais+' investimento(s) já estão atualizados.'):'O banco não trouxe investimentos. Confira a conexão no Meu Pluggy.',lista.length?'ok':'err'); return; }
+  abrirModalSimples('invbanco','Investimentos do banco','<div id="invb-body"></div>','Importar');
+  invBancoRender();
+}
+function invBancoRender(){
+  var d=ud(), h='', grupos={}, ordem=[];
+  INVB.items.forEach(function(it,i){ if(!grupos[it.inst]){ grupos[it.inst]=[]; ordem.push(it.inst); } grupos[it.inst].push(i); });
+  var nSel=INVB.items.filter(function(i){return i.sel;}).length;
+  h+='<div style="font-size:12px;color:var(--t2);margin-bottom:8px">'+nSel+' de '+INVB.items.length+' selecionados'+(INVB.iguais?' · '+INVB.iguais+' já em dia':'')+'. Marque o que quer trazer.</div>';
+  ordem.forEach(function(nome,gi){
+    var idx=grupos[nome], todos=idx.every(function(i){return INVB.items[i].sel;});
+    h+='<div style="display:flex;align-items:center;gap:8px;padding:10px 0 6px;font-size:12px;font-weight:700;color:var(--t2)"><input type="checkbox" '+(todos?'checked':'')+' onchange="invBancoGrupo('+gi+',this.checked)"><span class="mi" style="font-size:15px">account_balance</span>'+esc(nome)+'</div>';
+    idx.forEach(function(i){
+      var it=INVB.items[i], tag=it.st==='novo'?'Novo':(it.st==='atualizar'?'Atualizar':'Encerrado');
+      var valTxt=it.st==='atualizar'?fmtTxt(it.old)+' → '+fmtTxt(it.val):(it.st==='encerrar'?fmtTxt(it.old)+' → R$ 0,00':fmtTxt(it.val));
+      h+='<div style="display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">'+
+        '<input type="checkbox" '+(it.sel?'checked':'')+' onchange="INVB.items['+i+'].sel=this.checked;invBancoRender()">'+
+        '<div style="flex:1;min-width:0"><div style="font-size:13px;color:var(--t1);overflow-wrap:anywhere">'+esc(it.p.name)+'</div>'+
+        '<div style="font-size:11px;color:var(--t3)">'+tag+(it.st==='novo'?' · ':'')+(it.st==='novo'?'<select onchange="INVB.items['+i+'].tipo=this.value" style="background:var(--s2);color:var(--t1);border:1px solid var(--border);border-radius:6px;padding:2px 4px;font-size:11px">'+(d.cats.investimento||[]).map(function(c){return '<option value="'+esc(c)+'"'+(c===it.tipo?' selected':'')+'>'+esc(c)+'</option>';}).join('')+'</select>':'')+'</div></div>'+
+        '<div style="font-size:12px;font-weight:700;text-align:right;color:var(--teal);white-space:nowrap">'+valTxt+'</div></div>';
     });
-    d.invSyncAt=Date.now();
-    sud(d,function(){
-      volta();
-      if(manual){
-        if(!lista.length) toast('O banco não trouxe investimentos. Confira a conexão no Meu Pluggy.','err');
-        else toast(novos+' novo(s), '+atual+' atualizado(s)'+(zer?', '+zer+' encerrado(s)':'')+'.','ok');
-      }
-      if(S.page==='investimentos') rInv();
-    });
-  }).catch(function(){ volta(); if(manual) toast('Falha de conexão com o servidor. Tente de novo.','err'); });
+  });
+  var bd=g('invb-body'); if(bd) bd.innerHTML=h;
+  var ok=g('mFoot')&&g('mFoot').querySelector('.btn-primary'); if(ok){ ok.textContent='Importar '+nSel; ok.disabled=!nSel; }
+}
+function invBancoGrupo(gi,on){
+  var ordem=[]; INVB.items.forEach(function(it){ if(ordem.indexOf(it.inst)<0) ordem.push(it.inst); });
+  INVB.items.forEach(function(it){ if(it.inst===ordem[gi]) it.sel=on; });
+  invBancoRender();
+}
+function invBancoSalvar(){
+  var d=ud(), novos=0, atual=0, zer=0;
+  var hoje=new Date(), hojeIso=hoje.getFullYear()+'-'+p2(hoje.getMonth()+1)+'-'+p2(hoje.getDate());
+  INVB.items.forEach(function(it){
+    if(!it.sel) return;
+    if(it.st==='novo'){
+      d.inv.push({id:uid(),name:it.p.name,type:it.tipo,inst:it.p.inst||'',val:it.val,yld:it.yld,date:it.p.date||hojeIso,obs:'Importado do banco',fid:it.p.fid,ori:'Banco'}); novos++;
+    } else {
+      var ex=d.inv.find(function(i){return i.id===it.ex;}); if(!ex) return;
+      if(it.st==='atualizar'){ ex.val=it.val; ex.yld=it.yld; atual++; } else { ex.val=0; zer++; }
+    }
+  });
+  sud(d,function(){ closeModal(); toast(novos+' novo(s), '+atual+' atualizado(s)'+(zer?', '+zer+' encerrado(s)':'')+'.','ok'); if(S.page==='investimentos') rInv(); if(S.page==='dashboard') rDash(); });
 }
 
 // ===== GUARDAR DINHEIRO (manual + automático) =====
@@ -3511,6 +3548,7 @@ function saveModal(){
   var type=S.etype, d=ud(), isE=!!S.eid;
   if(type==='aporte') return saveAporte();
   if(type==='invauto') return saveInvAuto();
+  if(type==='invbanco') return invBancoSalvar();
   if(type==='entrada'||type==='saida'||type==='ent'||type==='sai'){
     var desc=(fv('fd')||'').trim(), val=parseFloat(fv('fv')), date=fv('fdt'), cat=fv('fc');
     if(!desc||isNaN(val)||!date){toast('Preencha os campos obrigatórios.','err');return;}
@@ -4040,7 +4078,7 @@ function extLer(file){
 }
 function extRevisar(rows){
   var d=ud(); if(!d) return; var seen={};
-  EXT.fora=0;
+  EXT.fora=0; EXT.grupos=[];
   if(EXT.modo!=='credito'){
     // Extrato bancario: traz somente o mes selecionado (dia 1 ate o ultimo dia)
     var total=rows.length; rows=rows.filter(function(r){ return inM(r.date); }); EXT.fora=total-rows.length;
@@ -4048,13 +4086,25 @@ function extRevisar(rows){
   }
   rows.sort(function(a,b){return a.date<b.date?1:-1;});
   if(EXT.modo==='credito'){
-    EXT.rows=rows.map(function(r){ var dup=extIsDupCred(d,r), pag=EXT_PAGRE.test(extNorm(r.desc))||(!!r.fid&&r.val>0); return {date:r.date,desc:r.desc,val:Math.abs(r.val),fid:r.fid,tipo:'sai',cat:extCategorize(r.desc,false,d.cats),dup:dup,sel:!dup&&!pag}; });
+    EXT.rows=rows.map(function(r){ var dup=extIsDupCred(d,r), pag=EXT_PAGRE.test(extNorm(r.desc))||(!!r.fid&&r.val>0); return {date:r.date,desc:r.desc,val:Math.abs(r.val),fid:r.fid,cid:r.cid,cnome:r.cnome,tipo:'sai',cat:extCategorize(r.desc,false,d.cats),dup:dup,sel:!dup&&!pag}; });
+    var gm={};
+    EXT.rows.forEach(function(r){ if(r.cid&&!gm[r.cid]){ gm[r.cid]=1; EXT.grupos.push({cid:r.cid,nome:r.cnome||'Cartão do banco',cartao:extAutoCartao(d,r.cnome)}); } });
+    if(EXT.grupos.length){ var ord=EXT.grupos.map(function(x){return x.cid;}); EXT.rows.sort(function(a,b){ return ord.indexOf(a.cid)-ord.indexOf(b.cid)||(a.date<b.date?1:-1); }); }
     var cs=g('ext-cartao'); cs.innerHTML='<option value="">Selecione o cartão...</option>'+d.cartoes.map(function(c){return '<option value="'+esc(c.id)+'">'+esc(c.nome||c.name||'Cartão')+'</option>';}).join('');
-    g('ext-cartao-wrap').style.display='block';
+    g('ext-cartao-wrap').style.display=EXT.grupos.length?'none':'block';
   } else {
     EXT.rows=rows.map(function(r){ var isEnt=r.val>0; var dup=extIsDup(d,r), interno=EXT_INTRE.test(extNorm(r.desc)); return {date:r.date,desc:r.desc,val:Math.abs(r.val),fid:r.fid,tipo:isEnt?'ent':'sai',cat:extCategorize(r.desc,isEnt,d.cats),dup:dup,interno:interno,sel:!dup&&!interno}; });
   }
   g('ext-up').style.display='none'; g('ext-banco').style.display='none'; g('ext-rev').style.display='block'; extRender();
+}
+function extAutoCartao(d,nome){
+  var n=extNorm(nome||''); if(!n) return '';
+  var m=(d.cartoes||[]).filter(function(c){ var w=extNorm(c.nome||c.name||'').split(/[^a-z0-9]+/).filter(function(x){return x.length>=3;})[0]; return w&&n.indexOf(w)>=0; });
+  return m.length===1?m[0].id:'';
+}
+function extCartaoDe(r){
+  if(EXT.grupos&&EXT.grupos.length){ var gp=EXT.grupos.find(function(x){return x.cid===r.cid;}); return gp?gp.cartao:''; }
+  return EXT.cartao;
 }
 function extBuscarBanco(){
   var SERVER='https://fintrack-server-production-9d87.up.railway.app';
@@ -4076,9 +4126,13 @@ function extBuscarBanco(){
   }).catch(function(){ volta(); extErro('Falha de conexão com o servidor. Tente de novo.'); });
 }
 function extRender(){
-  var d=ud(), h='';
+  var d=ud(), h='', lastCid=null;
   EXT.rows.forEach(function(r,i){
     var cats=r.tipo==='ent'?d.cats.entrada:d.cats.saida;
+    if(EXT.modo==='credito'&&EXT.grupos&&EXT.grupos.length&&r.cid!==lastCid){
+      lastCid=r.cid; var gi=EXT.grupos.findIndex(function(x){return x.cid===r.cid;}), gp=EXT.grupos[gi];
+      h+='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px 0 6px;font-size:12px;color:var(--t2)"><span class="mi" style="font-size:16px">credit_card</span><b>'+esc(gp.nome)+'</b> → lançar no cartão: <select onchange="EXT.grupos['+gi+'].cartao=this.value;extResumo()" style="background:var(--s2);color:var(--t1);border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-size:12px"><option value="">Escolha...</option>'+d.cartoes.map(function(c){return '<option value="'+esc(c.id)+'"'+(gp.cartao===c.id?' selected':'')+'>'+esc(c.nome||c.name||'Cartão')+'</option>';}).join('')+'</select></div>';
+    }
     h+='<div style="display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);'+(r.dup?'opacity:.55':'')+'">'+
       '<input type="checkbox" '+(r.sel?'checked':'')+' onchange="EXT.rows['+i+'].sel=this.checked;extResumo()">'+
       '<div style="flex:1;min-width:0"><div style="font-size:13px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(r.desc)+'</div>'+
@@ -4092,16 +4146,16 @@ function extRender(){
 function extTipo(i,t){ var d=ud(),r=EXT.rows[i]; r.tipo=t; r.cat=extCategorize(r.desc,t==='ent',d.cats); extRender(); }
 function extResumo(){
   var s=EXT.rows.filter(function(r){return r.sel;}), e=0, sa=0; s.forEach(function(r){ if(r.tipo==='ent') e+=r.val; else sa+=r.val; });
-  var cred=EXT.modo==='credito', okBtn=s.length&&(!cred||EXT.cartao);
+  var cred=EXT.modo==='credito', okBtn=s.length&&(!cred||(EXT.grupos&&EXT.grupos.length?s.every(function(r){return extCartaoDe(r);}):EXT.cartao));
   g('ext-resumo').innerHTML=(EXT.fora?'<div style="font-size:11px;color:var(--t3);margin-bottom:4px">Só '+MONTHS[S.month]+'/'+S.year+' (dia 1 ao último dia) · '+EXT.fora+' de outros meses ignorada(s)</div>':'')+s.length+' de '+EXT.rows.length+' selecionadas · '+(cred?'Total '+fmtTxt(sa):'Entradas '+fmtTxt(e)+' · Saídas '+fmtTxt(sa))+(cred&&!EXT.cartao?' · <b style="color:var(--yellow)">escolha o cartão</b>':'');
   g('ext-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharExtrato()">Cancelar</button><button class="btn btn-primary" '+(okBtn?'':'disabled ')+'onclick="extSalvar()">Importar '+s.length+'</button>';
 }
 function extSalvar(){
   var d=ud(); if(!d) return; var ne=0,ns=0;
   if(EXT.modo==='credito'){
-    if(!EXT.cartao){toast('Escolha o cartão.','err');return;}
+    if(EXT.rows.some(function(r){return r.sel&&!extCartaoDe(r);})){toast('Escolha o cartão de cada grupo.','err');return;}
     if(!d.gastos_credito) d.gastos_credito=[];
-    EXT.rows.forEach(function(r){ if(!r.sel) return; var gc={id:uid(),desc:r.desc,val:r.val,date:r.date,cat:r.cat,cartao_id:EXT.cartao,ori:'Extrato'}; if(r.fid) gc.fid=r.fid; d.gastos_credito.push(gc); ns++; });
+    EXT.rows.forEach(function(r){ if(!r.sel) return; var gc={id:uid(),desc:r.desc,val:r.val,date:r.date,cat:r.cat,cartao_id:extCartaoDe(r),ori:'Extrato'}; if(r.fid) gc.fid=r.fid; d.gastos_credito.push(gc); ns++; });
     sud(d,function(){ fecharExtrato(); toast(ns+' gastos lançados no cartão!','ok'); if(S.page==='credito')rCredito(); if(S.page==='dashboard')rDash(); });
     return;
   }
