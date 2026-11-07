@@ -1648,6 +1648,7 @@ td.selc{width:34px;padding-right:0}
         <div style="font-size:12px;color:var(--t3)">Arquivo PDF, OFX ou CSV &middot; as movimenta&#231;&#245;es s&#227;o separadas em entradas e sa&#237;das e categorizadas automaticamente</div>
         <input type="file" id="ext-input" accept=".ofx,.csv,.txt,.pdf" style="display:none" onchange="extLer(this.files[0])">
       </div>
+      <div id="ext-banco" style="display:none;margin-top:12px;text-align:center"><div style="font-size:12px;color:var(--t3);margin-bottom:8px">ou</div><button class="btn btn-primary" id="ext-banco-btn" onclick="extBuscarBanco()"><span class="mi" style="font-size:16px">account_balance</span> Buscar direto do banco</button><div style="font-size:11px;color:var(--t3);margin-top:6px">Traz as movimentações do mês selecionado, sem baixar extrato</div></div>
       <div id="ext-err" style="display:none;margin-top:12px;color:var(--red);font-size:13px"></div>
       <div id="ext-rev" style="display:none"><div id="ext-cartao-wrap" style="display:none;margin-bottom:10px"><div style="font-size:12px;color:var(--t2);margin-bottom:4px">De qual cartão é esta fatura?</div><select id="ext-cartao" onchange="EXT.cartao=this.value;extResumo()" style="width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--t1);font-size:14px;font-family:inherit"></select></div><div id="ext-resumo" style="font-size:12px;color:var(--t2);margin-bottom:8px"></div><div id="ext-list" style="max-height:50vh;overflow:auto"></div></div>
     </div>
@@ -3884,7 +3885,7 @@ function abrirExtrato(modo){
   if(!isPro()){showUpgrade('Importar extrato');return;}
   EXT.modo=(modo==='credito')?'credito':''; EXT.cartao='';
   g('ext-titulo').textContent=EXT.modo?'Importar fatura do cartão':'Importar extrato'; g('ext-cartao-wrap').style.display='none';
-  g('extratoModal').style.display='flex'; g('ext-up').style.display='block'; g('ext-rev').style.display='none'; g('ext-err').style.display='none'; g('ext-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharExtrato()">Cancelar</button>';
+  g('extratoModal').style.display='flex'; g('ext-up').style.display='block'; g('ext-banco').style.display=(S.isAdmin&&!EXT.modo)?'block':'none'; g('ext-rev').style.display='none'; g('ext-err').style.display='none'; g('ext-foot').innerHTML='<button class="btn btn-ghost" onclick="fecharExtrato()">Cancelar</button>';
 }
 function fecharExtrato(){ g('extratoModal').style.display='none'; var i=g('ext-input'); if(i) i.value=''; }
 function extDrop(e){ e.preventDefault(); if(e.dataTransfer.files[0]) extLer(e.dataTransfer.files[0]); }
@@ -3975,7 +3976,26 @@ function extRevisar(rows){
   } else {
     EXT.rows=rows.map(function(r){ var isEnt=r.val>0; var dup=extIsDup(d,r), interno=EXT_INTRE.test(extNorm(r.desc)); return {date:r.date,desc:r.desc,val:Math.abs(r.val),fid:r.fid,tipo:isEnt?'ent':'sai',cat:extCategorize(r.desc,isEnt,d.cats),dup:dup,interno:interno,sel:!dup&&!interno}; });
   }
-  g('ext-up').style.display='none'; g('ext-rev').style.display='block'; extRender();
+  g('ext-up').style.display='none'; g('ext-banco').style.display='none'; g('ext-rev').style.display='block'; extRender();
+}
+function extBuscarBanco(){
+  var SERVER='https://fintrack-server-production-9d87.up.railway.app';
+  var u=null; try{ u=fauth.currentUser; }catch(e){}
+  if(!u){ extErro('Faça login de novo para buscar do banco.'); return; }
+  var b=g('ext-banco-btn'), er=g('ext-err'); er.style.display='none';
+  b.disabled=true; b.textContent='Buscando no banco...';
+  var ini=new Date(S.year,S.month,1), fim=new Date(S.year,S.month+1,0);
+  function iso(x){ return x.getFullYear()+'-'+p2(x.getMonth()+1)+'-'+p2(x.getDate()); }
+  function volta(){ b.disabled=false; b.innerHTML='<span class="mi" style="font-size:16px">account_balance</span> Buscar direto do banco'; }
+  u.getIdToken().then(function(tk){
+    return fetch(SERVER+'/bancos/movimentacoes',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tk},body:JSON.stringify({de:iso(ini),ate:iso(fim)})});
+  }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); }).then(function(x){
+    volta();
+    if(!x.ok){ extErro(x.j.error||'Não foi possível buscar agora.'); return; }
+    var rows=(x.j.movimentacoes||[]).filter(function(m){return m.date;});
+    if(!rows.length){ extErro('O banco não trouxe movimentações de '+MONTHS[S.month]+'/'+S.year+'.'+(x.j.contas===0?' Nenhuma conta encontrada: confira a conexão no Meu Pluggy (a autorização dura 1 ano).':'')); return; }
+    extRevisar(rows);
+  }).catch(function(){ volta(); extErro('Falha de conexão com o servidor. Tente de novo.'); });
 }
 function extRender(){
   var d=ud(), h='';
