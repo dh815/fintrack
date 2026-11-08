@@ -557,6 +557,7 @@ body {
 /* ===== GRÁFICOS DO DASHBOARD ===== */
 .dash-charts { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-bottom: 16px; align-items: stretch; }
 .dash-charts .panel { margin-bottom: 0; display: flex; flex-direction: column; min-width: 0; }
+.dash-charts.dc2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .panel-sub { font-weight: 500; color: var(--t3); font-size: 12px; }
 .chart-body { padding: 18px 20px 20px; flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 16px; min-width: 0; }
 .chart-leg { display: flex; gap: 14px; font-size: 11px; color: var(--t2); }
@@ -594,6 +595,7 @@ body {
 }
 @media (max-width: 768px) {
   .dash-charts { grid-template-columns: minmax(0, 1fr); gap: 12px; margin-bottom: 12px; }
+  .dash-charts.dc2 { grid-template-columns: minmax(0, 1fr); }
   .chart-body { padding: 14px 14px 16px; gap: 14px; }
   .panel-sub { display: none; }
   .bs-v { font-size: 13px; }
@@ -1239,6 +1241,25 @@ td.selc{width:34px;padding-right:0}
               </div>
               <div class="chart-body">
                 <div class="dn"><canvas id="ch-inv" class="dch"></canvas><div class="dn-leg" id="d-inv-legend"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="dash-charts dc2">
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--orange,#F59E0B)">receipt_long</span>Vari&#225;veis por Categoria</span>
+              </div>
+              <div class="chart-body">
+                <div class="dn"><canvas id="ch-var" class="dch"></canvas><div class="dn-leg" id="d-var-legend"></div></div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--red)">credit_card</span>Cart&#245;es por Categoria</span>
+                <select id="d-cc-sel" onchange="ccSel(this.value)" style="background:var(--s2);color:var(--t1);border:1px solid var(--border);border-radius:8px;padding:5px 8px;font-size:12px;max-width:150px"></select>
+              </div>
+              <div class="chart-body">
+                <div class="dn"><canvas id="ch-cc" class="dch"></canvas><div class="dn-leg" id="d-cc-legend"></div></div>
               </div>
             </div>
           </div>
@@ -2348,6 +2369,8 @@ function rDash(){
     drawDonutChart(d);
     drawBarChart(d);
     drawInvChart(d);
+    drawVarChart(d);
+    drawCcChart(d);
   }, 50);
 }
 
@@ -2635,6 +2658,38 @@ function drawDonutChart(d){
   g('d-donut-legend').innerHTML=items.length?chLegend(items,cols,total):'<p class="lg-empty">Nenhuma saída registrada neste mês.</p>';
 }
 
+var CC_SEL='';
+try{ CC_SEL=localStorage.getItem('bi_cc_sel')||''; }catch(e){}
+function ccSel(v){ CC_SEL=v||''; try{ localStorage.setItem('bi_cc_sel',CC_SEL); }catch(e){} var d=ud(); if(d) drawCcChart(d); }
+function drawVarChart(d){
+  if(!g('ch-var')) return;
+  var catT={};
+  (d.parc||[]).forEach(function(p){
+    (p.pars||[]).forEach(function(x){ if(inM(x.date)){ var k=p.cat||'Outros'; catT[k]=(catT[k]||0)+parseFloat(x.val||0); } });
+  });
+  var items=chTopN(Object.keys(catT).map(function(k){return [k,catT[k]];}),6);
+  var total=items.reduce(function(a,x){return a+x[1];},0);
+  var cols=chColors(items,['#F59E0B','#16A34A','#4D9CFF','#A78BFA','#F06292','#4DB6AC','#FF8A65','#80CBC4']);
+  chRing('ch-var',window.innerWidth<=768?150:160,items,cols,total>0?'Total no mês':'Variáveis',total>0?chRingVal(total):'Sem dados');
+  g('d-var-legend').innerHTML=items.length?chLegend(items,cols,total):'<p class="lg-empty">Nenhum gasto variável neste mês.</p>';
+}
+function drawCcChart(d){
+  if(!g('ch-cc')) return;
+  var cs=d.cartoes||[], sel=g('d-cc-sel');
+  if(CC_SEL&&!cs.some(function(c){return c.id===CC_SEL;})) CC_SEL='';
+  if(sel){ sel.innerHTML='<option value="">Todos os cartões</option>'+cs.map(function(c){return '<option value="'+esc(c.id)+'"'+(c.id===CC_SEL?' selected':'')+'>'+esc(c.nome||c.name||'Cartão')+'</option>';}).join(''); }
+  var catT={};
+  (d.gastos_credito||[]).forEach(function(x){
+    if(!inM(x.date)) return; if(CC_SEL&&x.cartao_id!==CC_SEL) return;
+    var k=x.cat||'Outros'; catT[k]=(catT[k]||0)+parseFloat(x.val||0);
+  });
+  var items=chTopN(Object.keys(catT).map(function(k){return [k,catT[k]];}),6);
+  var total=items.reduce(function(a,x){return a+x[1];},0);
+  var cols=chColors(items,['#EF4444','#4D9CFF','#16A34A','#F59E0B','#A78BFA','#F06292','#4DB6AC','#FF8A65']);
+  chRing('ch-cc',window.innerWidth<=768?150:160,items,cols,total>0?'Total no cartão':'Cartões',total>0?chRingVal(total):'Sem dados');
+  g('d-cc-legend').innerHTML=items.length?chLegend(items,cols,total):'<p class="lg-empty">Nenhuma compra no cartão neste mês.</p>';
+}
+
 function drawInvChart(d){
   var invT={};
   (d.inv||[]).forEach(function(i){ var k=i.type||'Outros'; invT[k]=(invT[k]||0)+parseFloat(i.val||0); });
@@ -2764,7 +2819,7 @@ window.addEventListener('resize',function(){
   clearTimeout(_chRzT);
   _chRzT=setTimeout(function(){
     var pg=g('page-dashboard'); if(!pg||!pg.classList.contains('active')||!g('ch-bar')) return;
-    var d=ud(); if(!d) return; drawDonutChart(d); drawBarChart(d); drawInvChart(d);
+    var d=ud(); if(!d) return; drawDonutChart(d); drawBarChart(d); drawInvChart(d); drawVarChart(d); drawCcChart(d);
   },180);
 });
 
