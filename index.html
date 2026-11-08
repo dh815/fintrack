@@ -1121,7 +1121,7 @@ td.selc{width:34px;padding-right:0}
 #page-dashboard .panel{margin-bottom:0;min-width:0;display:flex;flex-direction:column}
 #d-kpis-user{display:contents}
 #page-dashboard .kb-dc{min-width:0}
-.do-wrap{max-width:980px}
+.do-wrap{max-width:none}
 .do-intro{background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 16px;font-size:13px;color:var(--t2);line-height:1.55}
 .do-map{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px}
 .do-box{background:#F0FDF4;border:1.5px solid #86EFAC;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:700;color:#15803D;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1139,8 +1139,19 @@ td.selc{width:34px;padding-right:0}
 .do-li input{user-select:text;-webkit-user-select:text}
 .do-li.drag{box-shadow:0 10px 28px rgba(17,24,39,.22);border-color:#16A34A;background:#F0FDF4;position:relative;z-index:3;cursor:grabbing}
 .do-h{touch-action:none;cursor:grab;color:var(--t3);font-size:20px;line-height:1;padding:4px 2px;flex:none}
+.do-grid{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:20px;align-items:start}
+.do-left{min-width:0}
+.do-right{position:sticky;top:76px}
+.do-pv{background:#fff;border:1px solid var(--border);border-radius:16px;padding:14px 16px;box-shadow:0 1px 8px rgba(17,24,39,.06)}
+.do-pv .do-map{background:#F6F8F7;padding:8px;gap:6px;border-radius:12px;max-height:calc(100vh - 230px);overflow:auto;align-content:start}
+.do-box{display:flex;align-items:flex-start;gap:6px;white-space:normal;line-height:1.25;padding:7px 8px}
+.do-box b{flex:none;width:16px;height:16px;border-radius:50%;background:#16A34A;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center}
+.do-box.c b{background:#2563EB}
+.do-box span{min-width:0}
+.do-pvn{margin-top:10px;font-size:11px;color:var(--t3);line-height:1.45}
+@media(max-width:1100px){.do-grid{grid-template-columns:minmax(0,1fr) 300px}}
 @media(max-width:1100px){#page-dashboard .dblk:not(.dfull){grid-column:span 6 !important}}
-@media(max-width:768px){#page-dashboard.active{grid-template-columns:minmax(0,1fr);gap:12px}#page-dashboard .dblk{grid-column:1/-1 !important}.do-map{display:none}.do-li{padding:10px}.do-a{width:100%}}
+@media(max-width:768px){#page-dashboard.active{grid-template-columns:minmax(0,1fr);gap:12px}#page-dashboard .dblk{grid-column:1/-1 !important}.do-grid{grid-template-columns:minmax(0,1fr)}.do-right{position:static;order:-1}.do-pv .do-map{max-height:none}.do-box{min-height:26px !important;padding:5px 7px;font-size:10px}.do-li{padding:10px}.do-a{width:100%}}
 @media(max-width:1180px){.kb-wrap{grid-template-columns:minmax(0,1fr) 380px}.kb-models{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:900px){.kb-dgrid .kb-s2{grid-column:span 3}}
 @media(max-width:768px){
@@ -3155,6 +3166,22 @@ function dashAfterSave(d,item,rep,pub){
   var at=ids.indexOf(rep); if(at<0) at=ids.length-1;
   ids.splice(at+1,0,me); L.order=ids; L.hide[rep]=true;
 }
+var DASH_H={hero:46,kpis:72,venc:58,metrics:52,insights:30,bar:100,donut:100,inv:88,'var':88,cc:88};
+function dashMapHtml(arr){
+  return arr.map(function(x){
+    return '<div class="do-box'+(x.c?' c':'')+'" style="grid-column:span '+x.span+';min-height:'+(DASH_H[x.id]||88)+'px"><b>'+(x.i+1)+'</b><span>'+esc(x.nm)+'</span></div>';
+  }).join('');
+}
+function dashMapRefresh(list){
+  var mp=g('do-map'); if(!mp) return;
+  var arr=[];
+  [].forEach.call(list.querySelectorAll('.do-li'),function(r,i){
+    var n=r.querySelector('.do-n'); if(n) n.textContent=String(i+1);
+    if(r.getAttribute('data-hid')==='1') return;
+    arr.push({id:r.getAttribute('data-id'),span:parseInt(r.getAttribute('data-span'),10)||6,c:r.getAttribute('data-c')==='1',nm:r.getAttribute('data-nm'),i:i});
+  });
+  mp.innerHTML=dashMapHtml(arr);
+}
 function dashDragInit(){
   var list=document.querySelector('.do-list'); if(!list) return;
   [].forEach.call(list.querySelectorAll('.do-li'),function(row){
@@ -3168,6 +3195,7 @@ function dashDragInit(){
         var y=e.clientY, before=null;
         for(var i=0;i<rows.length;i++){ var bx=rows[i].getBoundingClientRect(); if(y<bx.top+bx.height/2){ before=rows[i]; break; } }
         if(before){ if(row.nextSibling!==before) list.insertBefore(row,before); } else if(list.lastElementChild!==row) list.appendChild(row);
+        dashMapRefresh(list);
         var sc=document.querySelector('.content')||document.scrollingElement;
         if(e.clientY<90){ sc.scrollTop-=14; window.scrollBy(0,-14); } else if(e.clientY>window.innerHeight-90){ sc.scrollTop+=14; window.scrollBy(0,14); }
       }
@@ -3183,16 +3211,14 @@ function dashDragInit(){
 }
 function dashOrgHtml(d){
   var list=dashList(d);
-  var map='<div class="do-map">'+list.filter(function(b){return !b.hidden;}).map(function(b,i){
-    return '<div class="do-box'+(b.custom?' c':'')+'" style="grid-column:span '+b.span+'">'+esc(b.nome)+'</div>';
-  }).join('')+'</div>';
+  var map=dashMapHtml(list.filter(function(b){return !b.hidden;}).map(function(b){ return {id:b.id,span:b.span,c:b.custom,nm:b.nome,i:list.indexOf(b)}; }));
   var rows=list.map(function(b,i){
     var sel='<select class="kb-inp do-sel" onchange="dashSpan(\''+b.id+'\',this.value)">'+DASH_SPANS.map(function(s){return '<option value="'+s[0]+'"'+(b.span===s[0]?' selected':'')+'>'+s[1]+'</option>';}).join('')+'</select>';
     var nm=b.ren?'<input class="kb-inp do-nm" maxlength="40" value="'+esc(b.nome)+'" onchange="dashTitle(\''+b.id+'\',this.value)">':'<b class="do-fix">'+esc(b.nome)+(b.custom?' <i>meu indicador</i>':'')+'</b>';
     var ed=(DASH_TPL[b.id]||b.custom)?'<button class="btn btn-ghost btn-sm" onclick="dashEditar(\''+b.id+'\')">Editar gráfico</button>':'';
-    return '<div class="do-li'+(b.hidden?' off':'')+'" data-id="'+b.id+'"><span class="do-h" title="Arraste para reordenar">⠿</span><span class="do-n">'+(i+1)+'</span><div class="do-t">'+nm+'</div>'+sel+'<div class="do-a"><button class="btn btn-ghost btn-sm" title="Subir" onclick="dashMove(\''+b.id+'\',-1)"'+(i===0?' disabled':'')+'>↑</button><button class="btn btn-ghost btn-sm" title="Descer" onclick="dashMove(\''+b.id+'\',1)"'+(i===list.length-1?' disabled':'')+'>↓</button><button class="btn btn-ghost btn-sm" onclick="dashVis(\''+b.id+'\')">'+(b.hidden?'Mostrar':'Ocultar')+'</button>'+ed+'</div></div>';
+    return '<div class="do-li'+(b.hidden?' off':'')+'" data-id="'+b.id+'" data-span="'+b.span+'" data-hid="'+(b.hidden?1:0)+'" data-c="'+(b.custom?1:0)+'" data-nm="'+esc(b.nome)+'"><span class="do-h" title="Arraste para reordenar">⠿</span><span class="do-n">'+(i+1)+'</span><div class="do-t">'+nm+'</div>'+sel+'<div class="do-a"><button class="btn btn-ghost btn-sm" title="Subir" onclick="dashMove(\''+b.id+'\',-1)"'+(i===0?' disabled':'')+'>↑</button><button class="btn btn-ghost btn-sm" title="Descer" onclick="dashMove(\''+b.id+'\',1)"'+(i===list.length-1?' disabled':'')+'>↓</button><button class="btn btn-ghost btn-sm" onclick="dashVis(\''+b.id+'\')">'+(b.hidden?'Mostrar':'Ocultar')+'</button>'+ed+'</div></div>';
   }).join('');
-  return '<div class="do-wrap"><div class="do-intro"><b>Organize o Dashboard do seu jeito.</b> Arraste os blocos pela alça ⠿ (ou use as setas), escolha o tamanho de cada um, oculte o que não quer ver e renomeie os gráficos. Em "Editar gráfico" você muda a fonte, os filtros e o modelo — o novo gráfico substitui o original.</div><div class="kb-h" style="margin:14px 0 8px">Mapa do Dashboard (computador)</div>'+map+'<div class="kb-h" style="margin:18px 0 8px">Blocos</div><div class="do-list">'+rows+'</div><div style="margin-top:14px"><button class="btn btn-ghost btn-sm" onclick="dashReset()">Restaurar padrão</button></div></div>';
+  return '<div class="do-grid"><div class="do-left"><div class="do-intro"><b>Organize o Dashboard do seu jeito.</b> Arraste os blocos pela alça ⠿ (ou use as setas), escolha o tamanho de cada um, oculte o que não quer ver e renomeie os gráficos. Em "Editar gráfico" você muda a fonte, os filtros e o modelo — o novo gráfico substitui o original.</div><div class="kb-h" style="margin:14px 0 8px">Blocos</div><div class="do-list">'+rows+'</div><div style="margin-top:14px"><button class="btn btn-ghost btn-sm" onclick="dashReset()">Restaurar padrão</button></div></div><div class="do-right"><div class="do-pv"><div class="kb-pvtop"><span class="kb-h" style="margin:0">Prévia do Dashboard</span><span class="kb-live"><i></i>muda enquanto você arrasta</span></div><div class="do-map" id="do-map">'+map+'</div><div class="do-pvn">Esboço do layout no computador. No celular os blocos ficam um embaixo do outro, nesta ordem.</div></div></div></div>';
 }
 
 function chBRL(n){ return 'R$ '+parseFloat(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
