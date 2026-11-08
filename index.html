@@ -1218,7 +1218,7 @@ td.selc{width:34px;padding-right:0}
             <div class="panel panel-bar">
               <div class="panel-head">
                 <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--blue)">bar_chart</span>Entradas x Sa&#237;das <span class="panel-sub" id="d-bar-sub">&#183; ano todo</span></span>
-                <span class="chart-leg"><span><i style="background:#16A34A"></i>Entradas</span><span><i style="background:#FF5E5E"></i>Sa&#237;das</span></span>
+                <span class="chart-leg"><span><i style="background:#16A34A"></i>Entradas</span><span><i style="background:#FF5E5E"></i>Sa&#237;das</span><span><i style="width:14px;height:0;border-top:2px dashed #64748B;border-radius:0"></i>Tend&#234;ncia</span></span>
               </div>
               <div class="chart-body">
                 <div class="dch-wrap" id="ch-bar-wrap"><div id="ch-bar-in" style="position:relative"><canvas id="ch-bar" class="dch dch-bar"></canvas><div class="ch-tip" id="ch-bar-tip"></div></div></div>
@@ -2660,11 +2660,26 @@ function drawBarChart(d){
   var pad={t:44,r:8,b:26,l:8}, cW=W-pad.l-pad.r, cH=H-pad.t-pad.b, n=months.length, gW=cW/n;
   var bW=Math.max(6,Math.min(20,gW*0.30)), bGap=Math.max(3,Math.min(5,gW*0.06));
   var baseY=pad.t+cH, sel=Math.max(0,Math.min(n-1,S.month)), tip=g('ch-bar-tip');
-  function vlab(ctx,x,y,v,col){
+  function trend(k){
+    var pts=[]; months.forEach(function(mo,i){ if(mo.tE>0||mo.tS>0) pts.push([i,mo[k]]); });
+    if(pts.length<2) return null;
+    var n=pts.length, sx=0, sy=0, sxy=0, sxx=0;
+    pts.forEach(function(p){ sx+=p[0]; sy+=p[1]; sxy+=p[0]*p[1]; sxx+=p[0]*p[0]; });
+    var den=n*sxx-sx*sx; if(!den) return null;
+    var b=(n*sxy-sx*sy)/den, a=(sy-b*sx)/n;
+    return {a:a,b:b,i0:pts[0][0],i1:pts[n-1][0]};
+  }
+  var LB=[];
+  function vlab(ctx,x,y,v,col){ if(v>0) LB.push([x,y,v,col]); }
+  function vflush(ctx){
+    LB.forEach(function(l){ vdraw(ctx,l[0],l[1],l[2],l[3]); }); LB.length=0;
+  }
+  function vdraw(ctx,x,y,v,col){
     if(!(v>0)) return;
     ctx.save(); ctx.translate(x,y-5); ctx.rotate(-Math.PI/2);
     ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillStyle=col; ctx.font='700 9px Inter, sans-serif';
-    ctx.fillText(Math.round(v).toLocaleString('pt-BR'),0,0); ctx.restore();
+    var tx=Math.round(v).toLocaleString('pt-BR'); ctx.lineJoin='round'; ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.92)'; ctx.strokeText(tx,0,0);
+    ctx.fillText(tx,0,0); ctx.restore();
   }
 
   function rbar(ctx,x,y,w,h,c1,c2,alpha){
@@ -2704,6 +2719,17 @@ function drawBarChart(d){
       ctx.font=((i===sel||i===hov)?'700':'500')+' 10px Inter, sans-serif';
       ctx.fillText(MONTHS[mo.m].slice(0,3),pad.l+i*gW+gW/2,H-10);
     });
+    [['tE','#15803D'],['tS','#DC2626']].forEach(function(sr){
+      var f=trend(sr[0]); if(!f) return;
+      var x1=pad.l+f.i0*gW+gW/2, x2=pad.l+f.i1*gW+gW/2;
+      function yy2(i){ var v=Math.max(0,f.a+f.b*i); return baseY-Math.min(v,tk.top)/tk.top*cH; }
+      ctx.save(); ctx.strokeStyle=sr[1]; ctx.lineWidth=2; ctx.lineCap='round'; ctx.setLineDash([6,5]); ctx.globalAlpha=.9;
+      ctx.beginPath(); ctx.moveTo(x1,yy2(f.i0)); ctx.lineTo(x2,yy2(f.i1)); ctx.stroke();
+      ctx.setLineDash([]); ctx.fillStyle='#fff'; ctx.lineWidth=2;
+      [[x1,f.i0],[x2,f.i1]].forEach(function(pt){ ctx.beginPath(); ctx.arc(pt[0],yy2(pt[1]),3,0,Math.PI*2); ctx.fill(); ctx.stroke(); });
+      ctx.restore();
+    });
+    vflush(ctx);
   }
   function showTip(i){
     if(!tip) return;
