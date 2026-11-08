@@ -565,6 +565,7 @@ body {
 .dch { display: block; max-width: none; }
 .dch-wrap { position: relative; width: 100%; }
 .dch-bar { touch-action: pan-y; cursor: crosshair; }
+#ch-bar-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .ch-tip { position: absolute; top: 2px; display: none; pointer-events: none; z-index: 3; background: #0B1623; border: 1px solid var(--border2); border-radius: 10px; padding: 9px 12px; font-size: 11px; color: var(--t2); line-height: 1.6; white-space: nowrap; box-shadow: 0 10px 28px rgba(0,0,0,.45); }
 .ch-tip .tip-h { font-weight: 700; color: var(--t1); margin-bottom: 2px; }
 .ch-tip .tip-r { display: flex; align-items: center; gap: 6px; }
@@ -1216,11 +1217,11 @@ td.selc{width:34px;padding-right:0}
           <div class="dash-charts">
             <div class="panel panel-bar">
               <div class="panel-head">
-                <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--blue)">bar_chart</span>Entradas x Sa&#237;das <span class="panel-sub">&#183; &#250;ltimos 6 meses</span></span>
+                <span class="panel-title"><span class="mi" style="font-size:15px;vertical-align:middle;margin-right:6px;color:var(--blue)">bar_chart</span>Entradas x Sa&#237;das <span class="panel-sub" id="d-bar-sub">&#183; ano todo</span></span>
                 <span class="chart-leg"><span><i style="background:#16A34A"></i>Entradas</span><span><i style="background:#FF5E5E"></i>Sa&#237;das</span></span>
               </div>
               <div class="chart-body">
-                <div class="dch-wrap"><canvas id="ch-bar" class="dch dch-bar"></canvas><div class="ch-tip" id="ch-bar-tip"></div></div>
+                <div class="dch-wrap" id="ch-bar-wrap"><div id="ch-bar-in" style="position:relative"><canvas id="ch-bar" class="dch dch-bar"></canvas><div class="ch-tip" id="ch-bar-tip"></div></div></div>
                 <div class="bar-stats" id="d-bar-stats"></div>
               </div>
             </div>
@@ -2646,16 +2647,25 @@ function drawInvChart(d){
 
 function drawBarChart(d){
   var c=g('ch-bar'); if(!c) return;
-  var W=Math.max(240,Math.floor(c.parentElement.clientWidth)), H=window.innerWidth<=768?210:250;
+  var wrap=g('ch-bar-wrap')||c.parentElement, inner=g('ch-bar-in');
+  var avail=Math.max(240,Math.floor(wrap.clientWidth)), W=Math.max(avail,12*30), H=window.innerWidth<=768?240:280;
+  if(inner) inner.style.width=W+'px';
   var months=[];
-  for(var i=5;i>=0;i--){ var m=S.month-i, y=S.year; while(m<0){m+=12;y--;} months.push({m:m,y:y,tE:0,tS:0}); }
+  for(var i=0;i<12;i++){ months.push({m:i,y:S.year,tE:0,tS:0}); }
+  var sb=g('d-bar-sub'); if(sb) sb.innerHTML='&#183; '+S.year;
   function acc(arr,k){ (arr||[]).forEach(function(x){ var dd=new Date(x.date+'T12:00:00'); months.forEach(function(mo){ if(dd.getMonth()===mo.m&&dd.getFullYear()===mo.y) mo[k]+=parseFloat(x.val||0); }); }); }
   acc(d.ent,'tE'); acc(d.sai,'tS');
   var maxVal=Math.max.apply(null,months.map(function(mo){return Math.max(mo.tE,mo.tS);}));
   var tk=chNiceTicks(maxVal);
-  var pad={t:12,r:8,b:26,l:W<380?36:42}, cW=W-pad.l-pad.r, cH=H-pad.t-pad.b, n=months.length, gW=cW/n;
+  var pad={t:44,r:8,b:26,l:8}, cW=W-pad.l-pad.r, cH=H-pad.t-pad.b, n=months.length, gW=cW/n;
   var bW=Math.max(6,Math.min(20,gW*0.30)), bGap=Math.max(3,Math.min(5,gW*0.06));
-  var baseY=pad.t+cH, sel=n-1, tip=g('ch-bar-tip');
+  var baseY=pad.t+cH, sel=Math.max(0,Math.min(n-1,S.month)), tip=g('ch-bar-tip');
+  function vlab(ctx,x,y,v,col){
+    if(!(v>0)) return;
+    ctx.save(); ctx.translate(x,y-5); ctx.rotate(-Math.PI/2);
+    ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillStyle=col; ctx.font='700 9px Inter, sans-serif';
+    ctx.fillText(Math.round(v).toLocaleString('pt-BR'),0,0); ctx.restore();
+  }
 
   function rbar(ctx,x,y,w,h,c1,c2,alpha){
     if(h<=0) return;
@@ -2682,13 +2692,13 @@ function drawBarChart(d){
       ctx.strokeStyle=k===0?'rgba(17,24,39,.16)':'rgba(17,24,39,.07)';
       ctx.beginPath(); ctx.moveTo(pad.l,Math.round(yy)+.5); ctx.lineTo(pad.l+cW,Math.round(yy)+.5); ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle='rgba(17,24,39,.5)'; ctx.textAlign='right';
-      ctx.fillText(k===0?'0':chAxis(k*tk.step),pad.l-8,yy);
     }
     months.forEach(function(mo,i){
       var gx=pad.l+i*gW+(gW-(bW*2+bGap))/2, al=(i===sel||i===hov)?1:0.62;
       rbar(ctx,gx,baseY-mo.tE/tk.top*cH,bW,mo.tE/tk.top*cH,'#22C55E','#15803D',al);
       rbar(ctx,gx+bW+bGap,baseY-mo.tS/tk.top*cH,bW,mo.tS/tk.top*cH,'#FF7B7B','#E04848',al);
+      vlab(ctx,gx+bW/2,baseY-mo.tE/tk.top*cH,mo.tE,'#15803D');
+      vlab(ctx,gx+bW+bGap+bW/2,baseY-mo.tS/tk.top*cH,mo.tS,'#DC2626');
       ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillStyle=(i===sel||i===hov)?'#111827':'rgba(17,24,39,.5)';
       ctx.font=((i===sel||i===hov)?'700':'500')+' 10px Inter, sans-serif';
@@ -2713,6 +2723,7 @@ function drawBarChart(d){
   c.ontouchstart=c.ontouchmove=function(e){ var t=e.touches[0]; if(!t) return; var i=idxAt(t.clientX); render(i); showTip(i); };
   c.ontouchend=function(){ setTimeout(function(){ render(-1); showTip(-1); },2200); };
   render(-1);
+  if(W>avail+40&&wrap){ wrap.scrollLeft=Math.max(0,pad.l+sel*gW+gW/2-avail/2); }
 
   var act=months.filter(function(mo){return mo.tE>0||mo.tS>0;});
   var sE=months.reduce(function(a,mo){return a+mo.tE;},0), sS=months.reduce(function(a,mo){return a+mo.tS;},0);
@@ -2720,7 +2731,7 @@ function drawBarChart(d){
   g('d-bar-stats').innerHTML=
     '<div class="bs-item"><span class="bs-l">Média entradas</span><b class="bs-v" style="color:var(--teal)">'+(avgE==null?'—':chBRL(avgE))+'</b></div>'+
     '<div class="bs-item"><span class="bs-l">Média saídas</span><b class="bs-v" style="color:var(--red)">'+(avgS==null?'—':chBRL(avgS))+'</b></div>'+
-    '<div class="bs-item"><span class="bs-l">Saldo 6 meses</span><b class="bs-v" style="color:'+(bal6>=0?'var(--teal)':'var(--red)')+'">'+(act.length?(bal6<0?'-':'')+chBRL(Math.abs(bal6)):'—')+'</b></div>';
+    '<div class="bs-item"><span class="bs-l">Saldo do ano</span><b class="bs-v" style="color:'+(bal6>=0?'var(--teal)':'var(--red)')+'">'+(act.length?(bal6<0?'-':'')+chBRL(Math.abs(bal6)):'—')+'</b></div>';
 }
 var _chRzT;
 window.addEventListener('resize',function(){
