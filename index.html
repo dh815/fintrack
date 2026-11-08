@@ -1113,6 +1113,30 @@ td.selc{width:34px;padding-right:0}
 .kb-dcf{padding:0 16px 12px;font-size:11px;color:var(--t3);font-weight:600}
 .kb-new{border:2px solid #16A34A;box-shadow:0 0 0 5px rgba(22,163,74,.12),0 12px 28px rgba(22,163,74,.14)}
 .kb-badge{position:absolute;top:-11px;left:16px;background:#16A34A;color:#fff;font-size:10px;font-weight:800;padding:4px 9px;border-radius:7px;letter-spacing:.06em;z-index:1}
+/* ===== Organizar Dashboard ===== */
+#page-dashboard.active{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;align-items:stretch;overflow-x:hidden}
+#page-dashboard>*{grid-column:1/-1;margin-bottom:0;min-width:0}
+#page-dashboard .dash-charts{display:contents}
+#page-dashboard>:empty{display:none}
+#page-dashboard .panel{margin-bottom:0;min-width:0;display:flex;flex-direction:column}
+#d-kpis-user{display:contents}
+#page-dashboard .kb-dc{min-width:0}
+.do-wrap{max-width:980px}
+.do-intro{background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 16px;font-size:13px;color:var(--t2);line-height:1.55}
+.do-map{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px}
+.do-box{background:#F0FDF4;border:1.5px solid #86EFAC;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:700;color:#15803D;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.do-box.c{background:#EFF6FF;border-color:#93C5FD;color:#1D4ED8}
+.do-list{display:flex;flex-direction:column;gap:8px}
+.do-li{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 12px;flex-wrap:wrap}
+.do-li.off{opacity:.55}
+.do-n{width:24px;height:24px;border-radius:50%;background:#16A34A;color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;flex:none}
+.do-t{flex:1;min-width:150px}
+.do-t .do-nm{padding:8px 10px;font-size:13px}
+.do-fix{font-size:13px}.do-fix i{font-style:normal;font-size:10px;font-weight:800;background:#DBEAFE;color:#1D4ED8;border-radius:6px;padding:2px 6px;margin-left:4px}
+.do-sel{width:auto;padding:8px 10px;font-size:13px}
+.do-a{display:flex;gap:6px;flex-wrap:wrap}
+@media(max-width:1100px){#page-dashboard .dblk:not(.dfull){grid-column:span 6 !important}}
+@media(max-width:768px){#page-dashboard.active{grid-template-columns:minmax(0,1fr);gap:12px}#page-dashboard .dblk{grid-column:1/-1 !important}.do-map{display:none}.do-li{padding:10px}.do-a{width:100%}}
 @media(max-width:1180px){.kb-wrap{grid-template-columns:minmax(0,1fr) 380px}.kb-models{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:900px){.kb-dgrid .kb-s2{grid-column:span 3}}
 @media(max-width:768px){
@@ -2482,6 +2506,7 @@ function rDash(){
     drawVarChart(d);
     drawCcChart(d);
     try{ kbDashRender(d); }catch(eK){ console.error(eK); }
+    try{ dashApply(d); }catch(eD){ console.error(eD); }
   }, 50);
 }
 
@@ -2979,8 +3004,9 @@ function rKpis(){
   if(!d.kpis) d.kpis=[];
   if(!KB) KB=kbNovo();
   var pg=g('page-kpis'); if(!pg) return;
-  var tabs='<div class="kb-tabs"><button class="kb-tab'+(KB_TAB==='criar'?' a':'')+'" onclick="kbTab(\'criar\')">+ '+(KB.id?'Editar indicador':'Criar indicador')+'</button><button class="kb-tab'+(KB_TAB==='meus'?' a':'')+'" onclick="kbTab(\'meus\')">Meus indicadores ('+d.kpis.length+')</button></div>';
+  var tabs='<div class="kb-tabs"><button class="kb-tab'+(KB_TAB==='criar'?' a':'')+'" onclick="kbTab(\'criar\')">+ '+(KB.id?'Editar indicador':'Criar indicador')+'</button><button class="kb-tab'+(KB_TAB==='meus'?' a':'')+'" onclick="kbTab(\'meus\')">Meus indicadores ('+d.kpis.length+')</button><button class="kb-tab'+(KB_TAB==='org'?' a':'')+'" onclick="kbTab(\'org\')">Organizar Dashboard</button></div>';
   if(KB_TAB==='meus'){ pg.innerHTML=tabs+kbListaHtml(d); return; }
+  if(KB_TAB==='org'){ pg.innerHTML=tabs+dashOrgHtml(d); return; }
   pg.innerHTML=tabs+'<div class="kb-wrap"><div class="kb-formcol card-like" id="kb-form"></div><div class="kb-side"><div class="kb-pvbox"><div class="kb-pvtop"><span class="kb-h" style="margin:0">Prévia ao vivo</span><span class="kb-live"><i></i>atualiza enquanto você marca</span></div><div class="kb-pv" id="kb-prev"></div><div class="kb-pvnote"><span class="kb-tag">PRÉVIA</span>Dados reais — nada é salvo até você aprovar.</div></div>'+kbActions('kb-act kb-act-d')+'</div></div>'+kbActions('kb-act kb-act-m');
   kbRender();
 }
@@ -2992,9 +3018,10 @@ function kbSalvar(pub){
   if(!K.nome.trim()){ toast('Dê um nome ao indicador.','err'); var i=g('kb-nome'); if(i) i.focus(); return; }
   if(['numero','medidor'].indexOf(K.modelo)<0&&K.agrupar==='none'){ toast('Escolha um "Agrupar por" para este modelo de gráfico.','err'); return; }
   if(K.modelo==='medidor'&&!(parseFloat(K.meta)>0)){ toast('Defina a meta do medidor.','err'); return; }
-  var item=JSON.parse(JSON.stringify(K)); item.nome=K.nome.trim(); item.st=pub?'ativo':'rascunho';
+  var item=JSON.parse(JSON.stringify(K)); item.nome=K.nome.trim(); item.st=pub?'ativo':'rascunho'; var rep=K.replaces; delete item.replaces;
   if(!item.id){ item.id=uid(); d.kpis.push(item); }
   else { var ix=-1; d.kpis.forEach(function(x,j){ if(x.id===item.id) ix=j; }); if(ix>=0) d.kpis[ix]=item; else d.kpis.push(item); }
+  dashAfterSave(d,item,rep,pub);
   sud(d,function(){
     KB=null;
     if(pub){ window.__kbNew=item.id; toast('Indicador publicado no Dashboard!','ok'); nav('dashboard'); }
@@ -3034,13 +3061,108 @@ function kbExcluir(id){
 function kbDashRender(d){
   var el=g('d-kpis-user'); if(!el) return;
   var ativos=(d.kpis||[]).filter(function(K){return K.st==='ativo';});
-  if(!ativos.length){ el.innerHTML=''; return; }
-  var h='<div class="kb-dh"><span class="kb-dht">Meus indicadores</span><a onclick="nav(\'kpis\')">Gerenciar</a></div><div class="kb-dgrid">';
+  var h='';
   ativos.forEach(function(K){
     var res=kbCompute(d,K,0), nw=(window.__kbNew===K.id);
-    h+='<div class="kb-dc kb-s'+(K.tam||'3')+(nw?' kb-new':'')+'">'+(nw?'<span class="kb-badge">NOVO</span>':'')+'<div class="kb-dch"><b>'+esc(K.nome)+'</b><button title="Editar indicador" onclick="kbEditar(\''+K.id+'\')"><span class="mi">edit</span></button></div><div class="kb-dcb">'+kbHtml(K,res,{})+'</div><div class="kb-dcf">'+esc(kbSub(K))+'</div></div>';
+    h+='<div class="kb-dc'+(nw?' kb-new':'')+'" data-blk="k:'+K.id+'">'+(nw?'<span class="kb-badge">NOVO</span>':'')+'<div class="kb-dch"><b>'+esc(K.nome)+'</b><button title="Editar indicador" onclick="kbEditar(\''+K.id+'\')"><span class="mi">edit</span></button></div><div class="kb-dcb">'+kbHtml(K,res,{})+'</div><div class="kb-dcf">'+esc(kbSub(K))+'</div></div>';
   });
-  el.innerHTML=h+'</div>';
+  el.innerHTML=h;
+}
+
+/* ===== ORGANIZAR DASHBOARD ===== */
+var DASH_BLK=[['hero','Saldo do mês',12,0],['kpis','Indicadores do mês',12,1],['venc','Vencimentos (dias 5 e 10)',12,0],['metrics','Cards de métricas',12,0],['insights','Alertas e insights',12,0],['bar','Entradas x Saídas',6,1],['donut','Gastos por Categoria',6,1],['inv','Carteira de Investimentos',4,1],['var','Variáveis por Categoria',4,1],['cc','Cartões por Categoria',4,1]];
+var DASH_SPANS=[[3,'1/4'],[4,'1/3'],[6,'1/2'],[8,'2/3'],[12,'Linha toda']];
+var DASH_TPL={donut:{fonte:'sai',agrupar:'cat',modelo:'rosca'},inv:{fonte:'inv',agrupar:'cat',modelo:'rosca'},'var':{fonte:'var',agrupar:'cat',modelo:'rosca'},cc:{fonte:'cartao',agrupar:'cat',modelo:'rosca'}};
+function dashList(d){
+  var L=d.dash||{}, all=[], map={};
+  DASH_BLK.forEach(function(b){ var o={id:b[0],nome:b[1],span:b[2],ren:b[3],custom:false}; map[b[0]]=o; all.push(o); });
+  (d.kpis||[]).forEach(function(K){ if(K.st==='ativo'){ var o={id:'k:'+K.id,nome:K.nome,span:({'2':4,'3':6,'6':12})[K.tam||'3']||6,ren:0,custom:true,K:K}; map[o.id]=o; all.push(o); } });
+  var seen={}, out=[];
+  (L.order||[]).forEach(function(id){ if(map[id]&&!seen[id]){ seen[id]=1; out.push(map[id]); } });
+  all.forEach(function(o){ if(!seen[o.id]){ seen[o.id]=1; out.push(o); } });
+  out.forEach(function(o){
+    if(L.span&&L.span[o.id]) o.span=parseInt(L.span[o.id],10)||o.span;
+    o.hidden=!!(L.hide&&L.hide[o.id]);
+    o.orig=o.nome;
+    if(L.title&&L.title[o.id]) o.nome=L.title[o.id];
+  });
+  return out;
+}
+function dashRename(el,txt){
+  if(!el) return;
+  var t=el.querySelector('.panel-title,.kpi-head-title'); if(!t) return;
+  var n=null;
+  for(var c=t.firstChild;c;c=c.nextSibling){ if(c.nodeType===3&&c.nodeValue.trim()){ n=c; break; } }
+  if(!n) return;
+  if(!t.getAttribute('data-orig')) t.setAttribute('data-orig',n.nodeValue);
+  n.nodeValue=txt?txt+' ':t.getAttribute('data-orig');
+}
+function dashApply(d){
+  var pg=g('page-dashboard'); if(!pg) return;
+  function dp(i){ var c=g(i); return c?c.closest('.panel'):null; }
+  var els={hero:[g('d-hero')],kpis:[pg.querySelector('.kpi-head'),g('d-kpis')],venc:[g('d-venc')],metrics:[g('d-metrics')],insights:[g('d-insights')],bar:[pg.querySelector('.panel-bar')],donut:[dp('ch-donut')],inv:[dp('ch-inv')],'var':[dp('ch-var')],cc:[dp('ch-cc')]};
+  var cards={}; [].forEach.call(pg.querySelectorAll('#d-kpis-user > .kb-dc'),function(e){ cards[e.getAttribute('data-blk')]=e; });
+  dashList(d).forEach(function(b,i){
+    var arr=b.custom?[cards[b.id]]:els[b.id];
+    (arr||[]).forEach(function(e,j){
+      if(!e) return;
+      e.classList.add('dblk'); e.classList.toggle('dfull',b.span>=12);
+      e.style.order=String(i*2+j); e.style.gridColumn='span '+b.span;
+      e.style.display=b.hidden?'none':'';
+      if(!b.custom&&b.ren&&j===0) dashRename(e,b.nome===b.orig?'':b.nome);
+    });
+  });
+}
+function dashMut(fn){
+  var d=ud(); if(!d) return;
+  if(!d.dash) d.dash={};
+  var L=d.dash; L.order=dashList(d).map(function(b){return b.id;}); L.hide=L.hide||{}; L.span=L.span||{}; L.title=L.title||{};
+  fn(L,d);
+  sud(d,function(){ rKpis(); });
+}
+function dashMove(id,dir){ dashMut(function(L){ var i=L.order.indexOf(id), j=i+dir; if(i<0||j<0||j>=L.order.length) return; var t=L.order[i]; L.order[i]=L.order[j]; L.order[j]=t; }); }
+function dashVis(id){
+  if(id.indexOf('k:')===0){ kbToggleDash(id.slice(2)); return; }
+  dashMut(function(L){ if(L.hide[id]) delete L.hide[id]; else L.hide[id]=true; });
+}
+function dashSpan(id,v){ dashMut(function(L){ L.span[id]=parseInt(v,10); }); }
+function dashTitle(id,v){ dashMut(function(L){ v=String(v||'').trim().slice(0,40); if(v) L.title[id]=v; else delete L.title[id]; }); }
+function dashReset(){
+  if(!confirm('Restaurar a organização padrão do Dashboard? Os nomes, tamanhos e a ordem voltam ao original. Seus indicadores criados continuam.')) return;
+  var d=ud(); if(!d) return; delete d.dash;
+  sud(d,function(){ toast('Dashboard restaurado.','ok'); rKpis(); });
+}
+function dashEditar(id){
+  var d=ud(), tp=DASH_TPL[id]; if(!d) return;
+  if(id.indexOf('k:')===0){ kbEditar(id.slice(2)); return; }
+  if(!tp) return;
+  var b=dashList(d).filter(function(x){return x.id===id;})[0];
+  KB=kbNovo(); for(var k in tp) KB[k]=tp[k];
+  KB.nome=b.nome; KB.replaces=id; KB.tam=({3:'2',4:'2',6:'3',8:'6',12:'6'})[b.span]||'3';
+  KB_TAB='criar'; rKpis();
+  toast('Ajuste os passos e aprove: ele substitui o gráfico original.','ok');
+}
+function dashAfterSave(d,item,rep,pub){
+  if(d.dash&&d.dash.span) delete d.dash.span['k:'+item.id];
+  if(!(pub&&rep)) return;
+  var L=d.dash||(d.dash={}); L.hide=L.hide||{}; L.span=L.span||{}; L.title=L.title||{};
+  var ids=dashList(d).map(function(b){return b.id;}), me='k:'+item.id;
+  ids=ids.filter(function(x){return x!==me;});
+  var at=ids.indexOf(rep); if(at<0) at=ids.length-1;
+  ids.splice(at+1,0,me); L.order=ids; L.hide[rep]=true;
+}
+function dashOrgHtml(d){
+  var list=dashList(d);
+  var map='<div class="do-map">'+list.filter(function(b){return !b.hidden;}).map(function(b,i){
+    return '<div class="do-box'+(b.custom?' c':'')+'" style="grid-column:span '+b.span+'">'+esc(b.nome)+'</div>';
+  }).join('')+'</div>';
+  var rows=list.map(function(b,i){
+    var sel='<select class="kb-inp do-sel" onchange="dashSpan(\''+b.id+'\',this.value)">'+DASH_SPANS.map(function(s){return '<option value="'+s[0]+'"'+(b.span===s[0]?' selected':'')+'>'+s[1]+'</option>';}).join('')+'</select>';
+    var nm=b.ren?'<input class="kb-inp do-nm" maxlength="40" value="'+esc(b.nome)+'" onchange="dashTitle(\''+b.id+'\',this.value)">':'<b class="do-fix">'+esc(b.nome)+(b.custom?' <i>meu indicador</i>':'')+'</b>';
+    var ed=(DASH_TPL[b.id]||b.custom)?'<button class="btn btn-ghost btn-sm" onclick="dashEditar(\''+b.id+'\')">Editar gráfico</button>':'';
+    return '<div class="do-li'+(b.hidden?' off':'')+'"><span class="do-n">'+(i+1)+'</span><div class="do-t">'+nm+'</div>'+sel+'<div class="do-a"><button class="btn btn-ghost btn-sm" title="Subir" onclick="dashMove(\''+b.id+'\',-1)"'+(i===0?' disabled':'')+'>↑</button><button class="btn btn-ghost btn-sm" title="Descer" onclick="dashMove(\''+b.id+'\',1)"'+(i===list.length-1?' disabled':'')+'>↓</button><button class="btn btn-ghost btn-sm" onclick="dashVis(\''+b.id+'\')">'+(b.hidden?'Mostrar':'Ocultar')+'</button>'+ed+'</div></div>';
+  }).join('');
+  return '<div class="do-wrap"><div class="do-intro"><b>Organize o Dashboard do seu jeito.</b> Suba e desça os blocos, escolha o tamanho de cada um, oculte o que não quer ver e renomeie os gráficos. Em "Editar gráfico" você muda a fonte, os filtros e o modelo — o novo gráfico substitui o original.</div><div class="kb-h" style="margin:14px 0 8px">Mapa do Dashboard (computador)</div>'+map+'<div class="kb-h" style="margin:18px 0 8px">Blocos</div><div class="do-list">'+rows+'</div><div style="margin-top:14px"><button class="btn btn-ghost btn-sm" onclick="dashReset()">Restaurar padrão</button></div></div>';
 }
 
 function chBRL(n){ return 'R$ '+parseFloat(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
