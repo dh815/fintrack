@@ -875,7 +875,7 @@ tbody tr:hover td { background: rgba(17,24,39,.03); }
 @media(max-width:768px){
   .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } .sb-overlay.open { display: block; } .main { margin-left: 0; } .menu-btn { display: none !important; }
   .pro-bar-wrap { margin-left: 0 !important; }
-  .topbar { padding: 0 14px; height: 54px; } .page-title { font-size: 17px; } .topbar > div:last-child { gap: 6px !important; }
+  .topbar { padding: 0 14px; height: 54px; } .page-title { font-size: 17px; } .topbar { gap: 10px; } .topbar > div:last-child { display: contents !important; } .topbar .month-nav { order: -1; } .topbar-left { order: 0; flex: 1; min-width: 0; } #topAvatar { order: 1; margin-left: auto; }
   .month-nav { padding: 2px 3px; } .month-nav button { padding: 2px 4px; } .month-nav button .mi { font-size: 15px !important; } .month-nav span { min-width: 40px; font-size: 12px; font-weight: 700; padding: 0 1px; }
   .content { padding: 14px; padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)); }
   .metrics { grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; } .metric { padding: 16px 14px; border-radius: 14px; } .metric-icon { width: 40px; height: 40px; border-radius: 10px; margin-bottom: 12px; } .metric-icon .mi { font-size: 22px; } .metric-label { font-size: 11px; margin-bottom: 6px; } .metric-value { font-size: 22px; } .metric-sub { font-size: 12px; margin-top: 5px; }
