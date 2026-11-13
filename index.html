@@ -1208,7 +1208,7 @@ td.selc{width:34px;padding-right:0}
       <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
     </div>
     <button class="auth-btn" onclick="doLogin()">Entrar</button>
-    <button type="button" class="auth-btn" id="pkLoginBtn" onclick="pkEntrar()" style="display:none;margin-top:10px;background:transparent;border:1px solid var(--teal);color:var(--teal)"><span class="mi" style="font-size:18px;vertical-align:-4px">fingerprint</span> Entrar com biometria</button>
+    <button type="button" class="auth-btn" id="pkLoginBtn" onclick="pkEntrar()" aria-label="Entrar com biometria" title="Entrar com biometria" style="display:none;margin-top:10px;background:transparent;border:1px solid var(--teal);color:var(--teal);padding:8px"><span class="mi" style="font-size:36px;vertical-align:middle">face</span></button>
     <div class="auth-error" id="loginError">Usu&#225;rio ou senha incorretos.</div>
     <div class="auth-switch"><button onclick="showForgot()" style="color:var(--teal)">Esqueci minha senha</button></div>
     <div class="auth-switch">Sem conta? <button onclick="showRegister()">Criar conta grátis</button></div>
@@ -2180,8 +2180,8 @@ function pkEntrar(auto){
   auto=(auto===true);
   var u=''; try{ u=localStorage.getItem('bi_pk_user')||''; }catch(e){}
   var btn=g('pkLoginBtn'); showErr('loginError','');
-  btn.disabled=true; btn.textContent='Aguardando o aparelho...';
-  function volta(){ btn.disabled=false; btn.innerHTML='<span class="mi" style="font-size:18px;vertical-align:-4px">fingerprint</span> Entrar com biometria'; }
+  btn.disabled=true; btn.style.opacity='.6';
+  function volta(){ btn.disabled=false; btn.style.opacity=''; }
   pkJson('/passkey/login/opcoes',{username:u}).then(function(r){
     return navigator.credentials.get({publicKey:pkPrepOpts(r.options)}).then(function(cred){
       var resp=cred.response;
@@ -2200,7 +2200,7 @@ function pkEntrar(auto){
       if(data.firstAccess){ g('loginScreen').style.display='none'; g('changePassScreen').style.display='flex'; return; }
       loadUD(function(ud){ if(ud) showApp(data.nome); });
     });
-  }).catch(function(e){ window.__pkOk=false; volta(); showErr('loginError',(auto&&e&&(e.name==='NotAllowedError'||e.name==='AbortError'))?'Toque em "Entrar com biometria" para continuar.':pkErroMsg(e)); });
+  }).catch(function(e){ window.__pkOk=false; volta(); showErr('loginError',(auto&&e&&(e.name==='NotAllowedError'||e.name==='AbortError'))?'Toque no ícone do rosto para continuar.':pkErroMsg(e)); });
 }
 document.addEventListener('DOMContentLoaded',pkMostrarBotaoLogin);
 
