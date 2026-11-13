@@ -1208,6 +1208,7 @@ td.selc{width:34px;padding-right:0}
       <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
     </div>
     <button class="auth-btn" onclick="doLogin()">Entrar</button>
+    <button type="button" class="auth-btn" id="pkLoginBtn" onclick="pkEntrar()" style="display:none;margin-top:10px;background:transparent;border:1px solid var(--teal);color:var(--teal)"><span class="mi" style="font-size:18px;vertical-align:-4px">fingerprint</span> Entrar com biometria</button>
     <div class="auth-error" id="loginError">Usu&#225;rio ou senha incorretos.</div>
     <div class="auth-switch"><button onclick="showForgot()" style="color:var(--teal)">Esqueci minha senha</button></div>
     <div class="auth-switch">Sem conta? <button onclick="showRegister()">Criar conta grátis</button></div>
@@ -1611,6 +1612,16 @@ td.selc{width:34px;padding-right:0}
             </div>
             <div id="edit-assinatura-wrap" style="display:none;padding:0 20px 18px">
               <div id="p-assinatura-status" style="font-size:13px;color:var(--t2)"></div>
+            </div>
+          </div>
+
+          <!-- Biometria -->
+          <div class="panel" id="pk-wrap" style="margin-top:16px;display:none">
+            <div class="panel-head"><span class="panel-title"><span class="mi" style="font-size:16px;vertical-align:middle;margin-right:6px;color:var(--teal)">fingerprint</span>Entrar com biometria</span></div>
+            <div style="padding:20px">
+              <p style="font-size:12px;color:var(--t3);margin-bottom:12px">Use Face ID (iPhone) ou digital/rosto (Android) para entrar sem digitar a senha. Sua senha continua valendo.</p>
+              <div id="pk-lista" style="margin-bottom:12px"></div>
+              <button class="btn btn-primary" id="pk-ativar-btn" style="width:100%" onclick="pkAtivar()">Ativar neste aparelho</button>
             </div>
           </div>
 
@@ -2083,6 +2094,113 @@ function doLogin(){
   }).catch(function(e){ btn.textContent='Entrar'; btn.disabled=false; showErr('loginError','Erro: '+e.message); });
 }
 
+// ===== LOGIN COM BIOMETRIA (passkeys / WebAuthn) =====
+var PK_SERVER='https://fintrack-server-production-9d87.up.railway.app';
+function pkB64uToBuf(s){ s=s.replace(/-/g,'+').replace(/_/g,'/'); while(s.length%4) s+='='; var b=atob(s),a=new Uint8Array(b.length); for(var i=0;i<b.length;i++) a[i]=b.charCodeAt(i); return a.buffer; }
+function pkBufToB64u(buf){ var a=new Uint8Array(buf),s=''; for(var i=0;i<a.length;i++) s+=String.fromCharCode(a[i]); return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+function pkSuportado(){
+  var h=location.hostname;
+  return !!(window.PublicKeyCredential && navigator.credentials && navigator.credentials.create && window.isSecureContext &&
+    (/(^|\.)bolsointeligenteapp\.com\.br$/.test(h) || h==='localhost'));
+}
+function pkAparelho(){
+  var ua=navigator.userAgent||'';
+  if(/iPhone/.test(ua)) return 'iPhone';
+  if(/iPad/.test(ua)) return 'iPad';
+  if(/Android/.test(ua)) return 'Android';
+  if(/Mac/.test(ua)) return 'Mac';
+  if(/Windows/.test(ua)) return 'Windows';
+  return 'Este aparelho';
+}
+function pkPrepOpts(o){
+  o.challenge=pkB64uToBuf(o.challenge);
+  if(o.user) o.user.id=pkB64uToBuf(o.user.id);
+  (o.excludeCredentials||[]).forEach(function(c){ c.id=pkB64uToBuf(c.id); });
+  (o.allowCredentials||[]).forEach(function(c){ c.id=pkB64uToBuf(c.id); });
+  return o;
+}
+function pkJson(url,body,tk){
+  var h={'Content-Type':'application/json'}; if(tk) h.Authorization='Bearer '+tk;
+  return fetch(PK_SERVER+url,{method:'POST',headers:h,body:JSON.stringify(body||{})}).then(function(r){ return r.json().then(function(j){ if(!r.ok||j.error) throw new Error(j.error||'Erro'); return j; }); });
+}
+function pkErroMsg(e){
+  if(e&&(e.name==='NotAllowedError'||e.name==='AbortError')) return 'Cancelado. Você pode tentar de novo ou usar a senha.';
+  if(e&&e.name==='InvalidStateError') return 'Este aparelho já está ativado.';
+  return (e&&e.message)||'Não foi possível agora.';
+}
+function pkAtivar(){
+  var u=fauth.currentUser; if(!u){ toast('Entre de novo.','err'); return; }
+  var b=g('pk-ativar-btn'); if(b){ b.disabled=true; b.textContent='Aguardando o aparelho...'; }
+  function volta(){ pkRender(); }
+  u.getIdToken().then(function(tk){
+    return pkJson('/passkey/registrar/opcoes',{},tk).then(function(r){
+      return navigator.credentials.create({publicKey:pkPrepOpts(r.options)}).then(function(cred){
+        var resp=cred.response;
+        var resposta={id:cred.id,rawId:pkBufToB64u(cred.rawId),type:cred.type,clientExtensionResults:cred.getClientExtensionResults?cred.getClientExtensionResults():{},
+          authenticatorAttachment:cred.authenticatorAttachment||undefined,
+          response:{clientDataJSON:pkBufToB64u(resp.clientDataJSON),attestationObject:pkBufToB64u(resp.attestationObject),
+            transports:resp.getTransports?resp.getTransports():undefined}};
+        return pkJson('/passkey/registrar/verificar',{cid:r.cid,resposta:resposta,nome:pkAparelho()},tk);
+      });
+    });
+  }).then(function(){
+    try{ localStorage.setItem('bi_pk_user',S.user); }catch(e){}
+    toast('Biometria ativada!','ok'); volta();
+  }).catch(function(e){ toast(pkErroMsg(e),'err'); volta(); });
+}
+function pkRemover(id){
+  cf('Remover biometria?','Este aparelho deixará de entrar com biometria. Sua senha continua valendo.',function(){
+    var u=fauth.currentUser; if(!u) return;
+    u.getIdToken().then(function(tk){ return pkJson('/passkey/remover',{id:id},tk); })
+    .then(function(){ toast('Biometria removida.','ok'); pkRender(); })
+    .catch(function(e){ toast(pkErroMsg(e),'err'); });
+  });
+}
+function pkRender(){
+  var w=g('pk-wrap'); if(!w) return;
+  if(!pkSuportado()){ w.style.display='none'; return; }
+  w.style.display='';
+  var lista=g('pk-lista'); lista.innerHTML='<div style="font-size:12px;color:var(--t3)">Carregando...</div>';
+  var btn=g('pk-ativar-btn'); btn.disabled=false; btn.textContent='Ativar neste aparelho';
+  var u=fauth.currentUser; if(!u) return;
+  u.getIdToken().then(function(tk){ return pkJson('/passkey/listar',{},tk); }).then(function(r){
+    var l=r.passkeys||[];
+    lista.innerHTML=l.length?l.map(function(p){
+      return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border);font-size:13px"><span class="mi" style="font-size:18px;color:var(--teal)">fingerprint</span><span style="flex:1">'+esc(p.nome||'Aparelho')+(p.criadoEm?' <span style="color:var(--t3);font-size:11px">· '+new Date(p.criadoEm).toLocaleDateString('pt-BR')+'</span>':'')+'</span><button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="pkRemover(\''+esc(p.id)+'\')">Remover</button></div>';
+    }).join(''):'<div style="font-size:12px;color:var(--t3)">Nenhum aparelho ativado ainda.</div>';
+  }).catch(function(){ lista.innerHTML='<div style="font-size:12px;color:var(--t3)">Não foi possível carregar agora.</div>'; });
+}
+function pkMostrarBotaoLogin(){
+  var b=g('pkLoginBtn'); if(!b) return;
+  var u=''; try{ u=localStorage.getItem('bi_pk_user')||''; }catch(e){}
+  b.style.display=(pkSuportado()&&u)?'block':'none';
+}
+function pkEntrar(){
+  var u=''; try{ u=localStorage.getItem('bi_pk_user')||''; }catch(e){}
+  var btn=g('pkLoginBtn'); showErr('loginError','');
+  btn.disabled=true; btn.textContent='Aguardando o aparelho...';
+  function volta(){ btn.disabled=false; btn.innerHTML='<span class="mi" style="font-size:18px;vertical-align:-4px">fingerprint</span> Entrar com biometria'; }
+  pkJson('/passkey/login/opcoes',{username:u}).then(function(r){
+    return navigator.credentials.get({publicKey:pkPrepOpts(r.options)}).then(function(cred){
+      var resp=cred.response;
+      var resposta={id:cred.id,rawId:pkBufToB64u(cred.rawId),type:cred.type,clientExtensionResults:cred.getClientExtensionResults?cred.getClientExtensionResults():{},
+        authenticatorAttachment:cred.authenticatorAttachment||undefined,
+        response:{clientDataJSON:pkBufToB64u(resp.clientDataJSON),authenticatorData:pkBufToB64u(resp.authenticatorData),
+          signature:pkBufToB64u(resp.signature),userHandle:resp.userHandle?pkBufToB64u(resp.userHandle):undefined}};
+      return pkJson('/passkey/login/verificar',{cid:r.cid,resposta:resposta});
+    });
+  }).then(function(data){
+    return fauth.signInWithCustomToken(data.token).then(function(){
+      volta();
+      S.user=data.username; S.accName=data.nome; S.role=data.role||'free'; S.isAdmin=(data.role==='admin');
+      try{ localStorage.setItem('bi_pk_user',data.username); }catch(e){}
+      if(data.firstAccess){ g('loginScreen').style.display='none'; g('changePassScreen').style.display='flex'; return; }
+      loadUD(function(ud){ if(ud) showApp(data.nome); });
+    });
+  }).catch(function(e){ volta(); showErr('loginError',pkErroMsg(e)); });
+}
+document.addEventListener('DOMContentLoaded',pkMostrarBotaoLogin);
+
 function doRegister(){
   var n=g('regName').value.trim(),u=g('regUser').value.trim(),p=g('regPass').value,p2=g('regPass2').value;
   if(!n||!u||!p){showErr('registerError','Preencha todos os campos.');return;}
@@ -2119,6 +2237,7 @@ function doLogout(){
   g('changePassScreen').style.display='none';
   g('loginScreen').style.display='flex';
   g('loginUser').value=''; g('loginPass').value='';
+  try{ pkMostrarBotaoLogin(); }catch(e){}
 }
 function showRegister(){ g('loginScreen').style.display='none'; g('registerScreen').style.display='flex'; }
 function showLogin(){ g('registerScreen').style.display='none'; g('loginScreen').style.display='flex'; }
@@ -4442,6 +4561,7 @@ function rPerfil(){
     if(g('p-email')) g('p-email').value=acc.email||'';
     if(g('perfil-email-val')) g('perfil-email-val').textContent=acc.email||'—';
     if(g('p-whats')) g('p-whats').value=acc.whatsapp||'';
+    try{ pkRender(); }catch(e){}
     if(g('perfil-whats-val')) g('perfil-whats-val').textContent=acc.whatsapp?'('+acc.whatsapp.slice(0,2)+') '+acc.whatsapp.slice(2,7)+'-'+acc.whatsapp.slice(7):'—';
     var statusLine=g('perfil-status-line');
     var valBadge=g('perfil-assinatura-val');
