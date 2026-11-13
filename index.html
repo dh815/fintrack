@@ -2085,6 +2085,7 @@ function doLogin(){
       showErr('loginError',data.error||'Usuário ou senha incorretos.');
       return;
     }
+    window.__pkOk=true;
     return fauth.signInWithCustomToken(data.token).then(function(){
       btn.textContent='Entrar'; btn.disabled=false;
       S.user=u; S.accName=data.nome; S.role=data.role||'free'; S.isAdmin=(data.role==='admin');
@@ -2175,7 +2176,8 @@ function pkMostrarBotaoLogin(){
   var u=''; try{ u=localStorage.getItem('bi_pk_user')||''; }catch(e){}
   b.style.display=(pkSuportado()&&u)?'block':'none';
 }
-function pkEntrar(){
+function pkEntrar(auto){
+  auto=(auto===true);
   var u=''; try{ u=localStorage.getItem('bi_pk_user')||''; }catch(e){}
   var btn=g('pkLoginBtn'); showErr('loginError','');
   btn.disabled=true; btn.textContent='Aguardando o aparelho...';
@@ -2190,6 +2192,7 @@ function pkEntrar(){
       return pkJson('/passkey/login/verificar',{cid:r.cid,resposta:resposta});
     });
   }).then(function(data){
+    window.__pkOk=true;
     return fauth.signInWithCustomToken(data.token).then(function(){
       volta();
       S.user=data.username; S.accName=data.nome; S.role=data.role||'free'; S.isAdmin=(data.role==='admin');
@@ -2197,7 +2200,7 @@ function pkEntrar(){
       if(data.firstAccess){ g('loginScreen').style.display='none'; g('changePassScreen').style.display='flex'; return; }
       loadUD(function(ud){ if(ud) showApp(data.nome); });
     });
-  }).catch(function(e){ volta(); showErr('loginError',pkErroMsg(e)); });
+  }).catch(function(e){ window.__pkOk=false; volta(); showErr('loginError',(auto&&e&&(e.name==='NotAllowedError'||e.name==='AbortError'))?'Toque em "Entrar com biometria" para continuar.':pkErroMsg(e)); });
 }
 document.addEventListener('DOMContentLoaded',pkMostrarBotaoLogin);
 
@@ -2218,6 +2221,7 @@ function doRegister(){
       showErr('registerError',data.error||'Erro ao criar conta.');
       return;
     }
+    window.__pkOk=true;
     return fauth.signInWithCustomToken(data.token).then(function(){
       btn.textContent='Criar conta'; btn.disabled=false;
       S.user=u; S.accName=n; S.role='free'; S.isAdmin=false;
@@ -2231,7 +2235,7 @@ function doRegister(){
 }
 
 function doLogout(){
-  S.user=null; S.accName=null; _cache=null;
+  S.user=null; S.accName=null; _cache=null; window.__pkOk=false;
   try{ fauth.signOut(); }catch(e){}
   g('appScreen').style.display='none';
   g('changePassScreen').style.display='none';
@@ -5471,6 +5475,13 @@ window.addEventListener('load',function(){
       return;
     }
     var s=user.uid; // uid === username, graças ao token de login personalizado
+    // Aparelho com biometria ativada: não entra direto com a sessão salva; pede a biometria antes.
+    var pkGate=''; try{ pkGate=localStorage.getItem('bi_pk_user')||''; }catch(e){}
+    if(pkGate && pkGate===s && !window.__pkOk && pkSuportado()){
+      g('loginScreen').style.display='flex'; updMonth(); pkMostrarBotaoLogin();
+      setTimeout(function(){ pkEntrar(true); },400);
+      return;
+    }
     S.user=s;
     fdb.ref('accounts/'+s).once('value').then(function(snap){
       var acc=snap.val();
